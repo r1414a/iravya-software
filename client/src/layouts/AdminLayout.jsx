@@ -1,5 +1,9 @@
 // layouts/AdminLayout.jsx
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import React, { memo, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
+import { LogOut } from "lucide-react";
+import Header from "@/components/header/Header";
 
 export default function AdminLayout() {
     return (
@@ -17,11 +21,7 @@ export default function AdminLayout() {
             </div> */}
 
             {/* Navbar */}
-            <nav className="p-4 bg-white shadow flex gap-4">
-        <Link to="/admin">Dashboard</Link>
-        <Link to="/admin/trucks">Trucks</Link>
-        <Link to="/admin/devices">Devices</Link>
-      </nav>
+            <Header/>
 
             {/* Page Content */}
             <main className="">
@@ -32,16 +32,7 @@ export default function AdminLayout() {
 }
 
 
-{/* 
-    <div className="flex">
-  Sidebar
-  <aside className="w-64 bg-primary text-white">
-    Sidebar
-  </aside>
 
-  Content
-  <main className="flex-1 p-6">
-    <Outlet />
-  </main>
-</div> 
-*/}
+// Your specific color palette
+
+

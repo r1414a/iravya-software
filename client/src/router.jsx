@@ -5,6 +5,9 @@ import AdminLayout from "./layouts/AdminLayout";
 import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
 import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminManageUser";
 import ManageGpsDevice from "./pages/super-admin/manage-gps-device/ManageGpsDevices"
+import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
+import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
+import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -40,17 +43,22 @@ const router = createBrowserRouter([
             },
         ]
     },
-    //  {
-    //     path: '/brand',
-    //     element: <AdminLayout/>,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <BrandManagerHome/>
-    //         },
-    //         //more pages
-    //     ]
-    // }
+     {
+        path: '/stores',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <StoreManagerHome/>
+            },
+            //more pages
+
+            {
+                path: "view-trips",
+                element: <ViewTrips/>
+            },
+        ]
+    }
 
     // {
     //     path: '/brand',

@@ -37,7 +37,7 @@ const Header =()=>{
                 <Link to="/admin/devices">Devices</Link>
         </nav> */}
 
-        <div className=" bg-zinc-100 font-sans sticky top-0 z-[999]">
+        <div className=" bg-zinc-100 font-sans sticky top-0 z-[9]">
       {/* Navbar */}
       <nav
         className="w-full px-6 py-0 flex items-center justify-between h-16 shadow-lg"

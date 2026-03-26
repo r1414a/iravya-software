@@ -1,26 +1,21 @@
 import { Button } from "@/components/ui/button"
 import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 import {
     Field,
-    FieldContent,
     FieldDescription,
-    FieldError,
     FieldGroup,
     FieldLabel,
-    FieldLegend,
-    FieldSeparator,
     FieldSet,
-    FieldTitle,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -37,14 +32,14 @@ import { Plus, UserRound } from "lucide-react"
 export default function CreateUserModal() {
     return (
        <div>
-                        <Drawer direction="right" className="">
-                            <DrawerTrigger className="flex items-center bg-[#701a40] text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-2" />
-                                Create User</DrawerTrigger>
-                            <DrawerContent className="bg-white">
-                                <DrawerHeader className="border-b border-gray-200">
-                                    <DrawerTitle>Create new user</DrawerTitle>
-                                    <DrawerDescription>Set role and brand for created user</DrawerDescription>
-                                </DrawerHeader>
+                        <Sheet direction="right" className="">
+                            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-2" />
+                                Create User</SheetTrigger>
+                            <SheetContent className="bg-white">
+                                <SheetHeader className="border-b border-gray-200">
+                                    <SheetTitle>Create new user</SheetTitle>
+                                    <SheetDescription>Set role and brand for created user</SheetDescription>
+                                </SheetHeader>
                                 <div className="p-4">
                                     <FieldGroup>
                                         <FieldSet>
@@ -111,14 +106,14 @@ export default function CreateUserModal() {
                                         </FieldSet>
                                     </FieldGroup>
                                 </div>
-                                <DrawerFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                                    <Button className='basis-1/2'>Create User <UserRound /></Button>
-                                    <DrawerClose  className='basis-1/2' asChild>
+                                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+                                    <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Create User <UserRound /></Button>
+                                    <SheetClose  className='basis-1/2' asChild>
                                         <Button className="w-full" variant="outline">Cancel</Button>
-                                    </DrawerClose>
-                                </DrawerFooter>
-                            </DrawerContent>
-                        </Drawer>
+                                    </SheetClose>
+                                </SheetFooter>
+                            </SheetContent>
+                        </Sheet>
                     </div>
 
     )

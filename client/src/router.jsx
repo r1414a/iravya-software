@@ -4,6 +4,9 @@ import AuthLayout from "./layouts/AuthLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
 import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminManageUser";
+import DCHome from "./pages/dc-operator/DCHome";
+import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
+
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -28,23 +31,27 @@ const router = createBrowserRouter([
                 element: <SuperAdminHome/>
             },
             {
-                path: "manage-user",
+                path: "manage-users",
                 element: <SuperAdminManageUser/>
             },
             //more pages
         ]
     },
-    //  {
-    //     path: '/brand',
-    //     element: <AdminLayout/>,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <BrandManagerHome/>
-    //         },
-    //         //more pages
-    //     ]
-    // }
+     {
+        path: '/dc',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <DCHome/>
+            },
+            {
+                path: 'manage-trips',
+                element: <DCManageTrips/>
+            }
+            //more pages
+        ]
+    }
 ])
 
 export default router;

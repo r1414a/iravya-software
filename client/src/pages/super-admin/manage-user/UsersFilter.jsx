@@ -14,10 +14,12 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 export default function UsersFilter() {
+    const [role, setRole] = useState("all_roles")
     return (
-        <section className="mt-10 max-w-400 mx-auto">
+        <section className="mt-10 px-10">
             <div className="flex w-full justify-between">
                 <div className="basis-1/2 flex gap-4">
                     <InputGroup className="max-w-xs">
@@ -29,27 +31,30 @@ export default function UsersFilter() {
                     </InputGroup>
 
                     <div className="flex gap-4 w-full">
-                        <Select>
+                        <Select defaultValue="all_brands">
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a role..." />
+                                <SelectValue placeholder="Select brand..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
                                 <SelectGroup>
-                                    <SelectLabel>Role</SelectLabel>
-                                    <SelectItem value="brand_manager">Brand Manager</SelectItem>
-                                    <SelectItem value="dc_operator">DC Operator</SelectItem>
-                                    <SelectItem value="store_manager">Store Manager</SelectItem>
+                                    <SelectLabel>Brands</SelectLabel>
+                                    <SelectItem value="all_brands">All brands</SelectItem>
+                                    <SelectItem value="tata_westside">Tata Westside</SelectItem>
+                                    <SelectItem value="zudio">Zudio</SelectItem>
+                                    <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
+                                    <SelectItem value="tanishq">Tanishq</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
 
-                        <Select>
+                        <Select defaultValue="all_roles">
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select a role..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
                                 <SelectGroup>
                                     <SelectLabel>Role</SelectLabel>
+                                    <SelectItem value="all_roles">All roles</SelectItem>
                                     <SelectItem value="brand_manager">Brand Manager</SelectItem>
                                     <SelectItem value="dc_operator">DC Operator</SelectItem>
                                     <SelectItem value="store_manager">Store Manager</SelectItem>

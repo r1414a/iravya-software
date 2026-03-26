@@ -7,10 +7,12 @@ import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminMana
 import DCHome from "./pages/dc-operator/DCHome";
 import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
 
-import ManageGpsDevice from "./pages/super-admin/manage-gps-device/ManageGpsDevices"
+import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/ManageGpsDevices"
 import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
 import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
+import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
+import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -40,10 +42,7 @@ const router = createBrowserRouter([
             },
             //more pages
 
-            {
-                path: "manage-devices",
-                element: <ManageGpsDevice/>
-            },
+            
         ]
     },
      {
@@ -57,7 +56,19 @@ const router = createBrowserRouter([
             {
                 path: 'manage-trips',
                 element: <DCManageTrips/>
-            }
+            },
+            {
+                path: 'manage-drivers',
+                element: <DCManageDrivers/>
+            },
+            {
+                path: "manage-trucks",
+                element: <DCManageTrucks/>
+            },
+            {
+                path: "manage-gps-devices",
+                element: <ManageGpsDevice/>
+            },
             //more pages
         ]
     },

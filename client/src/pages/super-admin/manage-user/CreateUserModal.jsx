@@ -35,7 +35,7 @@ export default function CreateUserModal() {
                         <Sheet direction="right" className="">
                             <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-2" />
                                 Create User</SheetTrigger>
-                            <SheetContent className="bg-white">
+                            <SheetContent className="bg-white min-w-120">
                                 <SheetHeader className="border-b border-gray-200">
                                     <SheetTitle>Create new user</SheetTitle>
                                     <SheetDescription>Set role and brand for created user</SheetDescription>

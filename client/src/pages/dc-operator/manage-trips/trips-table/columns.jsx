@@ -1,0 +1,165 @@
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Eye, MapPin, XCircle } from "lucide-react"
+// import TripDetailSheet from "../TripDetailSheet"
+import { useState } from "react"
+
+// Status badge — matches your existing style pattern
+function StatusBadge({ status }) {
+    const config = {
+        in_transit:  { label: "In Transit",  className: "bg-blue-100 text-blue-700 border-blue-200" },
+        completed:   { label: "Completed",   className: "bg-green-100 text-green-700 border-green-200" },
+        scheduled:   { label: "Scheduled",   className: "bg-gray-100 text-gray-600 border-gray-200" },
+        cancelled:   { label: "Cancelled",   className: "bg-red-100 text-red-600 border-red-200" },
+    }
+    const c = config[status] || config.scheduled
+    return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${c.className}`}>
+            {c.label}
+        </span>
+    )
+}
+
+// Stops pills — shows store names as small badges
+function StopsPills({ stops }) {
+    const visible = stops.slice(0, 2)
+    const extra = stops.length - 2
+    return (
+        <div className="flex flex-wrap gap-1">
+            {visible.map((s, i) => (
+                <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                    <MapPin size={9} /> {s.replace(' Store', '')}
+                </span>
+            ))}
+            {extra > 0 && (
+                <span className="text-xs text-gray-400">+{extra} more</span>
+            )}
+        </div>
+    )
+}
+
+// Actions cell — uses a controlled Sheet so it opens from the row
+function ActionsCell({ row }) {
+    const [detailOpen, setDetailOpen] = useState(false)
+    const trip = row.original
+
+    return (
+        <>
+            {/* <TripDetailSheet
+                trip={trip}
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+            /> */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal size={14} />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white border shadow-md w-36">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDetailOpen(true)}>
+                        <Eye size={13} className="mr-2" /> View details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <MapPin size={13} className="mr-2" /> View on map
+                    </DropdownMenuItem>
+                    {trip.status === "in_transit" && (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                                <XCircle size={13} className="mr-2" /> Cancel trip
+                            </DropdownMenuItem>
+                        </>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
+    )
+}
+
+export const columns = [
+    {
+        accessorKey: "id",
+        header: "Trip ID",
+        cell: ({ row }) => (
+            <span className="font-mono text-sm font-medium text-maroon">
+                {row.getValue("id")}
+            </span>
+        ),
+    },
+    {
+        accessorKey: "brand",
+        header: "Brand",
+        cell: ({ row }) => (
+            <span className="text-sm">{row.getValue("brand")}</span>
+        ),
+    },
+    {
+        accessorKey: "truck",
+        header: "Truck",
+        cell: ({ row }) => (
+            <div>
+                <p className="font-mono text-sm">{row.getValue("truck")}</p>
+                <p className="text-xs text-gray-500">{row.original.driver}</p>
+            </div>
+        ),
+    },
+    {
+        accessorKey: "sourceDC",
+        header: "Source DC",
+        cell: ({ row }) => (
+            <span className="text-sm text-gray-600">{row.getValue("sourceDC")}</span>
+        ),
+    },
+    {
+        accessorKey: "stops",
+        header: "Stops",
+        cell: ({ row }) => (
+            <StopsPills stops={row.original.stops} />
+        ),
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+            <StatusBadge status={row.getValue("status")} />
+        ),
+    },
+    {
+        accessorKey: "departedAt",
+        header: "Departed",
+        cell: ({ row }) => (
+            <span className="text-sm text-gray-500">
+                {row.getValue("departedAt") || "—"}
+            </span>
+        ),
+    },
+    {
+        accessorKey: "eta",
+        header: "ETA / Completed",
+        cell: ({ row }) => {
+            const trip = row.original
+            if (trip.completedAt) return (
+                <span className="text-sm text-green-600 font-medium">{trip.completedAt}</span>
+            )
+            if (trip.eta) return (
+                <span className="text-sm text-blue-600">{trip.eta}</span>
+            )
+            return <span className="text-sm text-gray-400">—</span>
+        },
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => <ActionsCell row={row} />,
+    },
+]

@@ -26,6 +26,9 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { BadgeAlert } from 'lucide-react';
+
 
 export const roadTrips = [
   {
@@ -118,18 +121,18 @@ export default function TripTable (){
     }
     return (
         <>
-        <section className="mt-6 max-w-400 mx-auto">
+        <section className="mt-6 max-w-400 mx-auto px-10">
             <div className="border rounded-lg">
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead>Trip</TableHead>
-                            <TableHead>Truck Number</TableHead>
-                            <TableHead>Start and Destination</TableHead>
-                            <TableHead>Start and End Time</TableHead>
-                            <TableHead>Current Loacation</TableHead>
-                            <TableHead>Driver Details</TableHead>
-                            <TableHead>Report Problem</TableHead>
+                        <TableRow >
+                            <TableHead className="font-bold">Trip</TableHead>
+                            <TableHead className="font-bold">Truck Number</TableHead>
+                            <TableHead className="font-bold">Start and Destination</TableHead>
+                            <TableHead className="font-bold">Start and End Time</TableHead>
+                            <TableHead className="font-bold">Current Loacation</TableHead>
+                            <TableHead className="font-bold">Driver Details</TableHead>
+                            <TableHead className="font-bold">Report Problem</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -138,17 +141,31 @@ export default function TripTable (){
                                 <TableCell>{trips['trackId']}</TableCell>
                                 <TableCell>{trips['truckNumber']}</TableCell>
                                 <TableCell
+                                    className="text-blue-600"
+                                    >
+                                    {trips['startingPoint'] +" - "+ trips['destinationPoint']}
+                                </TableCell>
+                                <TableCell className="text-green-600">{trips['startTime']+" - "+trips['endTime']}</TableCell>
+                                <TableCell>{trips['currentLocation']}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col">
+                                        <p>{trips['driverName']}</p>
+                                        <p className="text-green-600">+91 {trips['contactNumber']}</p>
+                                        <p className="text-blue-600">{trips['email']}</p>
+
+                                    </div>
+                                    
+                                </TableCell>
+                                <TableCell
+                                    className="cursor-pointer "
                                     
                                     >
-                                    {trips['startingPoint'] +"-"+ trips['destinationPoint']}
-                                </TableCell>
-                                <TableCell>{trips['startTime']+"-"+trips['endTime']}</TableCell>
-                                <TableCell>{trips['currentLocation']}</TableCell>
-                                <TableCell>{trips['driverName']}</TableCell>
-                                <TableCell
-                                    className="cursor-pointer text-blue-600 hover:underline"
-                                    onClick={() => handleAssign(trips)}
-                                    >{trips['reportProblem']}</TableCell>
+                                        <div>
+                                            <p onClick={() => handleAssign(trips)}
+                                             className="text-blue-600 hover:underline">Report Problem</p>
+                                            <p>Issues: {trips['reportProblem']}</p>
+                                        </div>
+                                        </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -157,14 +174,17 @@ export default function TripTable (){
 
 
             {/* RIGHT SIDE FORM */}
-                <Sheet open={open} onOpenChange={setOpen}>
-                    <SheetContent className="w-[420px]">
+                <Sheet open={open} onOpenChange={setOpen} className="">
+                    <SheetContent className="w-[420px] flex flex-col h-full">
 
-                    <SheetHeader>
-                        <SheetTitle>Report Problem</SheetTitle>
+                    <SheetHeader className="border border-transparent border-b-gray-300">
+                        <SheetTitle>
+                            Report Problem
+                            <p className="text-sm text-gray-500">Make report of issues while continuing with deliveries</p>
+                        </SheetTitle>
                     </SheetHeader>
 
-                    <div className="space-y-5 mt-6">
+                    <div className="space-y-5 mt-6 p-5 flex-1 overflow-auto">
 
                         {/* Device IMEI */}
                         {/* <div>
@@ -191,31 +211,34 @@ export default function TripTable (){
 
 
                         {/* Assign Truck */}
-                        <div>
-                            <label className="text-sm font-medium">
-                                Assign Truck
-                            </label>
+                        <div className="flex flex-col">
+                            <div className="mb-2">
+                                <label className="text-sm font-medium ">
+                                    Problem list
+                                </label>
+                            </div>
+                            
 
                             <Select>
                                 <SelectTrigger>
-                                <SelectValue placeholder="Select Truck" />
+                                <SelectValue placeholder="Select Problem" />
                                 </SelectTrigger>
 
                                 <SelectContent>
                                 <SelectItem value="MH12">
-                                    MH 12 TR 9087
+                                    Not able to communicate with drives
                                 </SelectItem>
 
                                 <SelectItem value="GJ18">
-                                    GJ 18 TT 4433
+                                    Low fuel
                                 </SelectItem>
 
                                 <SelectItem value="KA51">
-                                    KA 51 TR 2201
+                                    Delayed due to traffic
                                 </SelectItem>
 
                                 <SelectItem value="TN58">
-                                    TN 58 AB 9922
+                                    No issues
                                 </SelectItem>
                                 </SelectContent>
 
@@ -224,15 +247,14 @@ export default function TripTable (){
 
 
                         {/* Brand */}
-                        {/* <div>
+                        <div>
                             <label className="text-sm font-medium">
-                                Brand
+                                Add your own issue
                             </label>
-                            <Input
-                                value={selectedDevice?.Brand || ""}
-                                disabled
+                            <Textarea 
+                                placeholder="Write issue"
                             />
-                        </div> */}
+                        </div>
 
 
                         {/* Health Check */}
@@ -248,20 +270,22 @@ export default function TripTable (){
 
                     </div>
 
+                <div className=" border border-transparent border border-t-gray-300 bottom-2 mb-2">
+                    <SheetFooter className=" flex flex-row bottom-0">
 
-                    <SheetFooter className="mt-6">
-                        <Button
-                        variant="outline"
-                        onClick={() => setOpen(false)}
-                        >
-                        Cancel
+                        <Button className="w-[50%] bg-maroon hover:bg-maroon-dark cursor-pointer">
+                            Report <BadgeAlert />
+                        </Button>
+                        <Button className="w-[50%] cursor-pointer"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
+                            >
+                            Cancel
                         </Button>
 
-                        <Button>
-                        Save
-                        </Button>
+                        
                     </SheetFooter>
-
+                </div>                
                     </SheetContent>
                 </Sheet>
         </section>

@@ -13,6 +13,7 @@ import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
 import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
 import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
+import DCManageStores  from "./pages/dc-operator/manage-stores/DCManageStores"
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
                 element: <ManageGpsDevice/>
             },
             //more pages
+            {
+                path: 'manage-stores',
+                element: <DCManageStores/>
+            }
         ]
     },
 

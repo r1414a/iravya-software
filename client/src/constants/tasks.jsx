@@ -16,7 +16,7 @@ export const SUPER_ADMIN_TASKS = [
 
 export const DC_TASKS = [
   { key: "drivers", label: "Manage Drivers", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg:  "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/dc/manage-drivers" },
-  { key: "devices", label: "Manage GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/dc/manage-devices" },
+  { key: "devices", label: "Manage GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/dc/manage-gps-devices" },
   { key: "trucks", label: "Manage Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/dc/manage-trucks" },
     { key: "stores", label: "Manage Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/dc/manage-stores" },
     { key: "trips", label: "Manage Trips", icon: <Road size={35} color="white"strokeWidth={1}/>, bg: "bg-slate-800 shadow-lg shadow-slate-800/40", path: "/dc/manage-trips" },

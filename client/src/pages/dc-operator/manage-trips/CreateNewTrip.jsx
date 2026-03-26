@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import {
     Sheet,
@@ -18,392 +17,395 @@ import {
     FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-
 import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
-} from "@/components/ui/combobox"
-import { Plus, CalendarClock, UserRound, Road } from "lucide-react"
-import { useState } from "react"
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Plus, Route, X, GripVertical } from "lucide-react"
+import { useState, useEffect } from "react"
 
-const STORAGE_KEYS = {
-    trucks: "dcTrucks",
-    trips: "dcActiveTrips",
+// Stops are added dynamically and can be reordered
+function StopsList({ stops, onRemove }) {
+    if (stops.length === 0) return (
+        <p className="text-xs text-gray-400 py-2">
+            No stops added yet. Add at least one store.
+        </p>
+    )
+    return (
+        <div className="flex flex-col gap-2 mt-2">
+            {stops.map((stop, index) => (
+                <div
+                    key={index}
+                    className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-md px-3 py-2"
+                >
+                    <GripVertical size={14} className="text-gray-400 cursor-grab" />
+                    <span className="text-xs font-medium text-gray-500 w-5">{index + 1}.</span>
+                    <span className="text-sm flex-1">{stop}</span>
+                    <button
+                        type="button"
+                        onClick={() => onRemove(index)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                        <X size={13} />
+                    </button>
+                </div>
+            ))}
+        </div>
+    )
 }
 
-const TRUCK_SEED = [
-    { id: "t1", truckNumber: "MH-14-KJ-1013", status: "idle" },
-    { id: "t2", truckNumber: "MH-14-FG-7013", status: "idle" },
-    { id: "t3", truckNumber: "MH-12-WE-2019", status: "idle" },
-    { id: "t4", truckNumber: "MH-14-AD-1315", status: "idle" },
-]
+export default function CreateTripModal() {
+    const [driverAdded, setDriverAdded] = useState(false)
+const [aadharPreview, setAadharPreview] = useState(null)
+    const [driverData, setDriverData] = useState({
+        name: "",
+        phone: "",
+        aadhar: null,
+    })
 
-const DRIVER_SEED = [
-    { id: "d1", driverName: "Nikhil Patil", },
-    { id: "d2", driverName: "Siddharth Iyer", },
-    { id: "d3", driverName: "Anita Sharma", },
-    { id: "d4", driverName: "Ravi Kumar", }
-]
+    const [otpSent, setOtpSent] = useState(false)
+    const [otp, setOtp] = useState("")
+    const [stops, setStops] = useState([])
+    const [selectedStore, setSelectedStore] = useState("")
+    const [selectedDriver, setSelectedDriver] = useState("")
+    const [showAddDriver, setShowAddDriver] = useState(false)
 
-export const GPS_DEVICE_SEED = [
-    { id: "g1", deviceLabel: "GPS Unit A", imei: "356930060123456", status: "available" },
-    { id: "g2", deviceLabel: "GPS Unit B", imei: "356930060234567", status: "available" },
-    { id: "g3", deviceLabel: "GPS Unit C", imei: "356930060345678", status: "assigned" },
-    { id: "g4", deviceLabel: "GPS Unit D", imei: "356930060456789", status: "available" },
-    { id: "g5", deviceLabel: "GPS Unit E", imei: "356930060567890", status: "assigned" },
-];
+    useEffect(() => {
+  return () => {
+    if (aadharPreview) URL.revokeObjectURL(aadharPreview)
+  }
+}, [aadharPreview])
 
-const STORE_SEED = [
-    { id: "s1", name: "Pune FC Road Store", city: "Pune" },
-    { id: "s2", name: "Pune Koregaon Park Store", city: "Pune" },
-    { id: "s3", name: "Mumbai Andheri Store", city: "Mumbai" },
-    { id: "s4", name: "Mumbai Lower Parel Store", city: "Mumbai" },
-    { id: "s5", name: "Nashik Indira Nagar Store", city: "Nashik" },
-    { id: "s6", name: "Nagpur Ashok Nagar Store", city: "Nagpur" },
-]
-
-export default function CreateNewTrip() {
-     const [selectedTruck, setSelectedTruck] = useState(null)
-    const [selectedDriver, setSelectedDriver] = useState(null)
-    const [selectedGps, setSelectedGps] = useState(null)
-    const [selectedStore, setSelectedStore] = useState(null)
-    const [createNewDriver, setCreateNewDriver] = useState(false)
-    const [newDriverName, setNewDriverName] = useState("")
-
-    const handleCreateTrip = () => {
-        const tripData = {
-            truckId: selectedTruck,
-            gpsId: selectedGps,
-            driver: createNewDriver ? { name: newDriverName, id: 'new' } : selectedDriver,
-            storeId: selectedStore,
-            createdAt: new Date().toISOString()
+    const addStop = () => {
+        if (selectedStore && !stops.includes(selectedStore)) {
+            setStops(prev => [...prev, selectedStore])
+            setSelectedStore("")
         }
-        console.log("Saving Trip:", tripData)
-        // Add your localStorage or API logic here
+    }
+
+    const removeStop = (index) => {
+        setStops(prev => prev.filter((_, i) => i !== index))
     }
 
     return (
-        <div>
-            <Sheet>
-                <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Create New Trip
-                </SheetTrigger>
-                <SheetContent className="bg-white min-w-[500px] flex flex-col">
-                    <SheetHeader className="border-b border-gray-200 pb-4">
-                        <SheetTitle>Create new trip</SheetTitle>
-                        <SheetDescription>
-                            Assign a truck and driver to a new route, and link a GPS device.
-                        </SheetDescription>
-                    </SheetHeader>
+        <Sheet direction="right">
+            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
+                <Plus className="w-4 h-4 mr-2" />
+                Dispatch Trip
+            </SheetTrigger>
 
-                    <div className="px-4 py-6 space-y-6 flex-1 overflow-y-auto">
-                        <div className="grid grid-cols-2 gap-4">
-                            <Field>
-                                <FieldLabel>Assign Truck</FieldLabel>
-                                <Combobox 
-                                    items={TRUCK_SEED} 
-                                    onValueChange={(t) => setSelectedTruck(t?.id)}
-                                >
-                                    <ComboboxInput placeholder="Select truck" />
-                                    <ComboboxContent>
-                                        <ComboboxList>
-                                            {(truck) => <ComboboxItem key={truck.id} value={truck.id}>{truck.truckNumber}</ComboboxItem>}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </Field>
+            <SheetContent className="bg-white min-w-120">
+                <SheetHeader className="border-b border-gray-200">
+                    <SheetTitle>Dispatch new trip</SheetTitle>
+                    <SheetDescription>
+                        Select a truck, add store stops, and schedule departure
+                    </SheetDescription>
+                </SheetHeader>
 
-                            <Field>
-                                <FieldLabel>Assign GPS Device</FieldLabel>
-                                <Combobox 
-                                    items={GPS_DEVICE_SEED} 
-                                    onValueChange={(g) => setSelectedGps(g?.id)}
-                                >
-                                    <ComboboxInput placeholder="Select IMEI" />
-                                    <ComboboxContent>
-                                        <ComboboxList>
-                                            {(gps) => <ComboboxItem key={gps.id} value={gps.id}>{gps.imei}</ComboboxItem>}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </Field>
-                        </div>
+                <div className="p-4 overflow-y-auto">
+                    <FieldGroup>
+                        <FieldSet>
+                            <FieldGroup>
+                                <div className="flex gap-2">
 
-                        <Field>
-                            <div className="flex justify-between items-center mb-2">
-                                <FieldLabel>Driver Details</FieldLabel>
-                                <button 
-                                    onClick={() => setCreateNewDriver(!createNewDriver)}
-                                    className="text-xs text-blue-600 hover:underline"
-                                >
-                                    {createNewDriver ? "Select existing" : "+ Add new driver"}
-                                </button>
-                            </div>
-                            {!createNewDriver ? (
-                                            <Field>
-                                                <Combobox
-                                                    items={DRIVER_SEED}
-                                                    value={selectedDriver}
-                                                    onValueChange={(driver) => setSelectedDriver(driver?.id)}
-                                                    itemToStringValue={(driver) => driver.id}
-                                                >
-                                                    <ComboboxInput placeholder="Search/Select a driver" />
-                                                    <ComboboxContent>
-                                                        <ComboboxEmpty>No items found.</ComboboxEmpty>
-                                                        <ComboboxList>
-                                                            {(driver) => (
-                                                                <ComboboxItem key={driver.id} value={driver.id}>
-                                                                    {driver.driverName}
-                                                                </ComboboxItem>
-                                                            )}
-                                                        </ComboboxList>
-                                                    </ComboboxContent>
-                                                </Combobox>
-                                            </Field>
-                                        ) : (
-                                            <div className="space-y-3 border rounded-md p-3 bg-gray-50">
-                                                <p className="text-xs font-medium text-gray-600">New Driver Details</p>
+                                    {/* Brand */}
+                                    <Field>
+                                        <FieldLabel>Brand</FieldLabel>
+                                        <Select>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select brand..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Brand</SelectLabel>
+                                                    <SelectItem value="tata_westside">Tata Westside</SelectItem>
+                                                    <SelectItem value="zudio">Zudio</SelectItem>
+                                                    <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
+                                                    <SelectItem value="tanishq">Tanishq</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </Field>
 
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <Field>
-                                                        <FieldLabel>Name</FieldLabel>
-                                                        <Input placeholder="Driver name" />
-                                                    </Field>
+                                    {/* Source DC */}
+                                    <Field>
+                                        <FieldLabel>Source data center</FieldLabel>
+                                        <Select>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select DC..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Data Centers</SelectLabel>
+                                                    <SelectItem value="pune_dc">Pune Warehouse DC</SelectItem>
+                                                    <SelectItem value="mumbai_dc">Mumbai Warehouse DC</SelectItem>
+                                                    <SelectItem value="nashik_dc">Nashik DC</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        {/* <FieldDescription className="text-xs">
+                                        The warehouse this truck will depart from
+                                    </FieldDescription> */}
+                                    </Field>
+                                </div>
 
-                                                    <Field>
-                                                        <FieldLabel>Phone</FieldLabel>
-                                                        <Input type="tel" placeholder="10-digit number" />
-                                                    </Field>
-                                                </div>
+                                {/* Truck */}
+                                <Field>
+                                    <FieldLabel>Truck</FieldLabel>
+                                    <Select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select idle truck..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white border shadow-md">
+                                            <SelectGroup>
+                                                <SelectLabel>Available trucks</SelectLabel>
+                                                <SelectItem value="mh12ab1234">MH12AB1234</SelectItem>
+                                                <SelectItem value="mh14cd5678">MH14CD5678</SelectItem>
+                                                <SelectItem value="mh04ef9012">MH04EF9012</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FieldDescription className="text-xs">
+                                        Only idle trucks are shown
+                                    </FieldDescription>
+                                </Field>
 
-                                                <div className="flex gap-2 items-end">
-                                                    <Field className="flex-1">
-                                                        <FieldLabel>OTP</FieldLabel>
-                                                        <Input placeholder="Enter OTP" />
-                                                    </Field>
+                                {/* Driver */}
+                                <Field>
+                                    <div className="flex justify-between items-center">
+                                        <FieldLabel>Driver</FieldLabel>
+                                        {/* Add new driver button */}
+                                        {!driverAdded && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAddDriver(!showAddDriver)}
+                                                className="text-maroon hover:underline text-sm"
+                                            >
+                                                {showAddDriver ? '- Select existing' : '+ Add new driver'}
+                                            </button>
+                                        )}
+                                    </div>
 
-                                                    <Button type="button" variant="outline" className="h-9">
-                                                        Send OTP
-                                                    </Button>
-                                                </div>
+                                    {driverAdded ? (
+                                        <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
 
-                                                <Field>
-                                                    <FieldLabel>Aadhaar Upload</FieldLabel>
-                                                    <Input type="file" accept="image/*,.pdf" />
-                                                </Field>
+                                            <div className="flex gap-2">
+                                            <Input
+                                                value={driverData.name}
+                                                onChange={(e) =>
+                                                    setDriverData({ ...driverData, name: e.target.value })
+                                                }
+                                                placeholder="Driver name"
+                                            />
+
+                                            <Input
+                                                value={driverData.phone}
+                                                onChange={(e) =>
+                                                    setDriverData({ ...driverData, phone: e.target.value })
+                                                }
+                                                placeholder="Phone number"
+                                            />
                                             </div>
-                                        )}
-                        </Field>
 
-                        <Field>
-                            <FieldLabel>Destination Store</FieldLabel>
-                            <Combobox 
-                                items={STORE_SEED} 
-                                onValueChange={(s) => setSelectedStore(s?.id)}
-                            >
-                                <ComboboxInput placeholder="Search destination..." />
-                                <ComboboxContent>
-                                    <ComboboxList>
-                                        {(store) => (
-                                            <ComboboxItem key={store.id} value={store.id}>
-                                                {store.name} ({store.city})
-                                            </ComboboxItem>
-                                        )}
-                                    </ComboboxList>
-                                </ComboboxContent>
-                            </Combobox>
-                        </Field>
-                    </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">
+                                                    Aadhar card
+                                                </label>
+                                                <Input type="file" className="mt-1" />
+                                                {aadharPreview && (
+  <img
+    src={aadharPreview}
+    alt="Aadhar"
+    className="w-40 h-28 object-cover rounded-md border"
+  />
+)}
+                                            </div>
 
-                     <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                         <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Create Trip <Road /></Button>
-                         <SheetClose className='basis-1/2' asChild>
-                             <Button className="w-full" variant="outline">Cancel</Button>
-                         </SheetClose>
-                     </SheetFooter>
-                </SheetContent>
-            </Sheet>
-        </div>
+                                            <p className="text-xs text-green-600 font-medium">
+                                                ✓ Driver added successfully
+                                            </p>
+                                        </div>
+
+                                    ) : showAddDriver ? (
+
+                                        /* ─────────────── 2. ADD DRIVER FORM ─────────────── */
+                                        <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
+                                            <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Driver name"
+                                                value={driverData.name}
+                                                onChange={(e) =>
+                                                    setDriverData({ ...driverData, name: e.target.value })
+                                                }
+                                            />
+
+                                            <Input
+                                                placeholder="Phone number"
+                                                type="tel"
+                                                value={driverData.phone}
+                                                onChange={(e) =>
+                                                    setDriverData({ ...driverData, phone: e.target.value })
+                                                }
+                                            />
+                                            </div>
+
+                                            <div>
+                                                <label className="text-xs text-gray-500">
+                                                    Aadhar card
+                                                </label>
+                                                <Input
+  type="file"
+  className="mt-1"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setDriverData({ ...driverData, aadhar: file })
+      setAadharPreview(URL.createObjectURL(file))
+    }
+  }}
+/>
+
+
+                                            </div>
+                                            {aadharPreview && (
+  <div className="mt-2">
+    <p className="text-xs text-gray-500 mb-1">Preview</p>
+
+    <img
+      src={aadharPreview}
+      alt="Aadhar Preview"
+      className="w-40 h-28 object-cover rounded-md border"
+    />
+  </div>
+)}
+
+                                            <Button
+                                                type="button"
+                                                className="bg-maroon hover:bg-maroon-dark text-white"
+                                                onClick={() => {
+                                                    setDriverAdded(true)
+                                                    setShowAddDriver(false)
+                                                }}
+                                            >
+                                                Save Driver
+                                            </Button>
+                                        </div>
+
+                                    ) : (
+
+                                        /* ─────────────── 3. SELECT DRIVER ─────────────── */
+                                        <Select
+                                            value={selectedDriver}
+                                            onValueChange={setSelectedDriver}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select driver..." />
+                                            </SelectTrigger>
+
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Drivers</SelectLabel>
+                                                    <SelectItem value="ramesh">Ramesh Kumar</SelectItem>
+                                                    <SelectItem value="suresh">Suresh Patil</SelectItem>
+                                                    <SelectItem value="vijay">Vijay Sharma</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+
+                                    <FieldDescription className="text-xs">
+                                        Select existing driver or add a new one
+                                    </FieldDescription>
+                                </Field>
+
+                                {/* Stops */}
+                                <Field>
+                                    <FieldLabel>Delivery stops</FieldLabel>
+                                    <div className="flex gap-2">
+                                        <Select
+                                            value={selectedStore}
+                                            onValueChange={setSelectedStore}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select store..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Stores</SelectLabel>
+                                                    <SelectItem value="Koregaon Park Store">Koregaon Park Store</SelectItem>
+                                                    <SelectItem value="Hinjawadi Store">Hinjawadi Store</SelectItem>
+                                                    <SelectItem value="FC Road Store">FC Road Store</SelectItem>
+                                                    <SelectItem value="Baner Store">Baner Store</SelectItem>
+                                                    <SelectItem value="Kothrud Store">Kothrud Store</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        <Button
+                                            type="button"
+                                            onClick={addStop}
+                                            className="bg-maroon hover:bg-maroon-dark text-white shrink-0"
+                                        >
+                                            <Plus size={14} />
+                                        </Button>
+                                    </div>
+                                    <FieldDescription className="text-xs">
+                                        Add stops in order — drag to reorder
+                                    </FieldDescription>
+                                    <StopsList stops={stops} onRemove={removeStop} />
+                                </Field>
+
+                                {/* Scheduled departure */}
+                                <Field>
+                                    <FieldLabel>Scheduled departure</FieldLabel>
+                                    <Input type="datetime-local" />
+                                    <FieldDescription className="text-xs">
+                                        Leave blank to dispatch immediately
+                                    </FieldDescription>
+                                </Field>
+
+
+                                {/* OTP Section */}
+                                {!otpSent ? (
+                                    <Button
+                                        type="button"
+                                        className="bg-maroon text-white"
+                                        onClick={() => setOtpSent(true)}
+                                    >
+                                        Send OTP
+                                    </Button>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <Input
+                                            placeholder="Enter OTP"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                        />
+                                        <Button className="bg-green-600 text-white">
+                                            Verify
+                                        </Button>
+                                    </div>
+                                )}
+
+                            </FieldGroup>
+                        </FieldSet>
+                    </FieldGroup>
+                </div>
+
+                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+                    <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
+                        Dispatch Trip <Route size={15} className="ml-1" />
+                    </Button>
+                    <SheetClose className="basis-1/2" asChild>
+                        <Button className="w-full" variant="outline">Cancel</Button>
+                    </SheetClose>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
     )
-    // const [selectedTruck, setSelectedTruck] = useState(null)
-    // const [selectedDriver, setSelectedDriver] = useState(null)
-    // const [selectedGps, setSelectedGps] = useState(null)
-    // const [selectedStore, setSelectedStore] = useState(null);
-    // const [createNewDriver, setCreateNewDriver] = useState(false)
-
-    // console.log(selectedDriver, selectedTruck);
-
-    // return (
-    //     <div>
-    //         <Sheet direction="right" className="">
-    //             <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-1" />
-    //                 Create New Trip</SheetTrigger>
-    //             <SheetContent className="bg-white min-w-[500px]">
-    //                 <SheetHeader className="border-b border-gray-200">
-    //                     <SheetTitle>Create new trip</SheetTitle>
-    //                     <SheetDescription>Assign a truck and driver to a new route, and link a GPS device for real-time tracking.</SheetDescription>
-    //                 </SheetHeader>
-    //                 <div className="p-4">
-    //                     <FieldGroup>
-    //                         <FieldSet>
-    //                             <FieldGroup>
-    //                                 <div className="flex gap-2">
-    //                                     <Field>
-    //                                         <FieldLabel>Assign Trucks</FieldLabel>
-    //                                         <Combobox items={TRUCK_SEED} value={selectedTruck}
-    //                                             onValueChange={(truck) => setSelectedTruck(truck?.id)}
-    //                                             itemToStringLabel={(truck) => truck.truckNumber}
-    //                                             itemToStringValue={(truck) => truck.id}
-    //                                         >
-    //                                             <ComboboxInput placeholder="Search/Select a truck" />
-    //                                             <ComboboxContent>
-    //                                                 <ComboboxEmpty>No items found.</ComboboxEmpty>
-    //                                                 <ComboboxList>
-    //                                                     {(truck) => (
-    //                                                         <ComboboxItem key={truck.id} value={truck.id}>
-    //                                                             {truck.truckNumber}
-    //                                                         </ComboboxItem>
-    //                                                     )}
-    //                                                 </ComboboxList>
-    //                                             </ComboboxContent>
-    //                                         </Combobox>
-
-
-    //                                     </Field>
-
-
-    //                                     <Field>
-    //                                         <FieldLabel>Assign GPS Device</FieldLabel>
-    //                                         <Combobox items={GPS_DEVICE_SEED} value={selectedGps}
-    //                                             onValueChange={(gps) => setSelectedGps(gps?.id)}
-    //                                             itemToStringValue={(gps) => gps.id}
-    //                                         >
-    //                                             <ComboboxInput placeholder="Search/Select a gps device" />
-    //                                             <ComboboxContent>
-    //                                                 <ComboboxEmpty>No items found.</ComboboxEmpty>
-    //                                                 <ComboboxList>
-    //                                                     {(gps) => (
-    //                                                         <ComboboxItem key={gps.id} value={gps.id}>
-    //                                                             {gps.imei}
-    //                                                         </ComboboxItem>
-    //                                                     )}
-    //                                                 </ComboboxList>
-    //                                             </ComboboxContent>
-    //                                         </Combobox>
-
-    //                                     </Field>
-    //                                 </div>
-
-    //                                 <div>
-    //                                     <div className="flex items-center justify-between mb-2">
-    //                                         <FieldLabel>Assign Driver</FieldLabel>
-
-    //                                         <button
-    //                                             type="button"
-    //                                             onClick={() => setCreateNewDriver(prev => !prev)}
-    //                                             className="text-xs text-maroon hover:underline"
-    //                                         >
-    //                                             {createNewDriver ? "Select existing" : "+ Add new"}
-    //                                         </button>
-    //                                     </div>
-
-    //                                     {!createNewDriver ? (
-    //                                         <Field>
-    //                                             <Combobox
-    //                                                 items={DRIVER_SEED}
-    //                                                 value={selectedDriver}
-    //                                                 onValueChange={(driver) => setSelectedDriver(driver?.id)}
-    //                                                 itemToStringValue={(driver) => driver.id}
-    //                                             >
-    //                                                 <ComboboxInput placeholder="Search/Select a driver" />
-    //                                                 <ComboboxContent>
-    //                                                     <ComboboxEmpty>No items found.</ComboboxEmpty>
-    //                                                     <ComboboxList>
-    //                                                         {(driver) => (
-    //                                                             <ComboboxItem key={driver.id} value={driver.id}>
-    //                                                                 {driver.driverName}
-    //                                                             </ComboboxItem>
-    //                                                         )}
-    //                                                     </ComboboxList>
-    //                                                 </ComboboxContent>
-    //                                             </Combobox>
-    //                                         </Field>
-    //                                     ) : (
-    //                                         <div className="space-y-3 border rounded-md p-3 bg-gray-50">
-    //                                             <p className="text-xs font-medium text-gray-600">New Driver Details</p>
-
-    //                                             <div className="grid grid-cols-2 gap-2">
-    //                                                 <Field>
-    //                                                     <FieldLabel>Name</FieldLabel>
-    //                                                     <Input placeholder="Driver name" />
-    //                                                 </Field>
-
-    //                                                 <Field>
-    //                                                     <FieldLabel>Phone</FieldLabel>
-    //                                                     <Input type="tel" placeholder="10-digit number" />
-    //                                                 </Field>
-    //                                             </div>
-
-    //                                             <div className="flex gap-2 items-end">
-    //                                                 <Field className="flex-1">
-    //                                                     <FieldLabel>OTP</FieldLabel>
-    //                                                     <Input placeholder="Enter OTP" />
-    //                                                 </Field>
-
-    //                                                 <Button type="button" variant="outline" className="h-9">
-    //                                                     Send OTP
-    //                                                 </Button>
-    //                                             </div>
-
-    //                                             <Field>
-    //                                                 <FieldLabel>Aadhaar Upload</FieldLabel>
-    //                                                 <Input type="file" accept="image/*,.pdf" />
-    //                                             </Field>
-    //                                         </div>
-    //                                     )}
-    //                                 </div>
-
-    //                                 <Field>
-    //                                     <FieldLabel>Add Stops</FieldLabel>
-
-    //                                     <div className="flex gap-2">
-    //                                         <Combobox items={STORE_SEED} value={selectedStore}
-    //                                             onValueChange={(store) => setSelectedStore(store?.id)}
-    //                                             itemToStringValue={(store) => store.id}
-    //                                         >
-    //                                             <ComboboxInput placeholder="Search store" />
-    //                                             <ComboboxContent>
-    //                                                 <ComboboxEmpty>No stores</ComboboxEmpty>
-    //                                                 <ComboboxList>
-    //                                                     {(store) => (
-    //                                                         <ComboboxItem key={store.id} value={store.id}>
-    //                                                             {store.name}
-    //                                                         </ComboboxItem>
-    //                                                     )}
-    //                                                 </ComboboxList>
-    //                                             </ComboboxContent>
-    //                                         </Combobox>
-
-    //                                     </div>
-    //                                 </Field>
-
-    //                             </FieldGroup>
-    //                         </FieldSet>
-    //                     </FieldGroup>
-    //                 </div>
-    //                 <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-    //                     <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Create Trip <Road /></Button>
-    //                     <SheetClose className='basis-1/2' asChild>
-    //                         <Button className="w-full" variant="outline">Cancel</Button>
-    //                     </SheetClose>
-    //                 </SheetFooter>
-    //             </SheetContent>
-    //         </Sheet>
-    //     </div>
-    // )
 }

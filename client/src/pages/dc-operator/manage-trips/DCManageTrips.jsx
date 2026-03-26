@@ -1,12 +1,14 @@
 import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 import CreateNewTrip from "./CreateNewTrip"
+import TripsFilter from "./TripsFilter"
+import TripsTable from "./TripsTable"
 
 export default function DCManageTrips(){
     return(
         <section>
             <div className="h-18 px-10 flex gap-4 items-center shadow-md ">
-                <Link to={'/admin'} className="bg-gold hover:bg-gold-dark p-2 rounded-full">
+                <Link to={'/dc'} className="bg-gold hover:bg-gold-dark p-2 rounded-full">
                     <ArrowLeft size={18} className="text-maroon"/>
                 </Link>
                 <div className="flex items-center justify-between w-full">
@@ -17,6 +19,9 @@ export default function DCManageTrips(){
                     <CreateNewTrip />
                 </div>
             </div>
+
+            <TripsFilter/>
+            <TripsTable/>
 
         </section>
     )

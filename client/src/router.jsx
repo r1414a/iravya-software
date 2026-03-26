@@ -11,11 +11,8 @@ import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/ManageGpsDevi
 import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
 import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
-<<<<<<< Updated upstream
 import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
 import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
-=======
->>>>>>> Stashed changes
 import DCManageStores  from "./pages/dc-operator/manage-stores/DCManageStores"
 
 const router = createBrowserRouter([
@@ -61,7 +58,6 @@ const router = createBrowserRouter([
                 path: 'manage-trips',
                 element: <DCManageTrips/>
             },
-<<<<<<< Updated upstream
             {
                 path: 'manage-drivers',
                 element: <DCManageDrivers/>
@@ -74,8 +70,6 @@ const router = createBrowserRouter([
                 path: "manage-gps-devices",
                 element: <ManageGpsDevice/>
             },
-=======
->>>>>>> Stashed changes
             //more pages
             {
                 path: 'manage-stores',

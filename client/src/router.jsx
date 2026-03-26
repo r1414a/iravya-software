@@ -60,7 +60,23 @@ const router = createBrowserRouter([
             }
             //more pages
         ]
-    }
+    },
+
+    {
+        path: '/stores',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <StoreManagerHome/>
+            },
+            {
+                path: 'view-trips',
+                element: <ViewTrips/>
+            }
+            //more pages
+        ]
+    },
     //  {
     //     path: '/brand',
     //     element: <AdminLayout/>,

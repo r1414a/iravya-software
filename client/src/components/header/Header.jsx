@@ -71,7 +71,7 @@ const Header =()=>{
         </div>
  
         {/* Center nav links (optional) */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* <div className="hidden md:flex items-center gap-8">
           {["Dashboard", "Projects", "Team", "Reports"].map((item) => (
             <Link
                 to ="*"
@@ -85,7 +85,7 @@ const Header =()=>{
               {item}
             </Link>
           ))}
-        </div>
+        </div> */}
  
         {/* Right: Admin + Dropdown */}
         <div className="relative" ref={dropdownRef}>

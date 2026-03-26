@@ -4,6 +4,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
 import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminManageUser";
+import ManageGpsDevice from "./pages/super-admin/manage-gps-device/ManageGpsDevices"
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -32,9 +33,26 @@ const router = createBrowserRouter([
                 element: <SuperAdminManageUser/>
             },
             //more pages
+
+            {
+                path: "manage-devices",
+                element: <ManageGpsDevice/>
+            },
         ]
     },
     //  {
+    //     path: '/brand',
+    //     element: <AdminLayout/>,
+    //     children: [
+    //         {
+    //             index: true,
+    //             element: <BrandManagerHome/>
+    //         },
+    //         //more pages
+    //     ]
+    // }
+
+    // {
     //     path: '/brand',
     //     element: <AdminLayout/>,
     //     children: [

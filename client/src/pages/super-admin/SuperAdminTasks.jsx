@@ -22,11 +22,12 @@ Settings
 } from 'lucide-react';
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ITEMS = [
   { key: "companies", label: "Manage Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/companies" },
-  { key: "users", label: "Manage Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/users" },
-  { key: "devices", label: "Register GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/admin/devices" },
+  { key: "users", label: "Manage Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/manage-user" },
+  { key: "devices", label: "Register GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/admin/manage-devices" },
   { key: "trucks", label: "Manage Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/admin/trucks" },
   { key: "dcs", label: "Manage Warehouses", icon: <Warehouse size={35} color="white"strokeWidth={1}/>, bg: "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/admin/dcs" },
   { key: "stores", label: "Manage Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/admin/stores" },
@@ -41,6 +42,7 @@ function MenuCard({ item, index }) {
   const [hovered, setHovered] = useState(false);
  
   return (
+    <Link to={item.path} key={item.label}>
     <button
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -78,6 +80,7 @@ function MenuCard({ item, index }) {
         {item.label}
       </span>
     </button>
+    </Link>
   );
 }
 export default function SuperAdminTasks(){
@@ -122,8 +125,13 @@ export default function SuperAdminTasks(){
           {/* Row 2: 2 cards centered */}
           <div className="col-span-3 grid gap-5" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
              {/* spacer to push cards to center visually */}
-            {ITEMS.slice(3).map((item, i) => (
+            {/* {ITEMS.slice(3).map((item, i) => (
               <MenuCard key={item.label} item={item} index={i + 3} />
+            ))} */}
+            {ITEMS.slice(3).map((item, i) => (
+              
+                <MenuCard item={item} index={i + 3} />
+              
             ))}
             
           </div>

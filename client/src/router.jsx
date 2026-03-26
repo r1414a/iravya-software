@@ -4,6 +4,9 @@ import AuthLayout from "./layouts/AuthLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
 import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminManageUser";
+import DCHome from "./pages/dc-operator/DCHome";
+import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
+
 import ManageGpsDevice from "./pages/super-admin/manage-gps-device/ManageGpsDevices"
 
 const router = createBrowserRouter([
@@ -29,7 +32,7 @@ const router = createBrowserRouter([
                 element: <SuperAdminHome/>
             },
             {
-                path: "manage-user",
+                path: "manage-users",
                 element: <SuperAdminManageUser/>
             },
             //more pages
@@ -40,6 +43,21 @@ const router = createBrowserRouter([
             },
         ]
     },
+     {
+        path: '/dc',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <DCHome/>
+            },
+            {
+                path: 'manage-trips',
+                element: <DCManageTrips/>
+            }
+            //more pages
+        ]
+    }
     //  {
     //     path: '/brand',
     //     element: <AdminLayout/>,

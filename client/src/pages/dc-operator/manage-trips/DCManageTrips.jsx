@@ -1,11 +1,9 @@
 import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
-import ManageUserForm from "./CreateUserModal"
-import UsersFilter from "./UsersFilter"
-import UsersTable from "./UsersTable"
+import CreateNewTrip from "./CreateNewTrip"
 
-export default function SuperAdminManageUser() {
-    return (
+export default function DCManageTrips(){
+    return(
         <section>
             <div className="h-18 px-10 flex gap-4 items-center shadow-md ">
                 <Link to={'/admin'} className="bg-gold hover:bg-gold-dark p-2 rounded-full">
@@ -13,16 +11,12 @@ export default function SuperAdminManageUser() {
                 </Link>
                 <div className="flex items-center justify-between w-full">
                     <div className="-space-y-1">
-                        <h1 className="text-lg">Manage Users</h1>
-                        <p className="text-sm text-gray-500">Manage users across all brands — invite, edit roles, deactivate and reset passwords</p>
+                        <h1 className="text-lg">Manage Trips</h1>
+                        <p className="text-sm text-gray-500">Plan, track, and dispatch deliveries across all stores — select trucks, and schedule departures.</p>
                     </div>
-                    <ManageUserForm />
+                    <CreateNewTrip />
                 </div>
             </div>
-
-            <UsersFilter/>
-            <UsersTable/>
-
 
         </section>
     )

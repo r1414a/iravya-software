@@ -7,6 +7,7 @@ import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminMana
 import DCHome from "./pages/dc-operator/DCHome";
 import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
 
+import ManageGpsDevice from "./pages/super-admin/manage-gps-device/ManageGpsDevices"
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -35,6 +36,11 @@ const router = createBrowserRouter([
                 element: <SuperAdminManageUser/>
             },
             //more pages
+
+            {
+                path: "manage-devices",
+                element: <ManageGpsDevice/>
+            },
         ]
     },
      {
@@ -52,6 +58,29 @@ const router = createBrowserRouter([
             //more pages
         ]
     }
+    //  {
+    //     path: '/brand',
+    //     element: <AdminLayout/>,
+    //     children: [
+    //         {
+    //             index: true,
+    //             element: <BrandManagerHome/>
+    //         },
+    //         //more pages
+    //     ]
+    // }
+
+    // {
+    //     path: '/brand',
+    //     element: <AdminLayout/>,
+    //     children: [
+    //         {
+    //             index: true,
+    //             element: <BrandManagerHome/>
+    //         },
+    //         //more pages
+    //     ]
+    // }
 ])
 
 export default router;

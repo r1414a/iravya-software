@@ -32,20 +32,40 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus, UserRound, LocateFixed } from "lucide-react"
+
+import {
+    Sheet,
+    SheetClose,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { Plus, UserRound, LocateFixed ,Truck } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function AddGPSDeviceModel() {
     return (
+        <>
        <div>
-                        <Drawer direction="right" className="">
-                            <DrawerTrigger className="flex items-center bg-[#701a40] text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-2" />
-                                Add new device</DrawerTrigger>
-                            <DrawerContent className="bg-white">
-                                <DrawerHeader className="border-b border-gray-200">
-                                    <DrawerTitle>Add new device</DrawerTitle>
-                                    <DrawerDescription>Assign Truck and add retired hitory</DrawerDescription>
-                                </DrawerHeader>
-                                <div className="p-4">
+            <Sheet>
+                <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add new device
+                </SheetTrigger>
+                <SheetContent className="bg-white min-w-[500px] flex flex-col">
+                    <SheetHeader className="border-b border-gray-200 pb-4">
+                        <SheetTitle>Add new device</SheetTitle>
+                        <SheetDescription>
+                            Assign truck and add retired history.
+                        </SheetDescription>
+                    </SheetHeader>
+
+                    <div className="px-4 py-6 space-y-6 flex-1 overflow-y-auto">
+                        
+                        <div className="p-4">
                                     <FieldGroup>
                                         <FieldSet>
                                             <FieldGroup>
@@ -61,24 +81,24 @@ export default function AddGPSDeviceModel() {
                                                 </div>
 
                                                 <Field>
-                                                    <FieldLabel htmlFor="username">SIM Number</FieldLabel>
-                                                    <Input id="username" type="text" placeholder="" />
+                                                    <FieldLabel htmlFor="simmnumber">SIM Number</FieldLabel>
+                                                    <Input id="username" type="text" placeholder="+91 9876543210" />
                                                     {/* <FieldDescription className="text-xs">
                                                         Invite will be sent to this email
                                                     </FieldDescription> */}
                                                 </Field>
 
                                                 <Field>
-                                                    <FieldLabel htmlFor="username">Firmware Version</FieldLabel>
-                                                    <Input id="username" type="text" placeholder="" />
+                                                    <FieldLabel htmlFor="firmware">Firmware Version</FieldLabel>
+                                                    <Input id="username" type="text" placeholder="03.27.05.Rev.45" />
                                                     {/* <FieldDescription className="text-xs">
                                                         Invite will be sent to this email
                                                     </FieldDescription> */}
                                                 </Field>
 
                                                 <Field>
-                                                    <FieldLabel htmlFor="username">Mannufactured At</FieldLabel>
-                                                    <Input id="username" type="text" placeholder="" />
+                                                    <FieldLabel htmlFor="manufactured">Mannufactured At</FieldLabel>
+                                                    <Input id="username" type="text" placeholder="Gujarat, India" />
                                                     {/* <FieldDescription className="text-xs">
                                                         Invite will be sent to this email
                                                     </FieldDescription> */}
@@ -89,11 +109,11 @@ export default function AddGPSDeviceModel() {
                                                     <FieldLabel>Truck</FieldLabel>
                                                     <Select>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select a role..." />
+                                                            <SelectValue placeholder="Select a Truck..." />
                                                         </SelectTrigger>
                                                         <SelectContent className="bg-white border shadow-md">
                                                             <SelectGroup>
-                                                                <SelectLabel>Role</SelectLabel>
+                                                                <SelectLabel>Truck</SelectLabel>
                                                                 <SelectItem value="brand_manager">MH 04 AB 1234</SelectItem>
                                                                 <SelectItem value="dc_operator">MH 12 TR 9087</SelectItem>
                                                                 <SelectItem value="store_manager">MH 43 XY 6677</SelectItem>
@@ -101,7 +121,7 @@ export default function AddGPSDeviceModel() {
                                                         </SelectContent>
                                                     </Select>
                                                     <FieldDescription className="text-xs">
-                                                        Brand managers can see all trucks and trips for their brand
+                                                        Brand managers can assign trucks to GPS devices
                                                     </FieldDescription>
 
                                                 </Field>
@@ -127,7 +147,7 @@ export default function AddGPSDeviceModel() {
                                                     <FieldLabel>Status</FieldLabel>
                                                     <Select>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select brand..." />
+                                                            <SelectValue placeholder="Set status..." />
                                                         </SelectTrigger>
                                                         <SelectContent className="bg-white border shadow-md">
                                                             <SelectGroup>
@@ -144,15 +164,19 @@ export default function AddGPSDeviceModel() {
                                         </FieldSet>
                                     </FieldGroup>
                                 </div>
-                                <DrawerFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                                    <Button className='basis-1/2'>Add new device<LocateFixed /></Button>
-                                    <DrawerClose  className='basis-1/2' asChild>
-                                        <Button className="w-full" variant="outline">Cancel</Button>
-                                    </DrawerClose>
-                                </DrawerFooter>
-                            </DrawerContent>
-                        </Drawer>
-                    </div>
+                
+                    </div>    
+                
+                    <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+                        <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Add Device <LocateFixed /></Button>
+                        <SheetClose className='basis-1/2' asChild>
+                            <Button className="w-full" variant="outline">Cancel</Button>
+                        </SheetClose>
+                    </SheetFooter>
+                </SheetContent>
+            </Sheet>
+        </div>
+    </>
 
     )
 }

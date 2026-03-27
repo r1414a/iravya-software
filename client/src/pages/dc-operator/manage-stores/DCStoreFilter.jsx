@@ -31,14 +31,13 @@ export default function DCStoreFilter() {
                     </InputGroup>
 
                     <div className="flex gap-4 w-full">
-                        <Select defaultValue="all_brands">
+                        <Select defaultValue="All City">
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select brand..." />
+                                <SelectValue placeholder="Select City..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
                                 <SelectGroup>
                                     <SelectLabel>City</SelectLabel>
-                                    
                                     <SelectItem value="All City">All City</SelectItem>
                                     <SelectItem value="Pune">Pune</SelectItem>
                                     <SelectItem value="Nashik">Nashik</SelectItem>
@@ -49,9 +48,9 @@ export default function DCStoreFilter() {
                             </SelectContent>
                         </Select>
 
-                        <Select defaultValue="all_roles">
+                        <Select defaultValue="All State">
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a role..." />
+                                <SelectValue placeholder="Select a state..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
                                 <SelectGroup>
@@ -69,9 +68,9 @@ export default function DCStoreFilter() {
                             </SelectContent>
                         </Select>
 
-                        <Select defaultValue="all_roles">
+                        <Select defaultValue="All coutry">
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a role..." />
+                                <SelectValue placeholder="Select a country..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
                                 <SelectGroup>

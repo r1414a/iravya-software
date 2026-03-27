@@ -50,7 +50,7 @@ export default function DashboardHomePageAdminTask({tasks}){
     return(
     <main className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
       <div
-          className="grid gap-5 w-full grid-cols-1 md:grid-cols-3 max-w-[600px]"
+          className="grid gap-5 w-full grid-cols-1 md:grid-cols-3 max-w-[600px]  items-center justify-center content-center"
           // style={{
           //   maxWidth: "600px",
           //   gridTemplateColumns: "repeat(3, 1fr)",
@@ -62,7 +62,7 @@ export default function DashboardHomePageAdminTask({tasks}){
           ))}
  
           {/* Row 2: 2 cards centered */}
-          <div className="col-span-3 grid gap-5" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <div className="col-span-3 grid gap-5 justify-center " style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
              {/* spacer to push cards to center visually */}
             {tasks.slice(3).map((item, i) => (
               <MenuCard key={item.label} item={item} index={i + 3} />

@@ -2,22 +2,22 @@ import { BookUser, Building2, ChartNoAxesCombined, LocateFixed, Road, Settings, 
 
 
 export const SUPER_ADMIN_TASKS = [
-  { key: "companies", label: "Manage Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/companies" },
-  { key: "users", label: "Manage Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/manage-users" },
+  { key: "companies", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/companies" },
+  { key: "users", label: "Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/manage-users" },
   { key: "devices", label: "Register GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/admin/devices" },
-  { key: "trucks", label: "Manage Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/admin/trucks" },
-  { key: "dcs", label: "Manage Warehouses", icon: <Warehouse size={35} color="white"strokeWidth={1}/>, bg: "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/admin/dcs" },
-  { key: "stores", label: "Manage Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/admin/stores" },
+  { key: "trucks", label: "Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/admin/trucks" },
+  { key: "dcs", label: "Warehouses", icon: <Warehouse size={35} color="white"strokeWidth={1}/>, bg: "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/admin/dcs" },
+  { key: "stores", label: "Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/admin/stores" },
   { key: "trips", label: "View Trips", icon: <Road size={35} color="white"strokeWidth={1}/>, bg: "bg-slate-800 shadow-lg shadow-slate-800/40", path: "/admin/trips" },
-  { key: "alerts", label: "Alerts", icon: <Siren size={35} color="white"strokeWidth={1}/>, bg: "bg-red-800 shadow-lg shadow-red-800/40", path: "/admin/alerts" },
+  //  { key: "alerts", label: "Alerts", icon: <Siren size={35} color="white"strokeWidth={1}/>, bg: "bg-red-800 shadow-lg shadow-red-800/40", path: "/admin/alerts" },
   { key: "analytics", label: "Analytics", icon: <ChartNoAxesCombined strokeWidth={1} size={35} color="white"/>, bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40", path: "/admin/analytics" },
   { key: "settings", label: "Settings", icon: <Settings size={35} color="white" strokeWidth={1}/>,  bg: "bg-green-500 shadow-lg shadow-green-500/40", path: "/admin/settings" },
 ];
 
 export const DC_TASKS = [
-  { key: "drivers", label: "Manage Drivers", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg:  "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/dc/manage-drivers" },
-  { key: "devices", label: "Manage GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/dc/manage-gps-devices" },
-  { key: "trucks", label: "Manage Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/dc/manage-trucks" },
-    { key: "stores", label: "Manage Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/dc/manage-stores" },
-    { key: "trips", label: "Manage Trips", icon: <Road size={35} color="white"strokeWidth={1}/>, bg: "bg-slate-800 shadow-lg shadow-slate-800/40", path: "/dc/manage-trips" },
+  { key: "drivers", label: "Drivers", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg:  "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/dc/manage-drivers" },
+  { key: "devices", label: "GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/dc/manage-gps-devices" },
+  { key: "trucks", label: "Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/dc/manage-trucks" },
+    { key: "stores", label: "Stores", icon: <Store size={35} color="white"strokeWidth={1}/>, bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40", path: "/dc/manage-stores" },
+    { key: "trips", label: "Trips", icon: <Road size={35} color="white"strokeWidth={1}/>, bg: "bg-slate-800 shadow-lg shadow-slate-800/40", path: "/dc/manage-trips" },
 ];

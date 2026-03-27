@@ -3,22 +3,28 @@ import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 import { MoreHorizontal, Eye, MapPin, XCircle } from "lucide-react"
 // import TripDetailSheet from "../TripDetailSheet"
 import { useState } from "react"
+import TripDetailSheet from "../TripDetailSheet"
+import TripMapModal from "../TripMapModal"
 
 // Status badge — matches your existing style pattern
 function StatusBadge({ status }) {
     const config = {
-        in_transit:  { label: "In Transit",  className: "bg-blue-100 text-blue-700 border-blue-200" },
-        completed:   { label: "Completed",   className: "bg-green-100 text-green-700 border-green-200" },
-        scheduled:   { label: "Scheduled",   className: "bg-gray-100 text-gray-600 border-gray-200" },
-        cancelled:   { label: "Cancelled",   className: "bg-red-100 text-red-600 border-red-200" },
+        in_transit: { label: "In Transit", className: "bg-blue-100 text-blue-700 border-blue-200" },
+        completed: { label: "Completed", className: "bg-green-100 text-green-700 border-green-200" },
+        scheduled: { label: "Scheduled", className: "bg-gray-100 text-gray-600 border-gray-200" },
+        cancelled: { label: "Cancelled", className: "bg-red-100 text-red-600 border-red-200" },
     }
     const c = config[status] || config.scheduled
     return (
@@ -49,15 +55,22 @@ function StopsPills({ stops }) {
 // Actions cell — uses a controlled Sheet so it opens from the row
 function ActionsCell({ row }) {
     const [detailOpen, setDetailOpen] = useState(false)
+    const [mapOpen, setMapOpen] = useState(false)
     const trip = row.original
 
     return (
         <>
-            {/* <TripDetailSheet
+            <TripDetailSheet
                 trip={trip}
                 open={detailOpen}
-                onClose={() => setDetailOpen(false)}
-            /> */}
+                onClose={setDetailOpen}
+            />
+
+            <TripMapModal
+                trip={trip}
+                open={mapOpen}
+                onClose={setMapOpen}
+            />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -70,7 +83,7 @@ function ActionsCell({ row }) {
                     <DropdownMenuItem onClick={() => setDetailOpen(true)}>
                         <Eye size={13} className="mr-2" /> View details
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setMapOpen(true)}>
                         <MapPin size={13} className="mr-2" /> View on map
                     </DropdownMenuItem>
                     {trip.status === "in_transit" && (
@@ -130,7 +143,53 @@ export const columns = [
     },
     {
         accessorKey: "status",
-        header: "Status",
+        header: ({column}) => {
+            const currentValue = column.getFilterValue() || "all"
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Status</span>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+                                {currentValue === "all"
+                                    ? "All"
+                                    : currentValue === "in_transit"
+                                        ? "In Transit"
+                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
+                            </Button>
+                            {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-36 bg-white border shadow-md">
+                            <DropdownMenuRadioGroup
+                                value={currentValue}
+                                onValueChange={(value) => {
+                                    column.setFilterValue(
+                                        value === "all" ? undefined : value
+                                    )
+                                }}
+                            >
+                                <DropdownMenuRadioItem value="all" className="text-xs">
+                                    All
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="in_transit" className="text-xs">
+                                    In transit
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="completed" className="text-xs">
+                                    Completed
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="scheduled" className="text-xs">
+                                    Scheduled
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="cancelled" className="text-xs">
+                                    Cancelled
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )
+        },
         cell: ({ row }) => (
             <StatusBadge status={row.getValue("status")} />
         ),

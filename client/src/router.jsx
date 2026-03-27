@@ -7,7 +7,7 @@ import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminMana
 import DCHome from "./pages/dc-operator/DCHome";
 import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
 
-import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/ManageGpsDevices"
+import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/DCManageDevices"
 import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
 import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."

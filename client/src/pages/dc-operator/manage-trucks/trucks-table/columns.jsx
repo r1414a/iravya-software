@@ -1,12 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
     MoreHorizontal,
     Pencil,
     UserRound,
@@ -14,39 +8,93 @@ import {
     Wrench,
     SendHorizonal,
     ChevronRight,
+    Filter,
 } from "lucide-react"
- 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox"
+import { FieldLabel } from "@/components/ui/field"
+
 // Truck type icon colours — a small coloured square instead of avatar initials
 const typeColors = {
     mini_truck: "bg-teal-100 text-teal-700",
-    medium:     "bg-amber-100 text-amber-700",
-    heavy:      "bg-purple-100 text-purple-700",
+    medium: "bg-amber-100 text-amber-700",
+    heavy: "bg-purple-100 text-purple-700",
 }
- 
+
 const typeLabels = {
     mini_truck: "Mini",
-    medium:     "Medium",
-    heavy:      "Heavy",
+    medium: "Medium",
+    heavy: "Heavy",
 }
- 
+
 // Status badge styles matching the three truck states
 const statusStyles = {
-    idle:        "bg-green-100 text-green-700",
-    in_transit:  "bg-blue-100 text-blue-700",
+    idle: "bg-green-100 text-green-700",
+    in_transit: "bg-blue-100 text-blue-700",
     maintenance: "bg-amber-100 text-amber-700",
 }
- 
+
 const statusLabels = {
-    idle:        "Idle",
-    in_transit:  "In transit",
+    idle: "Idle",
+    in_transit: "In transit",
     maintenance: "Maintenance",
 }
- 
+
 export const columns = [
     // Truck reg no. + type badge
     {
-        accessorKey: "regNo",
-        header: "Truck",
+        accessorKey: "type",
+        header: ({ column }) => {
+            const currentValue = column.getFilterValue() || "all"
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Truck</span>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+                                {currentValue === "all"
+                                    ? "All classes"
+                                    : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
+                            </Button>
+                            {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-36 bg-white border shadow-md">
+                            <DropdownMenuRadioGroup
+                                value={currentValue}
+                                onValueChange={(value) => {
+                                    column.setFilterValue(
+                                        value === "all" ? undefined : value
+                                    )
+                                }}
+                            >
+                                <DropdownMenuRadioItem value="all" className="text-xs">
+                                    All
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="mini_truck" className="text-xs">
+                                    Mini
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="medium" className="text-xs">
+                                    Medium
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="heavy" className="text-xs">
+                                    Heavy
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )
+        },
         cell: ({ row }) => {
             const { regNo, type } = row.original
             return (
@@ -61,11 +109,39 @@ export const columns = [
                 </div>
             )
         },
+        filterFn: (row, id, value) => {
+            if (!value) return true
+            return row.getValue(id) === value
+        }
     },
     // Driver name + phone
     {
-        accessorKey: "driver",
-        header: "Driver",
+        accessorKey: "driverName",
+        header: ({ column }) => {
+            const currentValue = column.getFilterValue() || "all"
+            const isChecked = currentValue === "unassigned"
+
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Truck</span>
+
+                    <Checkbox
+                        id="terms-checkbox-basic"
+                        name="terms-checkbox-basic"
+                        className="w-3 h-3 rounded-xs -mr-1 border border-gray-500"
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                            column.setFilterValue(
+                                checked ? "unassigned" : undefined
+                            )
+                        }}
+                    />
+                    <FieldLabel htmlFor="terms-checkbox-basic" className="text-xs">
+                        Unassigned only
+                    </FieldLabel>
+                </div>
+            )
+        },
         cell: ({ row }) => {
             const { driverName, driverPhone } = row.original
             return driverName ? (
@@ -76,6 +152,14 @@ export const columns = [
             ) : (
                 <span className="text-xs text-gray-400 italic">No driver assigned</span>
             )
+        },
+        filterFn: (row, id, value) => {
+            if (!value) return true
+
+            const driverName = row.getValue(id)
+
+            // ✅ show only rows with NO driver
+            return !driverName
         },
     },
     // GPS device
@@ -121,7 +205,50 @@ export const columns = [
     // Status badge
     {
         accessorKey: "status",
-        header: "Status",
+        header: ({ column }) => {
+            const currentValue = column.getFilterValue() || "all"
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Status</span>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+                                {currentValue === "all"
+                                    ? "All"
+                                    : currentValue === "in_transit"
+                                        ? "In transit"
+                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
+                            </Button>
+                            {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-36 bg-white border shadow-md">
+                            <DropdownMenuRadioGroup
+                                value={currentValue}
+                                onValueChange={(value) => {
+                                    column.setFilterValue(
+                                        value === "all" ? undefined : value
+                                    )
+                                }}
+                            >
+                                <DropdownMenuRadioItem value="all" className="text-xs">
+                                    All
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="idle" className="text-xs">
+                                    Idle
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="in_transit" className="text-xs">
+                                    In transit
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="maintenance" className="text-xs">
+                                    Maintenance
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )
+        },
         cell: ({ row }) => {
             const s = row.original.status
             return (
@@ -130,6 +257,10 @@ export const columns = [
                 </Badge>
             )
         },
+        filterFn: (row, id, value) => {
+            if (!value) return true
+            return row.getValue(id) === value
+        }
     },
     // Actions — idle trucks get a "Dispatch now" quick button; others get the 3-dot menu only
     {
@@ -152,14 +283,14 @@ export const columns = [
                             Dispatch
                         </Button>
                     )}
- 
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreHorizontal size={16} />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white border shadow-md">
+                        <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
                             <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
                                 <Pencil size={14} /> Edit truck details
                             </DropdownMenuItem>
@@ -174,7 +305,7 @@ export const columns = [
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
- 
+
                     {/* Row arrow — clicking the row opens the detail drawer */}
                     <ChevronRight size={16} className="text-gray-300" />
                 </div>

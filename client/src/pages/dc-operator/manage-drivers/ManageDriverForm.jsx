@@ -49,38 +49,40 @@ export default function ManageDriverForm() {
                             <FieldGroup>
                                 <div className="flex gap-2">
                                     <Field>
-                                    <FieldLabel>Full name</FieldLabel>
-                                    <Input placeholder="e.g. Ravi Deshmukh" />
-                                </Field>
-                                <Field>
-                                    <FieldLabel>Phone number</FieldLabel>
-                                    <Input placeholder="+91 98XXX XXXXX" />
-                                </Field>
+                                        <FieldLabel>Full name</FieldLabel>
+                                        <Input placeholder="e.g. Ravi Deshmukh" />
+                                    </Field>
+                                    <Field>
+                                        <FieldLabel>Phone number</FieldLabel>
+                                        <Input placeholder="+91 98XXX XXXXX" />
+                                    </Field>
                                 </div>
-                                
+
                                 <div className="flex gap-2">
-                                <Field>
-                                    <FieldLabel>Licence number</FieldLabel>
-                                    <Input placeholder="e.g. MH1220190012345" className="font-mono" />
-                                </Field>
+                                    <Field>
+                                        <FieldLabel>Licence number</FieldLabel>
+                                        <Input placeholder="e.g. MH1220190012345" className="font-mono" />
+                                    </Field>
 
 
-                                <Field>
-                                    <FieldLabel>Licence class</FieldLabel>
-                                    <Select>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select class" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Class</SelectLabel>
-                                                <SelectItem value="lmv">LMV</SelectItem>
-                                                <SelectItem value="hmv">HMV</SelectItem>
-                                                <SelectItem value="hgmv">HGMV</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </Field>
+                                    <Field>
+                                        <FieldLabel>Licence class</FieldLabel>
+                                        <Select>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select class" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Class</SelectLabel>
+                                                    <SelectItem value="all_licences">All classes</SelectItem>
+                                                    <SelectItem value="lmv">LMV - light motor vehicles/cars</SelectItem>
+                                                    <SelectItem value="hmv">HMV - heavy motor vehicles</SelectItem>
+                                                    <SelectItem value="hgmv">HGMV - heavy goods motor vehicle</SelectItem>
+                                                    <SelectItem value="htv">HTV - heavy transport vehicle</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </Field>
                                 </div>
 
                                 <Field>

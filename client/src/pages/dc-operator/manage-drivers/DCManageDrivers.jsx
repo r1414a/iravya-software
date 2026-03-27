@@ -3,11 +3,18 @@ import { Link } from "react-router-dom"
 import ManageDriverForm from "./ManageDriverForm"
 import DriversFilter from "./DriversFilter"
 import DriversTable from "./DriversTable"
- 
+import AdminSubHeader from "@/components/AdminSubHeader"
+
 export default function DCManageDrivers() {
     return (
         <section>
-            <div className="h-18 px-10 flex gap-4 items-center shadow-md">
+            <AdminSubHeader
+                to="/dc"
+                heading="Manage Drivers"
+                subh="Manage drivers at this DC — add, edit, assign to trucks, and deactivate"
+                CreateButton={<ManageDriverForm />}
+            />
+            {/* <div className="h-18 px-10 flex gap-4 items-center shadow-md">
                 <Link to={'/dc'} className="bg-gold hover:bg-gold-dark p-2 rounded-full">
                     <ArrowLeft size={18} className="text-maroon" />
                 </Link>
@@ -20,7 +27,7 @@ export default function DCManageDrivers() {
                     </div>
                     <ManageDriverForm />
                 </div>
-            </div>
+            </div> */}
  
             <DriversFilter />
             <DriversTable />

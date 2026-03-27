@@ -132,20 +132,21 @@ export default function AddNewStore() {
                                             <FieldLabel htmlFor="l_name">Address</FieldLabel>
                                             <Textarea id="l_name" type="text" placeholder="Add address" />
                                     </Field> */}
+                                    <div className="flex gap-2">
+                                        <Field>
+                                                <FieldLabel htmlFor="l_name">City</FieldLabel>
+                                                <Input id="l_name" type="text" placeholder="Add city" />
+                                        </Field>
+                                        <Field>
+                                                <FieldLabel htmlFor="l_name">State</FieldLabel>
+                                                <Input id="l_name" type="text" placeholder="Add state" />
+                                        </Field>
 
-                                    <Field>
-                                            <FieldLabel htmlFor="l_name">City</FieldLabel>
-                                            <Input id="l_name" type="text" placeholder="Add city" />
-                                    </Field>
-                                    <Field>
-                                            <FieldLabel htmlFor="l_name">State</FieldLabel>
-                                            <Input id="l_name" type="text" placeholder="Add state" />
-                                    </Field>
-
-                                    <Field>
-                                            <FieldLabel htmlFor="l_name">Country</FieldLabel>
-                                            <Input id="l_name" type="text" placeholder="Add country" />
-                                    </Field>
+                                        <Field>
+                                                <FieldLabel htmlFor="l_name">Country</FieldLabel>
+                                                <Input id="l_name" type="text" placeholder="Add country" />
+                                        </Field>
+                                    </div>
 
                                     <Field>
                                             <FieldLabel htmlFor="f_name">Email</FieldLabel>

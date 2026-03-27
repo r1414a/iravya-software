@@ -273,7 +273,7 @@ export const columns = [
                     {status === "idle" && (
                         <Button
                             size="sm"
-                            className="bg-[#701a40] text-white h-7 px-3 text-xs flex items-center gap-1"
+                            className="bg-maroon text-white h-7 px-3 text-xs flex items-center gap-1"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 // navigate to /dc/dispatch?truck=regNo

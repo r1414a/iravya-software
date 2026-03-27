@@ -2,7 +2,8 @@ import {
     flexRender,
     getCoreRowModel,
     useReactTable,
-    getPaginationRowModel
+    getPaginationRowModel,
+    getFilteredRowModel
 } from "@tanstack/react-table"
 
 import {
@@ -14,17 +15,24 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 // import { useState } from "react"
 // import EditUserDrawer from "./EditUserDrawer"
 
 export function DataTable({ columns, data }) {
 //     const [open, setOpen] = useState(false)
 // const [selectedUser, setSelectedUser] = useState(null)
+const [columnFilters, setColumnFilters] = useState([])
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            columnFilters
+        },
+        onColumnFiltersChange: setColumnFilters,
         initialState: {
             pagination: {
                 pageSize: 5,

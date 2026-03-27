@@ -104,7 +104,7 @@ export default function AddNewStore() {
                     <Plus className="w-4 h-4 mr-1" />
                     Add new store
                 </SheetTrigger>
-                <SheetContent className="bg-white min-w-[500px] flex flex-col">
+                <SheetContent className="bg-white min-w-125 flex flex-col">
                     <SheetHeader className="border-b border-gray-200 pb-4">
                         <SheetTitle>Add new store</SheetTitle>
                         <SheetDescription>

@@ -69,7 +69,7 @@ export default function TripsFilter() {
                 </div>
 
                 {/* Right — status tabs */}
-                <div className="basis-1/2 flex gap-2 justify-end">
+                {/* <div className="basis-1/2 flex gap-2 justify-end">
                     {statusTabs.map((tab) => (
                         <Button
                             key={tab}
@@ -83,7 +83,7 @@ export default function TripsFilter() {
                             {tab}
                         </Button>
                     ))}
-                </div>
+                </div> */}
 
             </div>
         </section>

@@ -1,0 +1,96 @@
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
+import { MapPin, Truck, User } from "lucide-react"
+
+export default function TripDetailSheet({ trip, open, onClose }) {
+  if (!trip) return null
+
+  return (
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent className="bg-white min-w-120">
+        <SheetHeader>
+          <SheetTitle>Trip Details</SheetTitle>
+          <SheetDescription>
+            Complete overview of this trip
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="p-4 flex flex-col gap-6 text-sm">
+
+          {/* Top Info */}
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-xs text-gray-500">Trip ID</p>
+              <p className="font-mono text-maroon font-semibold">{trip.id}</p>
+            </div>
+
+            <Badge>{trip.status.replace("_", " ")}</Badge>
+          </div>
+
+          {/* Truck + Driver */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <Truck size={16} />
+              <div>
+                <p className="text-xs text-gray-500">Truck</p>
+                <p className="font-medium">{trip.truck}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <User size={16} />
+              <div>
+                <p className="text-xs text-gray-500">Driver</p>
+                <p className="font-medium">{trip.driver}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Source */}
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Source DC</p>
+            <p className="font-medium">{trip.sourceDC}</p>
+          </div>
+
+          {/* Stops */}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">Stops</p>
+            <div className="flex flex-col gap-2">
+              {trip.stops.map((stop, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 bg-gray-50 border px-3 py-2 rounded-md"
+                >
+                  <span className="text-xs text-gray-500">{i + 1}.</span>
+                  <MapPin size={14} />
+                  <span>{stop}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-500">Departed</p>
+              <p>{trip.departedAt || "—"}</p>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500">
+                {trip.completedAt ? "Completed" : "ETA"}
+              </p>
+              <p>{trip.completedAt || trip.eta || "—"}</p>
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}

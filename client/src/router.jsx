@@ -15,6 +15,7 @@ import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers"
 import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
 import DCManageStores  from "./pages/dc-operator/manage-stores/DCManageStores"
 import DCManageDevices from "./pages/dc-operator/manage-gps-device/DCManageDevices";
+import TrackTrip from "./pages/track_trip/trackTrrip"
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -94,17 +95,17 @@ const router = createBrowserRouter([
             //more pages
         ]
     },
-    //  {
-    //     path: '/brand',
-    //     element: <AdminLayout/>,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <BrandManagerHome/>
-    //         },
-    //         //more pages
-    //     ]
-    // }
+    {
+        path: '/track',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <TrackTrip/>
+            },
+            //more pages
+        ]
+    }
 
     // {
     //     path: '/brand',

@@ -15,8 +15,9 @@ import {
 import { MoreHorizontal, Eye, MapPin, XCircle } from "lucide-react"
 // import TripDetailSheet from "../TripDetailSheet"
 import { useState } from "react"
-import TripDetailSheet from "../TripDetailSheet"
 import TripMapModal from "../TripMapModal"
+import TripDetailSheet from "../TripDetailSheet"
+
 
 // Status badge — matches your existing style pattern
 function StatusBadge({ status }) {
@@ -38,13 +39,18 @@ function StatusBadge({ status }) {
 function StopsPills({ stops }) {
     const visible = stops.slice(0, 2)
     const extra = stops.length - 2
+
     return (
         <div className="flex flex-wrap gap-1">
-            {visible.map((s, i) => (
-                <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                    <MapPin size={9} /> {s.replace(' Store', '')}
-                </span>
-            ))}
+            {visible.map((s, i) => {
+                const name = typeof s === "string" ? s : s?.name || "—"
+
+                return (
+                    <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                        <MapPin size={9} /> {name.replace(' Store', '')}
+                    </span>
+                )
+            })}
             {extra > 0 && (
                 <span className="text-xs text-gray-400">+{extra} more</span>
             )}
@@ -57,7 +63,7 @@ function ActionsCell({ row }) {
     const [detailOpen, setDetailOpen] = useState(false)
     const [mapOpen, setMapOpen] = useState(false)
     const trip = row.original
-
+  
     return (
         <>
             <TripDetailSheet
@@ -124,6 +130,7 @@ export const columns = [
             <div>
                 <p className="font-mono text-sm">{row.getValue("truck")}</p>
                 <p className="text-xs text-gray-500">{row.original.driver}</p>
+                <p className="text-xs text-gray-500">{row.original.phone}</p>
             </div>
         ),
     },

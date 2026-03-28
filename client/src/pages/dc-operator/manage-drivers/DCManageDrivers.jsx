@@ -1,9 +1,7 @@
-import { ArrowLeft } from "lucide-react"
-import { Link } from "react-router-dom"
-import ManageDriverForm from "./ManageDriverForm"
-import DriversFilter from "./DriversFilter"
-import DriversTable from "./DriversTable"
 import AdminSubHeader from "@/components/AdminSubHeader"
+import DriversFilter from "@/components/manage-driver/DriversFilter"
+import DriversTable from "@/components/manage-driver/DriversTable"
+import ManageDriverForm from "@/components/manage-driver/ManageDriverForm"
 
 export default function DCManageDrivers() {
     return (
@@ -11,7 +9,7 @@ export default function DCManageDrivers() {
             <AdminSubHeader
                 to="/dc"
                 heading="Manage Drivers"
-                subh="Manage drivers at this DC — add, edit, assign to trucks, and deactivate"
+                subh="Manage drivers at this DC — add, edit, trip status, details, history, and deactivate"
                 CreateButton={<ManageDriverForm />}
             />
             {/* <div className="h-18 px-10 flex gap-4 items-center shadow-md">

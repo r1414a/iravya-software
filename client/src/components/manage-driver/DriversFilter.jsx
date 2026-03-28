@@ -27,7 +27,7 @@ export default function DriversFilter() {
                     </InputGroup>
  
                         {/* Filter by truck assignment */}
-                        <Select defaultValue="all_trucks">
+                        {/* <Select defaultValue="all_trucks">
                             <SelectTrigger className="w-56">
                                 <SelectValue placeholder="Select truck..." />
                             </SelectTrigger>
@@ -35,13 +35,13 @@ export default function DriversFilter() {
                                 <SelectGroup>
                                     <SelectLabel>Truck</SelectLabel>
                                     <SelectItem value="all_trucks">All trucks</SelectItem>
-                                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                                    <SelectItem value="idle">Idle</SelectItem>
                                     <SelectItem value="MH12AB1234">MH12AB1234</SelectItem>
                                     <SelectItem value="MH14CD5678">MH14CD5678</SelectItem>
                                     <SelectItem value="MH12XY9090">MH12XY9090</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
-                        </Select>
+                        </Select> */}
                 </div>
  
             </div>

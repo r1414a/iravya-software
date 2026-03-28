@@ -1,18 +1,16 @@
-
-import TripsTable from "@/components/manage-trip/TripsTable"
 import AdminSubHeader from "@/components/AdminSubHeader"
-import CreateNewTrip from "@/components/manage-trip/CreateNewTrip"
 import TripsFilter from "@/components/manage-trip/TripsFilter"
+import TripsTable from "@/components/manage-trip/TripsTable"
 
-export default function DCManageTrips() {
+export default function SuperAdminManageTrips() {
     return (
         <section>
 
             <AdminSubHeader
-                to="/dc"
+                to="/admin"
                 heading="Manage Trips"
                 subh="Plan, track, and dispatch deliveries across all stores — select trucks, and schedule departures."
-                CreateButton={<CreateNewTrip />}
+                CreateButton={null}
             />
 
             <TripsFilter />

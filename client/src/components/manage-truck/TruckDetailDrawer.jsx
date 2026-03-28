@@ -55,93 +55,93 @@ const mockDocs = {
 }
 
 // ── Document status config ────────────────────────────────────────────────────
-const docStatusConfig = {
-    valid:    { color: "text-green-600",  bg: "bg-green-50  border-green-200",  label: "Valid" },
-    expiring: { color: "text-amber-600",  bg: "bg-amber-50  border-amber-200",  label: "Expiring soon" },
-    expired:  { color: "text-red-600",    bg: "bg-red-50    border-red-200",    label: "Expired" },
-    missing:  { color: "text-gray-400",   bg: "bg-gray-50   border-dashed border-gray-200", label: "Not uploaded" },
-}
+// const docStatusConfig = {
+//     valid:    { color: "text-green-600",  bg: "bg-green-50  border-green-200",  label: "Valid" },
+//     expiring: { color: "text-amber-600",  bg: "bg-amber-50  border-amber-200",  label: "Expiring soon" },
+//     expired:  { color: "text-red-600",    bg: "bg-red-50    border-red-200",    label: "Expired" },
+//     missing:  { color: "text-gray-400",   bg: "bg-gray-50   border-dashed border-gray-200", label: "Not uploaded" },
+// }
 
 // ── Document icons ────────────────────────────────────────────────────────────
-const docIcons = {
-    rc:        <FileText   size={15} />,
-    insurance: <ShieldCheck size={15} />,
-    puc:       <Wind       size={15} />,
-}
+// const docIcons = {
+//     rc:        <FileText   size={15} />,
+//     insurance: <ShieldCheck size={15} />,
+//     puc:       <Wind       size={15} />,
+// }
 
-const docLabels = {
-    rc:        "RC",
-    insurance: "Insurance",
-    puc:       "PUC",
-}
+// const docLabels = {
+//     rc:        "RC",
+//     insurance: "Insurance",
+//     puc:       "PUC",
+// }
 
 // ── Single document row ───────────────────────────────────────────────────────
-function DocRow({ docKey, doc }) {
-    const inputRef = useRef(null)
-    const [replaced, setReplaced] = useState(null) // locally replaced file (not persisted)
+// function DocRow({ docKey, doc }) {
+//     const inputRef = useRef(null)
+//     const [replaced, setReplaced] = useState(null) // locally replaced file (not persisted)
 
-    const cfg = docStatusConfig[doc?.status ?? "missing"]
-    const displayName = replaced?.name ?? doc?.name
-    const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
+//     const cfg = docStatusConfig[doc?.status ?? "missing"]
+//     const displayName = replaced?.name ?? doc?.name
+//     const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
 
-    return (
-        <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border ${cfg.bg} transition-colors`}>
-            {/* Icon */}
-            <span className={`shrink-0 ${cfg.color}`}>
-                {docIcons[docKey]}
-            </span>
+//     return (
+//         <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border ${cfg.bg} transition-colors`}>
+//             {/* Icon */}
+//             <span className={`shrink-0 ${cfg.color}`}>
+//                 {docIcons[docKey]}
+//             </span>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-gray-800">{docLabels[docKey]}</p>
-                    {doc?.expiry && (
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                            doc.status === "expiring" ? "bg-amber-100 text-amber-700"
-                            : doc.status === "expired" ? "bg-red-100 text-red-600"
-                            : "bg-green-100 text-green-700"
-                        }`}>
-                            {doc.status === "expiring" ? "⚠ " : ""} Exp {doc.expiry}
-                        </span>
-                    )}
-                </div>
-                {displayName
-                    ? <p className="text-xs text-gray-500 truncate">{displayName} · {displaySize}</p>
-                    : <p className="text-xs text-gray-400 italic">No file uploaded</p>
-                }
-            </div>
+//             {/* Info */}
+//             <div className="flex-1 min-w-0">
+//                 <div className="flex items-center gap-1.5">
+//                     <p className="text-sm font-medium text-gray-800">{docLabels[docKey]}</p>
+//                     {doc?.expiry && (
+//                         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+//                             doc.status === "expiring" ? "bg-amber-100 text-amber-700"
+//                             : doc.status === "expired" ? "bg-red-100 text-red-600"
+//                             : "bg-green-100 text-green-700"
+//                         }`}>
+//                             {doc.status === "expiring" ? "⚠ " : ""} Exp {doc.expiry}
+//                         </span>
+//                     )}
+//                 </div>
+//                 {displayName
+//                     ? <p className="text-xs text-gray-500 truncate">{displayName} · {displaySize}</p>
+//                     : <p className="text-xs text-gray-400 italic">No file uploaded</p>
+//                 }
+//             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-1 shrink-0">
-                {/* View / open */}
-                {displayName && (
-                    <button
-                        className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
-                        title="View document"
-                    >
-                        <ExternalLink size={13} />
-                    </button>
-                )}
+//             {/* Actions */}
+//             <div className="flex items-center gap-1 shrink-0">
+//                 {/* View / open */}
+//                 {displayName && (
+//                     <button
+//                         className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
+//                         title="View document"
+//                     >
+//                         <ExternalLink size={13} />
+//                     </button>
+//                 )}
 
-                {/* Replace / upload */}
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className="hidden"
-                    onChange={(e) => setReplaced(e.target.files?.[0] ?? null)}
-                />
-                <button
-                    onClick={() => inputRef.current?.click()}
-                    className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
-                    title={displayName ? "Replace" : "Upload"}
-                >
-                    <Upload size={13} />
-                </button>
-            </div>
-        </div>
-    )
-}
+//                 {/* Replace / upload */}
+//                 <input
+//                     ref={inputRef}
+//                     type="file"
+//                     accept=".pdf,.jpg,.jpeg,.png"
+//                     className="hidden"
+//                     onChange={(e) => setReplaced(e.target.files?.[0] ?? null)}
+//                 />
+//                 <button
+//                     onClick={() => inputRef.current?.click()}
+//                     className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
+//                     title={displayName ? "Replace" : "Upload"}
+//                 >
+//                     <Upload size={13} />
+//                 </button>
+//             </div>
+//         </div>
+//     )
+// }
 
 // ── Main drawer ───────────────────────────────────────────────────────────────
 export default function TruckDetailDrawer({ truck, open, onClose }) {
@@ -172,16 +172,16 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
                         </Badge>
                     </div>
 
-                    {truck.status === "idle" && (
+                    {/* {truck.status === "idle" && (
                         <Button className="bg-maroon hover:bg-maroon-dark text-white w-full mt-3 flex items-center gap-2">
                             <SendHorizonal size={15} />
                             Dispatch this truck
                         </Button>
-                    )}
+                    )} */}
                 </SheetHeader>
 
                 {/* ── GPS device ── */}
-                <div className="px-6 py-4 border-b">
+                {/* <div className="px-6 py-4 border-b">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">GPS Device</p>
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-mono">{truck.deviceId ?? "—"}</p>
@@ -189,10 +189,10 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
                             {truck.deviceStatus === "online" ? "● Online" : "○ Offline"}
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 {/* ── Driver info ── */}
-                <div className="px-6 py-4 border-b">
+                {/* <div className="px-6 py-4 border-b">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Driver</p>
                         <button
@@ -230,14 +230,13 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
                     ) : (
                         <p className="text-sm text-gray-400 italic">No driver assigned</p>
                     )}
-                </div>
+                </div> */}
 
                 {/* ── Documents ── */}
-                <div className="px-6 py-4 border-b">
+                {/* <div className="px-6 py-4 border-b">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documents</p>
 
-                        {/* Warn if any doc is expiring / expired / missing */}
                         {Object.values(docs).some((d) => !d || ["expiring", "expired", "missing"].includes(d?.status)) && (
                             <span className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
                                 <AlertTriangle size={11} />
@@ -251,7 +250,7 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
                             <DocRow key={key} docKey={key} doc={docs[key] ?? null} />
                         ))}
                     </div>
-                </div>
+                </div> */}
 
                 {/* ── Trip history ── */}
                 <div className="px-6 py-4 flex-1">

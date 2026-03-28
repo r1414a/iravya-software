@@ -7,10 +7,10 @@ export default function DCHome() {
 
       {/* Heading */}
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-light text-white">
+        {/* <h1 className="text-3xl font-light text-white">
           Welcome to dashboard!.
-        </h1>
-        <p className="text-white/70 mt-2">
+        </h1> */}
+        <p className="text-white/70 text-xl mt-2">
           Manage trucks, drivers, stores, trips, gps devices.
         </p>
       </div>

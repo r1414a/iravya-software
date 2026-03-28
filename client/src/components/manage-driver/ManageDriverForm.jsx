@@ -41,7 +41,7 @@ export default function ManageDriverForm() {
             <SheetContent className="bg-white min-w-120">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>Create new driver</SheetTitle>
-                    <SheetDescription>Add driver details, licence information, and optionally assign a truck</SheetDescription>
+                    <SheetDescription>Add driver details and licence information</SheetDescription>
                 </SheetHeader>
                 <div className="p-4">
                     <FieldGroup>
@@ -90,7 +90,7 @@ export default function ManageDriverForm() {
                                     <Input type="date" />
                                 </Field>
 
-                                <Field>
+                                {/* <Field>
                                     <FieldLabel>Assign to truck <span className="text-gray-400 font-normal">(optional)</span></FieldLabel>
                                     <Select>
                                         <SelectTrigger>
@@ -105,7 +105,7 @@ export default function ManageDriverForm() {
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
-                                </Field>
+                                </Field> */}
                             </FieldGroup>
                         </FieldSet>
                     </FieldGroup>
@@ -119,93 +119,5 @@ export default function ManageDriverForm() {
                 </SheetFooter>
             </SheetContent>
         </Sheet>
-
-
-        //    <Dialog open={open} onOpenChange={setOpen}>
-        //         <DialogTrigger asChild>
-        //             <Button className="bg-[#701a40] text-white flex items-center gap-2">
-        //                 <UserPlus size={16} />
-        //                 Add driver
-        //             </Button>
-        //         </DialogTrigger>
-
-        //         <DialogContent className="bg-white max-w-md">
-        //             <DialogHeader>
-        //                 <DialogTitle>Add new driver</DialogTitle>
-        //             </DialogHeader>
-
-        //             <div className="flex flex-col gap-4 mt-2">
-        //                 {/* Full name */}
-        //                 <div className="flex flex-col gap-1.5">
-        //                     <Label>Full name</Label>
-        //                     <Input placeholder="e.g. Ravi Deshmukh" />
-        //                 </div>
-
-        //                 {/* Phone */}
-        //                 <div className="flex flex-col gap-1.5">
-        //                     <Label>Phone number</Label>
-        //                     <Input placeholder="+91 98XXX XXXXX" />
-        //                 </div>
-
-        //                 {/* Licence number */}
-        //                 <div className="flex flex-col gap-1.5">
-        //                     <Label>Licence number</Label>
-        //                     <Input placeholder="e.g. MH1220190012345" className="font-mono" />
-        //                 </div>
-
-        //                 {/* Licence class + expiry — 2 col */}
-        //                 <div className="grid grid-cols-2 gap-4">
-        //                     <div className="flex flex-col gap-1.5">
-        //                         <Label>Licence class</Label>
-        //                         <Select>
-        //                             <SelectTrigger>
-        //                                 <SelectValue placeholder="Select class" />
-        //                             </SelectTrigger>
-        //                             <SelectContent className="bg-white border shadow-md">
-        //                                 <SelectGroup>
-        //                                     <SelectLabel>Class</SelectLabel>
-        //                                     <SelectItem value="lmv">LMV</SelectItem>
-        //                                     <SelectItem value="hmv">HMV</SelectItem>
-        //                                     <SelectItem value="hgmv">HGMV</SelectItem>
-        //                                 </SelectGroup>
-        //                             </SelectContent>
-        //                         </Select>
-        //                     </div>
-        //                     <div className="flex flex-col gap-1.5">
-        //                         <Label>Licence expiry</Label>
-        //                         <Input type="date" />
-        //                     </div>
-        //                 </div>
-
-        //                 {/* Assign truck (optional) */}
-        //                 <div className="flex flex-col gap-1.5">
-        //                     <Label>Assign to truck <span className="text-gray-400 font-normal">(optional)</span></Label>
-        //                     <Select>
-        //                         <SelectTrigger>
-        //                             <SelectValue placeholder="Select idle truck..." />
-        //                         </SelectTrigger>
-        //                         <SelectContent className="bg-white border shadow-md">
-        //                             <SelectGroup>
-        //                                 <SelectLabel>Idle trucks</SelectLabel>
-        //                                 <SelectItem value="MH12AB1234">MH12AB1234</SelectItem>
-        //                                 <SelectItem value="MH14CD5678">MH14CD5678</SelectItem>
-        //                                 <SelectItem value="MH12XY9090">MH12XY9090</SelectItem>
-        //                             </SelectGroup>
-        //                         </SelectContent>
-        //                     </Select>
-        //                 </div>
-
-        //                 {/* Actions */}
-        //                 <div className="flex justify-end gap-2 pt-2">
-        //                     <Button variant="outline" onClick={() => setOpen(false)}>
-        //                         Cancel
-        //                     </Button>
-        //                     <Button className="bg-[#701a40] text-white">
-        //                         Add driver
-        //                     </Button>
-        //                 </div>
-        //             </div>
-        //         </DialogContent>
-        //     </Dialog>
     )
 }

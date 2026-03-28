@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { SUPER_ADMIN_TASKS } from "@/constants/tasks";
 
 
 import { Building2 ,
@@ -23,6 +24,7 @@ Settings
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+
 
 const ITEMS = [
   { key: "companies", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/companies" },
@@ -118,7 +120,7 @@ export default function SuperAdminTasks(){
           // }}
         >
           {/* Row 1: 3 cards */}
-          {ITEMS.slice(0, 3).map((item, i) => (
+          {SUPER_ADMIN_TASKS.slice(0, 3).map((item, i) => (
             <MenuCard key={item.label} item={item} index={i} />
           ))}
  
@@ -128,7 +130,7 @@ export default function SuperAdminTasks(){
             {/* {ITEMS.slice(3).map((item, i) => (
               <MenuCard key={item.label} item={item} index={i + 3} />
             ))} */}
-            {ITEMS.slice(3).map((item, i) => (
+            {SUPER_ADMIN_TASKS.slice(3).map((item, i) => (
               
                 <MenuCard item={item} index={i + 3} />
               

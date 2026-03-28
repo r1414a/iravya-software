@@ -3,19 +3,21 @@ import Auth from "./pages/auth/Auth";
 import AuthLayout from "./layouts/AuthLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
-import SuperAdminManageUser from "./pages/super-admin/manage-user/SuperAdminManageUser";
+import SuperAdminManageUser from "./pages/super-admin/manage-users/SuperAdminManageUser";
 import DCHome from "./pages/dc-operator/DCHome";
 import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
-
-import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/DCManageDevices"
-import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
 import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
 import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
 import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
 import DCManageStores  from "./pages/dc-operator/manage-stores/DCManageStores"
 import DCManageDevices from "./pages/dc-operator/manage-gps-device/DCManageDevices";
-import TrackTrip from "./pages/track_trip/trackTrrip"
+import SuperAdminManageTrips from "./pages/super-admin/manage-trips/SuperAdminManageTrips";
+import SuperAdminManageDrivers from "./pages/super-admin/manage-drivers/SuperAdminManageDrivers";
+import SuperAdminManageTrucks from "./pages/super-admin/manage-trucks/SuperAdminManageTrucks";
+import SuperAdminManageDCs from "./pages/super-admin/manage-dcs/SuperAdminManageDCS";
+import TrackTrip from "./pages/track_trip/trackTrrip";
+
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -40,8 +42,24 @@ const router = createBrowserRouter([
                 element: <SuperAdminHome/>
             },
             {
+                path: "manage-dcs",
+                element: <SuperAdminManageDCs/>
+            },
+            {
                 path: "manage-users",
                 element: <SuperAdminManageUser/>
+            },
+            {
+                path: "manage-trips",
+                element: <SuperAdminManageTrips/>
+            },
+{
+                path: "manage-drivers",
+                element: <SuperAdminManageDrivers/>
+            },
+            {
+                path: "manage-trucks",
+                element: <SuperAdminManageTrucks/>
             },
             //more pages
 

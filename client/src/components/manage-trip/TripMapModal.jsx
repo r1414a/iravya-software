@@ -31,7 +31,7 @@ export default function TripMapModal({ open, onClose, trip }) {
                 className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded-full"
               >
                 <MapPin size={10} />
-                {stop}
+                {stop.name}
               </div>
             ))}
           </div>

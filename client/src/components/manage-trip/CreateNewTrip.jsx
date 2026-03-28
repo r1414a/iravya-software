@@ -59,14 +59,16 @@ function StopsList({ stops, onRemove }) {
     )
 }
 
-export default function CreateTripModal() {
+export default function CreateTripModal({ truck, open, onClose }) {
+  
     const [driverAdded, setDriverAdded] = useState(false)
-const [aadharPreview, setAadharPreview] = useState(null)
+    const [aadharPreview, setAadharPreview] = useState(null)
     const [driverData, setDriverData] = useState({
         name: "",
         phone: "",
         aadhar: null,
     })
+    const [truckNo, setTruckNo] = useState(truck?.regNo ?? "");
 
     const [otpSent, setOtpSent] = useState(false)
     const [otp, setOtp] = useState("")
@@ -76,10 +78,10 @@ const [aadharPreview, setAadharPreview] = useState(null)
     const [showAddDriver, setShowAddDriver] = useState(false)
 
     useEffect(() => {
-  return () => {
-    if (aadharPreview) URL.revokeObjectURL(aadharPreview)
-  }
-}, [aadharPreview])
+        return () => {
+            if (aadharPreview) URL.revokeObjectURL(aadharPreview)
+        }
+    }, [aadharPreview])
 
     const addStop = () => {
         if (selectedStore && !stops.includes(selectedStore)) {
@@ -93,11 +95,17 @@ const [aadharPreview, setAadharPreview] = useState(null)
     }
 
     return (
-        <Sheet direction="right">
-            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
-                <Plus className="w-4 h-4 mr-2" />
-                Dispatch Trip
-            </SheetTrigger>
+        <Sheet direction="right" open={open} onOpenChange={onClose}>
+            {
+                truck ?
+                    null
+                    :
+                    <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Dispatch Trip
+                    </SheetTrigger>
+            }
+
 
             <SheetContent className="bg-white min-w-120">
                 <SheetHeader className="border-b border-gray-200">
@@ -111,7 +119,7 @@ const [aadharPreview, setAadharPreview] = useState(null)
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
-                                <div className="flex gap-2">
+                                <div className="flex gap-5">
 
                                     {/* Brand */}
                                     <Field>
@@ -133,40 +141,27 @@ const [aadharPreview, setAadharPreview] = useState(null)
                                     </Field>
 
                                     {/* Source DC */}
+                                    
+                                    {/* source dc will automatically comes from logged in account */}
                                     <Field>
                                         <FieldLabel>Source data center</FieldLabel>
-                                        <Select>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select DC..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Data Centers</SelectLabel>
-                                                    <SelectItem value="pune_dc">Pune Warehouse DC</SelectItem>
-                                                    <SelectItem value="mumbai_dc">Mumbai Warehouse DC</SelectItem>
-                                                    <SelectItem value="nashik_dc">Nashik DC</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                        {/* <FieldDescription className="text-xs">
-                                        The warehouse this truck will depart from
-                                    </FieldDescription> */}
+                                        <p className="font-bold">Pune Warehouse DC</p>
                                     </Field>
                                 </div>
 
                                 {/* Truck */}
                                 <Field>
                                     <FieldLabel>Truck</FieldLabel>
-                                    <Select>
+                                    <Select value={truckNo} onValueChange={setTruckNo}>
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select idle truck..." />
                                         </SelectTrigger>
                                         <SelectContent className="bg-white border shadow-md">
                                             <SelectGroup>
                                                 <SelectLabel>Available trucks</SelectLabel>
-                                                <SelectItem value="mh12ab1234">MH12AB1234</SelectItem>
-                                                <SelectItem value="mh14cd5678">MH14CD5678</SelectItem>
-                                                <SelectItem value="mh04ef9012">MH04EF9012</SelectItem>
+                                                <SelectItem value="MH04EF3344">MH04EF3344</SelectItem>
+                                                <SelectItem value="MH14CD5678">MH14CD5678</SelectItem>
+                                                <SelectItem value="MH20GH7788">MH20GH7788</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -195,21 +190,21 @@ const [aadharPreview, setAadharPreview] = useState(null)
                                         <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
 
                                             <div className="flex gap-2">
-                                            <Input
-                                                value={driverData.name}
-                                                onChange={(e) =>
-                                                    setDriverData({ ...driverData, name: e.target.value })
-                                                }
-                                                placeholder="Driver name"
-                                            />
+                                                <Input
+                                                    value={driverData.name}
+                                                    onChange={(e) =>
+                                                        setDriverData({ ...driverData, name: e.target.value })
+                                                    }
+                                                    placeholder="Driver name"
+                                                />
 
-                                            <Input
-                                                value={driverData.phone}
-                                                onChange={(e) =>
-                                                    setDriverData({ ...driverData, phone: e.target.value })
-                                                }
-                                                placeholder="Phone number"
-                                            />
+                                                <Input
+                                                    value={driverData.phone}
+                                                    onChange={(e) =>
+                                                        setDriverData({ ...driverData, phone: e.target.value })
+                                                    }
+                                                    placeholder="Phone number"
+                                                />
                                             </div>
 
                                             <div>
@@ -218,12 +213,12 @@ const [aadharPreview, setAadharPreview] = useState(null)
                                                 </label>
                                                 <Input type="file" className="mt-1" />
                                                 {aadharPreview && (
-  <img
-    src={aadharPreview}
-    alt="Aadhar"
-    className="w-40 h-28 object-cover rounded-md border"
-  />
-)}
+                                                    <img
+                                                        src={aadharPreview}
+                                                        alt="Aadhar"
+                                                        className="w-40 h-28 object-cover rounded-md border"
+                                                    />
+                                                )}
                                             </div>
 
                                             <p className="text-xs text-green-600 font-medium">
@@ -236,22 +231,22 @@ const [aadharPreview, setAadharPreview] = useState(null)
                                         /* ─────────────── 2. ADD DRIVER FORM ─────────────── */
                                         <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
                                             <div className="flex gap-2">
-                                            <Input
-                                                placeholder="Driver name"
-                                                value={driverData.name}
-                                                onChange={(e) =>
-                                                    setDriverData({ ...driverData, name: e.target.value })
-                                                }
-                                            />
+                                                <Input
+                                                    placeholder="Driver name"
+                                                    value={driverData.name}
+                                                    onChange={(e) =>
+                                                        setDriverData({ ...driverData, name: e.target.value })
+                                                    }
+                                                />
 
-                                            <Input
-                                                placeholder="Phone number"
-                                                type="tel"
-                                                value={driverData.phone}
-                                                onChange={(e) =>
-                                                    setDriverData({ ...driverData, phone: e.target.value })
-                                                }
-                                            />
+                                                <Input
+                                                    placeholder="Phone number"
+                                                    type="tel"
+                                                    value={driverData.phone}
+                                                    onChange={(e) =>
+                                                        setDriverData({ ...driverData, phone: e.target.value })
+                                                    }
+                                                />
                                             </div>
 
                                             <div>
@@ -259,31 +254,31 @@ const [aadharPreview, setAadharPreview] = useState(null)
                                                     Aadhar card
                                                 </label>
                                                 <Input
-  type="file"
-  className="mt-1"
-  accept="image/*"
-  onChange={(e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setDriverData({ ...driverData, aadhar: file })
-      setAadharPreview(URL.createObjectURL(file))
-    }
-  }}
-/>
+                                                    type="file"
+                                                    className="mt-1"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0]
+                                                        if (file) {
+                                                            setDriverData({ ...driverData, aadhar: file })
+                                                            setAadharPreview(URL.createObjectURL(file))
+                                                        }
+                                                    }}
+                                                />
 
 
                                             </div>
                                             {aadharPreview && (
-  <div className="mt-2">
-    <p className="text-xs text-gray-500 mb-1">Preview</p>
+                                                <div className="mt-2">
+                                                    <p className="text-xs text-gray-500 mb-1">Preview</p>
 
-    <img
-      src={aadharPreview}
-      alt="Aadhar Preview"
-      className="w-40 h-28 object-cover rounded-md border"
-    />
-  </div>
-)}
+                                                    <img
+                                                        src={aadharPreview}
+                                                        alt="Aadhar Preview"
+                                                        className="w-40 h-28 object-cover rounded-md border"
+                                                    />
+                                                </div>
+                                            )}
 
                                             <Button
                                                 type="button"

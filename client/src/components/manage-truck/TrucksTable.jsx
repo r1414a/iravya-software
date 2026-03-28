@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { DataTable } from "./trucks-table/data-table"
 import { columns } from "./trucks-table/columns"
-import TruckDetailDrawer from "./TruckDetailDrawer"
- 
+
 const trucks = [
     {
         id: 1,
@@ -10,10 +9,10 @@ const trucks = [
         type: "heavy",
         make: "Tata 407",
         capacity: "4T",
-        driverName: "Ravi Deshmukh",
-        driverPhone: "+91 98201 11234",
-        deviceId: "GPS-001-PUNE",
-        deviceStatus: "online",
+        // driverName: "Ravi Deshmukh",
+        // driverPhone: "+91 98201 11234",
+        // deviceId: "GPS-001-PUNE",
+        // deviceStatus: "online",
         totalTrips: 142,
         tripsThisMonth: 9,
         lastTrip: "2h ago",
@@ -26,10 +25,10 @@ const trucks = [
         type: "medium",
         make: "Ashok Leyland",
         capacity: "2.5T",
-        driverName: "Suresh Pawar",
-        driverPhone: "+91 99705 44321",
-        deviceId: "GPS-002-PUNE",
-        deviceStatus: "online",
+        // driverName: "Suresh Pawar",
+        // driverPhone: "+91 99705 44321",
+        // deviceId: "GPS-002-PUNE",
+        // deviceStatus: "online",
         totalTrips: 87,
         tripsThisMonth: 5,
         lastTrip: "Yesterday",
@@ -42,10 +41,10 @@ const trucks = [
         type: "mini_truck",
         make: "Mahindra Bolero",
         capacity: "1T",
-        driverName: "Manoj Kale",
-        driverPhone: "+91 87654 32109",
-        deviceId: "GPS-003-PUNE",
-        deviceStatus: "offline",
+        // driverName: "Manoj Kale",
+        // driverPhone: "+91 87654 32109",
+        // deviceId: "GPS-003-PUNE",
+        // deviceStatus: "offline",
         totalTrips: 210,
         tripsThisMonth: 0,
         lastTrip: "2 weeks ago",
@@ -58,10 +57,10 @@ const trucks = [
         type: "heavy",
         make: "Tata Prima",
         capacity: "6T",
-        driverName: "Vijay Jadhav",
-        driverPhone: "+91 93422 65432",
-        deviceId: "GPS-004-PUNE",
-        deviceStatus: "online",
+        // driverName: "Vijay Jadhav",
+        // driverPhone: "+91 93422 65432",
+        // deviceId: "GPS-004-PUNE",
+        // deviceStatus: "online",
         totalTrips: 12,
         tripsThisMonth: 4,
         lastTrip: "3 days ago",
@@ -74,10 +73,10 @@ const trucks = [
         type: "medium",
         make: "Eicher Pro",
         capacity: "3T",
-        driverName: null,
-        driverPhone: null,
-        deviceId: "GPS-005-PUNE",
-        deviceStatus: "offline",
+        // driverName: null,
+        // driverPhone: null,
+        // deviceId: "GPS-005-PUNE",
+        // deviceStatus: "offline",
         totalTrips: 56,
         tripsThisMonth: 2,
         lastTrip: "5 days ago",
@@ -87,7 +86,7 @@ const trucks = [
 ]
  
 export default function TrucksTable() {
-    const [selectedTruck, setSelectedTruck] = useState(null)
+    // const [selectedTruck, setSelectedTruck] = useState(null)
  
     return (
         <section className="mt-6 px-10">
@@ -95,17 +94,17 @@ export default function TrucksTable() {
                 <DataTable
                     columns={columns}
                     data={trucks}
-                    onRowClick={(row) => setSelectedTruck(row)}
+                    // onRowClick={(row) => setSelectedTruck(row)}
                 />
             </div>
  
             {/* Detail drawer — opens on row click */}
             
-            <TruckDetailDrawer
+            {/* <TruckDetailDrawer
                 truck={selectedTruck}
                 open={!!selectedTruck}
                 onClose={() => setSelectedTruck(null)}
-            />
+            /> */}
         </section>
     )
 }

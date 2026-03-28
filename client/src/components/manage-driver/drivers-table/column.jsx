@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter } from "lucide-react"
+import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter, Road } from "lucide-react"
 import EditDriverSheet from "./EditDriverSheet"
 import AssignTruckSheet from "./AssignTruckSheet"
 import TripHistorySheet from "./TripHistorySheet"
@@ -24,6 +24,9 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox"
+import { FieldLabel } from "@/components/ui/field"
+import TripDetailSheet from "../../manage-trip/TripDetailSheet"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -39,7 +42,7 @@ const statusStyles = {
 function ActionsCell({ row }) {
     const driver = row.original
     const [editOpen, setEditOpen] = useState(false)
-    const [assignOpen, setAssignOpen] = useState(false)
+    const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
     const [historyOpen, setHistoryOpen] = useState(false)
 
     return (
@@ -49,11 +52,32 @@ function ActionsCell({ row }) {
                 open={editOpen}
                 onClose={() => setEditOpen(false)}
             />
-            <AssignTruckSheet
+
+            {/* Will need to fetch trip details by trip id by api call */}
+            <TripDetailSheet
+                trip={{
+                    id: "TRP-2840",
+                    brand: "Zudio",
+                    truck: "MH14CD5678",
+                    driver: "Suresh M.",
+                    sourceDC: "Mumbai Warehouse DC",
+                    stops: [
+                        { name: "Hinjawadi Store", status: "pending" },
+                    ],
+                    stopsCount: 1,
+                    status: "in_transit",
+                    departedAt: "Today, 08:15 AM",
+                    eta: "Today, 10:30 AM",
+                    completedAt: null,
+                }}
+                open={tripDetailsOpen}
+                onClose={setTripDetailsOpen}
+            />
+            {/* <AssignTruckSheet
                 driver={driver}
                 open={assignOpen}
                 onClose={() => setAssignOpen(false)}
-            />
+            /> */}
             <TripHistorySheet
                 driver={driver}
                 open={historyOpen}
@@ -73,12 +97,17 @@ function ActionsCell({ row }) {
                     >
                         <Pencil size={14} /> Edit driver
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        className="gap-2 text-sm cursor-pointer"
-                        onClick={() => setAssignOpen(true)}
-                    >
-                        <Truck size={14} /> Assign truck
-                    </DropdownMenuItem>
+                    {
+                        driver.currentTrip && (
+                            <DropdownMenuItem
+                                className="gap-2 text-sm cursor-pointer"
+                                onClick={() => setTripDetailsOpen(true)}
+                            >
+                                <Road size={14} /> View trip details
+                            </DropdownMenuItem>
+                        )
+                    }
+
                     <DropdownMenuItem
                         className="gap-2 text-sm cursor-pointer"
                         onClick={() => setHistoryOpen(true)}
@@ -126,11 +155,11 @@ export const columns = [
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                            {currentValue === "all"
-                                ? "All classes"
-                                :  currentValue.toUpperCase() }
-                        </Button>
+                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+                                {currentValue === "all"
+                                    ? "All classes"
+                                    : currentValue.toUpperCase()}
+                            </Button>
                             {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-36 bg-white border shadow-md">
@@ -174,20 +203,52 @@ export const columns = [
             return row.getValue(id)?.toLowerCase() === value.toLowerCase()
         }
     },
-    // Assigned truck (or "—")
+    // Current Trip(or "—")
     {
-        accessorKey: "truck",
-        header: "Assigned truck",
+        accessorKey: "currentTrip",
+        header: ({ column }) => {
+            const currentValue = column.getFilterValue() || "all"
+            const isChecked = currentValue === "idle"
+
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Current trip</span>
+
+                    <Checkbox
+                        id="terms-checkbox-basic"
+                        name="terms-checkbox-basic"
+                        className="w-3 h-3 rounded-xs -mr-1 border border-gray-500"
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                            column.setFilterValue(
+                                checked ? "idle" : undefined
+                            )
+                        }}
+                    />
+                    <FieldLabel htmlFor="terms-checkbox-basic" className="text-xs">
+                        idle only
+                    </FieldLabel>
+                </div>
+            )
+        },
         cell: ({ row }) => {
-            const truck = row.original.assignedTruck
-            return truck ? (
+            const trip = row.original.currentTrip
+            return trip ? (
                 <div className="flex items-center gap-1.5 text-sm">
-                    <Truck size={14} className="text-gray-400" />
-                    <span>{truck}</span>
+                    <Road size={14} className="text-gray-400" />
+                    <span>{trip}</span>
                 </div>
             ) : (
                 <span className="text-gray-400 text-sm">—</span>
             )
+        },
+        filterFn: (row, id, value) => {
+            if (!value) return true
+
+            const trip = row.getValue(id)
+
+            // ✅ show only rows with NO driver
+            return !trip
         },
     },
     // Total trips + this month
@@ -218,12 +279,12 @@ export const columns = [
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                            {currentValue === "all"
-                                ? "All"
-                                : currentValue === "on_trip"
-                                ? "On trip"
-                                : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
-                        </Button>
+                                {currentValue === "all"
+                                    ? "All"
+                                    : currentValue === "on_trip"
+                                        ? "On trip"
+                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
+                            </Button>
                             {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-36 bg-white border shadow-md">
@@ -244,9 +305,9 @@ export const columns = [
                                 <DropdownMenuRadioItem value="on_trip" className="text-xs">
                                     On trip
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="inactive" className="text-xs">
+                                {/* <DropdownMenuRadioItem value="inactive" className="text-xs">
                                     Inactive
-                                </DropdownMenuRadioItem>
+                                </DropdownMenuRadioItem> */}
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>

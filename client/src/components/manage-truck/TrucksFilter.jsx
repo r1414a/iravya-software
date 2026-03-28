@@ -21,7 +21,7 @@ export default function TrucksFilter() {
             <div className="flex w-full justify-between">
                 <div className="basis-1/2 flex gap-4">
                     <InputGroup className="max-w-xs">
-                        <InputGroupInput placeholder="Search reg. no. or driver..." />
+                        <InputGroupInput placeholder="Search reg. no." />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>

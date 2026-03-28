@@ -8,13 +8,20 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Truck, User } from "lucide-react"
 
+const statusStyles = {
+  in_transit: "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-600",
+}
+
+
 export default function TripDetailSheet({ trip, open, onClose }) {
   if (!trip) return null
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="bg-white min-w-120">
-        <SheetHeader>
+        <SheetHeader className="border-b border-gray-200">
           <SheetTitle>Trip Details</SheetTitle>
           <SheetDescription>
             Complete overview of this trip
@@ -30,7 +37,9 @@ export default function TripDetailSheet({ trip, open, onClose }) {
               <p className="font-mono text-maroon font-semibold">{trip.id}</p>
             </div>
 
-            <Badge>{trip.status.replace("_", " ")}</Badge>
+            <Badge className={`${statusStyles[trip.status]} border-0 text-xs`}>
+  {trip.status?.replace("_", " ") || "_"}
+</Badge>
           </div>
 
           {/* Truck + Driver */}
@@ -48,6 +57,7 @@ export default function TripDetailSheet({ trip, open, onClose }) {
               <div>
                 <p className="text-xs text-gray-500">Driver</p>
                 <p className="font-medium">{trip.driver}</p>
+                <p className="text-muted-foreground text-xs">{trip.phone}</p>
               </div>
             </div>
           </div>
@@ -63,14 +73,30 @@ export default function TripDetailSheet({ trip, open, onClose }) {
             <p className="text-xs text-gray-500 mb-2">Stops</p>
             <div className="flex flex-col gap-2">
               {trip.stops.map((stop, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 bg-gray-50 border px-3 py-2 rounded-md"
-                >
-                  <span className="text-xs text-gray-500">{i + 1}.</span>
-                  <MapPin size={14} />
-                  <span>{stop}</span>
-                </div>
+                 <div
+    key={i}
+    className={`flex items-center gap-2 border px-3 py-2 rounded-md ${
+      stop.status === "completed"
+        ? "bg-green-50 border-green-200"
+        : "bg-gray-50"
+    }`}
+  >
+    <span className="text-xs text-gray-500">{i + 1}.</span>
+    <MapPin size={14} />
+    <span>{stop.name}</span>
+
+    {stop.status === "completed" && (
+      <span className="ml-auto text-xs text-green-600">Done</span>
+    )}
+  </div>
+                // <div
+                //   key={i}
+                //   className="flex items-center gap-2 bg-gray-50 border px-3 py-2 rounded-md"
+                // >
+                //   <span className="text-xs text-gray-500">{i + 1}.</span>
+                //   <MapPin size={14} />
+                //   <span>{stop}</span>
+                // </div>
               ))}
             </div>
           </div>

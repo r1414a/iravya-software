@@ -1,0 +1,18 @@
+import AdminSubHeader from "@/components/AdminSubHeader"
+import DriversFilter from "@/components/manage-driver/DriversFilter"
+import DriversTable from "@/components/manage-driver/DriversTable"
+
+export default function SuperAdminManageDrivers() {
+    return (
+        <section>
+            <AdminSubHeader
+                to="/admin"
+                heading="Manage Drivers"
+                subh="Manage drivers — view, edit, trip status, details, history, and deactivate"
+                CreateButton={null}
+            />
+            <DriversFilter />
+            <DriversTable />
+        </section>
+    )
+}

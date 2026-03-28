@@ -30,7 +30,7 @@ export default function DCStoreFilter() {
                         {/* <InputGroupAddon align="inline-end">12 results</InputGroupAddon> */}
                     </InputGroup>
 
-                    <div className="flex gap-4 w-full">
+                    {/* <div className="flex gap-4 w-full">
                         <Select defaultValue="All City">
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select City..." />
@@ -88,7 +88,7 @@ export default function DCStoreFilter() {
                             </SelectContent>
                         </Select>
 
-                    </div>
+                    </div> */}
 
                 </div>
                 

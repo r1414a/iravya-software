@@ -6,9 +6,6 @@ import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
 import SuperAdminManageUser from "./pages/super-admin/manage-users/SuperAdminManageUser";
 import DCHome from "./pages/dc-operator/DCHome";
 import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
-
-import ManageGpsDevice from "./pages/dc-operator/manage-gps-device/DCManageDevices"
-import StoreManagerTasks from "./pages/store-manager/storeManagerTask"
 import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
 import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
 import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
@@ -19,6 +16,8 @@ import SuperAdminManageTrips from "./pages/super-admin/manage-trips/SuperAdminMa
 import SuperAdminManageDrivers from "./pages/super-admin/manage-drivers/SuperAdminManageDrivers";
 import SuperAdminManageTrucks from "./pages/super-admin/manage-trucks/SuperAdminManageTrucks";
 import SuperAdminManageDCs from "./pages/super-admin/manage-dcs/SuperAdminManageDCS";
+import TrackTrip from "./pages/track_trip/trackTrrip";
+
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -114,17 +113,17 @@ const router = createBrowserRouter([
             //more pages
         ]
     },
-    //  {
-    //     path: '/brand',
-    //     element: <AdminLayout/>,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <BrandManagerHome/>
-    //         },
-    //         //more pages
-    //     ]
-    // }
+    {
+        path: '/track',
+        element: <AdminLayout/>,
+        children: [
+            {
+                index: true,
+                element: <TrackTrip/>
+            },
+            //more pages
+        ]
+    }
 
     // {
     //     path: '/brand',

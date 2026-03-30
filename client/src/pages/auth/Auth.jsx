@@ -103,9 +103,9 @@ export default function Auth() {
                 >
                     Iravya
                 </span>
-                <span className="text-[11px] font-medium tracking-[3px] uppercase text-white/55 -mt-1">
+                {/* <span className="text-[11px] font-medium tracking-[3px] uppercase text-white/55 -mt-1">
                     Service Management
-                </span>
+                </span> */}
                 </div>
         
                 {/* Card */}
@@ -198,21 +198,21 @@ export default function Auth() {
                 </div> */}
         
                 {/* Divider */}
-                <div className="flex items-center gap-3 my-5">
+                {/* <div className="flex items-center gap-3 my-5">
                     <div className="flex-1 h-px bg-[#e8e8f0]" />
                     <span className="text-[10.5px] font-semibold tracking-[2px] uppercase text-[#b0b0c0]">
                     Default Credentials
                     </span>
                     <div className="flex-1 h-px bg-[#e8e8f0]" />
-                </div>
+                </div> */}
         
                 {/* Credential cards */}
-                {credentials.map((cred) => (
-                    <div
-                    key={cred.role}
-                    className="cred-card flex items-center justify-between bg-[#f7f7fb] border border-[#ececf5] rounded-[10px] px-3.5 py-3 mb-2.5 transition-all duration-150 cursor-default"
-                    >
-                    <div className="flex flex-col gap-1">
+                {/* /* {credentials.map((cred) => ( */}
+                    /* {/* <div */} */
+                    {/* key={cred.role} */}
+                    {/* className="cred-card flex items-center justify-between bg-[#f7f7fb] border border-[#ececf5] rounded-[10px] px-3.5 py-3 mb-2.5 transition-all duration-150 cursor-default" */}
+                    > */
+                    {/* <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                         <span className="text-[13.5px] font-semibold text-[#1a1a2e]">{cred.role}</span>
                         <span
@@ -225,17 +225,17 @@ export default function Auth() {
                         <span className="text-[12px] text-[#9090a0] font-mono">
                         {cred.user} / {cred.pass}
                         </span>
-                    </div>
-                    <button
+                    </div> */}
+                    {/* <button
                         type="button"
                         onClick={() => handleUse(cred)}
                         className="use-btn text-[12.5px] font-semibold bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
                         style={{ color: "#8b1a30" }}
                     >
                         Use →
-                    </button>
+                    </button> */}
                     </div>
-                ))}
+                {/* ))} */}
                 </div>
             </div>
         </>

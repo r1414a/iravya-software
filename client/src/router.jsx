@@ -84,9 +84,7 @@ const router = createBrowserRouter([
             {
                 path: "alerts",
                 element: <SuperAdminAlerts/>
-            }
-            //more pages
-
+            },
             {
                 path: "manage-brands",
                 element: <SuperAdminManageBrands/>

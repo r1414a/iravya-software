@@ -175,67 +175,7 @@ export default function Auth() {
                 >
                     Sign In
                 </button>
-        
-                {/* Links */}
-                {/* <div className="flex flex-col items-center gap-1.5 mt-5">
-                    <span className="text-[13px] text-[#8e8e97]">
-                    Customer?{" "}
-                    <a
-                        href="#"
-                        className="link-action font-semibold cursor-pointer transition-colors duration-150 no-underline"
-                        style={{ color: "#8b1a30" }}
-                    >
-                        Submit a request →
-                    </a>
-                    </span>
-                    <a
-                    href="#"
-                    className="link-action text-[13px] font-semibold no-underline cursor-pointer transition-colors duration-150"
-                    style={{ color: "#8b1a30" }}
-                    >
-                    <Search />Track ticket →
-                    </a>
-                </div> */}
-        
-                {/* Divider */}
-                {/* <div className="flex items-center gap-3 my-5">
-                    <div className="flex-1 h-px bg-[#e8e8f0]" />
-                    <span className="text-[10.5px] font-semibold tracking-[2px] uppercase text-[#b0b0c0]">
-                    Default Credentials
-                    </span>
-                    <div className="flex-1 h-px bg-[#e8e8f0]" />
-                </div> */}
-        
-                {/* Credential cards */}
-                {/* /* {credentials.map((cred) => ( */}
-                    /* {/* <div */} */
-                    {/* key={cred.role} */}
-                    {/* className="cred-card flex items-center justify-between bg-[#f7f7fb] border border-[#ececf5] rounded-[10px] px-3.5 py-3 mb-2.5 transition-all duration-150 cursor-default" */}
-                    > */
-                    {/* <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                        <span className="text-[13.5px] font-semibold text-[#1a1a2e]">{cred.role}</span>
-                        <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-[5px] tracking-wide border ${cred.badgeClass}`}
-                            style={{ borderWidth: "1.5px" }}
-                        >
-                            {cred.badge}
-                        </span>
-                        </div>
-                        <span className="text-[12px] text-[#9090a0] font-mono">
-                        {cred.user} / {cred.pass}
-                        </span>
-                    </div> */}
-                    {/* <button
-                        type="button"
-                        onClick={() => handleUse(cred)}
-                        className="use-btn text-[12.5px] font-semibold bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
-                        style={{ color: "#8b1a30" }}
-                    >
-                        Use →
-                    </button> */}
-                    {/* </div> */}
-                {/* ))} */}
+       
                 </div>
             </div>
         </>

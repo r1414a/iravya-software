@@ -5,6 +5,16 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet"
+
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -134,6 +144,29 @@ export default function StoreFormModal({ open, onClose, store, onSave }) {
                             className="h-10"
                         />
                     </div>
+
+                    <div className="space-y-1.5">
+                        <Label className="text-sm font-medium text-gray-700">
+                            Status
+                        </Label>
+                        <Select
+                            value={form.status || ""}
+                            onValueChange={set("status")}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+
+                            <SelectContent className="bg-white border shadow-md">
+                                <SelectGroup>
+                                    <SelectLabel>Status</SelectLabel>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+
+                        </Select>
+                    </div>
                 </div>
 
                 {/* Footer — sticky at bottom like image */}
@@ -142,9 +175,9 @@ export default function StoreFormModal({ open, onClose, store, onSave }) {
                         className="flex-1 bg-maroon text-white hover:bg-maroon-dark h-11 text-sm font-semibold flex items-center gap-2"
                         onClick={handleSave}
                     >
-                       
+
                         {isEdit ? "Save changes" : "Add store"}
-                         <Store size={16} />
+                        <Store size={16} />
                     </Button>
                     <Button
                         variant="outline"

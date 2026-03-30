@@ -36,6 +36,14 @@ export default function TripDetailSheet({ trip, open, onClose }) {
               <p className="text-xs text-gray-500">Trip ID</p>
               <p className="font-mono text-maroon font-semibold">{trip.id}</p>
             </div>
+            {
+              trip.gpsDevice &&
+              <div>
+              <p className="text-xs text-gray-500">GPS Device</p>
+              <p className="font-mono text-maroon font-semibold">{trip.gpsDevice}</p>
+            </div>
+            }
+            
 
             <Badge className={`${statusStyles[trip.status]} border-0 text-xs`}>
   {trip.status?.replace("_", " ") || "_"}

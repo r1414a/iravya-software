@@ -10,6 +10,8 @@ import {
     ChevronRight,
     Filter,
     Road,
+    Eye,
+    Trash2
 } from "lucide-react"
 import {
     DropdownMenu,
@@ -65,8 +67,8 @@ function ActionsCell({ row }) {
     const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
     const location = useLocation();
     // console.log(location.pathname);
-    
-    
+
+
     return (
         <>
             <AddTruckModal
@@ -94,6 +96,7 @@ function ActionsCell({ row }) {
                     brand: "Zudio",
                     truck: "MH14CD5678",
                     driver: "Suresh M.",
+                    gpsDevice: "GPS-002-PUNE",
                     sourceDC: "Mumbai Warehouse DC",
                     stops: [
                         { name: "Hinjawadi Store", status: "pending" },
@@ -108,6 +111,8 @@ function ActionsCell({ row }) {
                 onClose={setTripDetailsOpen}
             />
             <div className="flex items-center gap-2 justify-end">
+
+
                 {/* Dispatch now — only shown for idle trucks */}
                 {truck.status === "idle" && location.pathname.startsWith('/dc') && (
                     <Button
@@ -123,17 +128,18 @@ function ActionsCell({ row }) {
                         Dispatch
                     </Button>
                 )}
-
+                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                             <MoreHorizontal size={16} />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
-                        <DropdownMenuItem onClick={() => setEditOpen(true)} className="gap-2 text-sm cursor-pointer">
+                    <DropdownMenuContent align="end" className="bg-white border shadow-md w-46">
+                        {/* <DropdownMenuItem onClick={() => setEditOpen(true)} className="gap-2 text-sm cursor-pointer">
                             <Pencil size={14} /> Edit truck details
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         {truck.status === "in_transit" && (
                             <DropdownMenuItem onClick={() => setTripDetailsOpen(true)} className="gap-2 text-sm cursor-pointer">
                                 <Road size={14} /> View trip details
@@ -147,9 +153,6 @@ function ActionsCell({ row }) {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-                {/* Row arrow — clicking the row opens the detail drawer */}
-                <ChevronRight size={16} className="text-gray-300" />
             </div>
         </>
     )
@@ -373,54 +376,4 @@ export const columns = [
         id: "actions",
         cell: ({ row }) => <ActionsCell row={row} />,
     },
-
-    // {
-    //     id: "actions",
-    //     cell: ({ row }) => {
-    //         const { status } = row.original
-    //         return (
-    //             <div className="flex items-center gap-2 justify-end">
-    //                 {/* Dispatch now — only shown for idle trucks */}
-    //                 {status === "idle" && (
-    //                     <Button
-    //                         size="sm"
-    //                         className="bg-maroon text-white h-7 px-3 text-xs flex items-center gap-1"
-    //                         onClick={(e) => {
-    //                             e.stopPropagation()
-    //                             // navigate to /dc/dispatch?truck=regNo
-    //                         }}
-    //                     >
-    //                         <SendHorizonal size={12} />
-    //                         Dispatch
-    //                     </Button>
-    //                 )}
-
-    //                 <DropdownMenu>
-    //                     <DropdownMenuTrigger asChild>
-    //                         <Button variant="ghost" size="icon" className="h-8 w-8">
-    //                             <MoreHorizontal size={16} />
-    //                         </Button>
-    //                     </DropdownMenuTrigger>
-    //                     <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
-    //                         <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-    //                             <Pencil size={14} /> Edit truck details
-    //                         </DropdownMenuItem>
-    //                         {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-    //                             <UserRound size={14} /> Change driver
-    //                         </DropdownMenuItem> */}
-    //                         <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-    //                             <History size={14} /> View trip history
-    //                         </DropdownMenuItem>
-    //                         <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-    //                             <Wrench size={14} /> Mark as maintenance
-    //                         </DropdownMenuItem>
-    //                     </DropdownMenuContent>
-    //                 </DropdownMenu>
-
-    //                 {/* Row arrow — clicking the row opens the detail drawer */}
-    //                 <ChevronRight size={16} className="text-gray-300" />
-    //             </div>
-    //         )
-    //     },
-    // },
 ]

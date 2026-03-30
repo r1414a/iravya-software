@@ -18,14 +18,68 @@ import {
     MapPin,
     ChevronRight,
     LocateFixed,
+    Trash2,
+    Eye
 } from "lucide-react"
+import { useState } from "react"
+import DCDetailDrawer from "../DcDetailDrawer"
 
 const statusStyles = {
-    active:   "bg-green-100 text-green-700",
+    active: "bg-green-100 text-green-700",
     inactive: "bg-gray-100 text-gray-500",
 }
 
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
+
+function ActionsCell({ row }) {
+    const dc = row.original;
+    const [viewDetails, setViewDetails] = useState(false);
+    return (
+        <>
+            <DCDetailDrawer
+                dc={dc}
+                open={viewDetails}
+                onClose={() => setViewDetails(false)}
+            />
+        
+        <div className="flex items-center gap-2 justify-end">
+            <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16}/></Button>
+            <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+
+            <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+            {/* <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <MoreHorizontal size={16} />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    align="end"
+                    className="bg-white border shadow-md w-44"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
+                        <Pencil size={14} /> Edit DC details
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className={`gap-2 text-sm cursor-pointer ${dc.status === "active" ? "text-red-500" : "text-green-600"}`}>
+                        <Ban size={14} />
+                        {dc.status === "active" ? "Deactivate DC" : "Reactivate DC"}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <ChevronRight size={16} className="text-gray-300" /> */}
+        </div>
+        </>
+    )
+}
+
+
 
 export const columns = [
     // DC name + city + address
@@ -170,8 +224,8 @@ export const columns = [
                                     column.setFilterValue(val === "all" ? undefined : val)
                                 }
                             >
-                                <DropdownMenuRadioItem value="all"      className="text-xs">All</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="active"   className="text-xs">Active</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="all" className="text-xs">All</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="active" className="text-xs">Active</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="inactive" className="text-xs">Inactive</DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
@@ -192,43 +246,8 @@ export const columns = [
             return row.getValue(id) === value
         },
     },
-
-    // Actions
     {
         id: "actions",
-        cell: ({ row }) => {
-            const dc = row.original
-            return (
-                <div className="flex items-center gap-2 justify-end">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <MoreHorizontal size={16} />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="end"
-                            className="bg-white border shadow-md w-44"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-                                <Pencil size={14} /> Edit DC details
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className={`gap-2 text-sm cursor-pointer ${dc.status === "active" ? "text-red-500" : "text-green-600"}`}>
-                                <Ban size={14} />
-                                {dc.status === "active" ? "Deactivate DC" : "Reactivate DC"}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <ChevronRight size={16} className="text-gray-300" />
-                </div>
-            )
-        },
+        cell: ({ row }) => <ActionsCell row={row} />,
     },
 ]

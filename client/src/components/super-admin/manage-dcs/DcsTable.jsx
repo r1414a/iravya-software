@@ -120,11 +120,11 @@ export default function DCsTable() {
                 />
             </div>
 
-            <DCDetailDrawer
+            {/* <DCDetailDrawer
                 dc={selectedDC}
                 open={!!selectedDC}
                 onClose={() => setSelectedDC(null)}
-            />
+            /> */}
         </section>
     )
 }

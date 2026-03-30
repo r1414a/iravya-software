@@ -26,21 +26,30 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus, Warehouse } from "lucide-react"
+import { Plus, Store } from "lucide-react"
+import { useState } from "react"
 
-export default function AddDCForm() {
+export default function AddStoreForm() {
+    // Auto-generate slug from store name
+    const [storeName, setStoreName] = useState("")
+    const slug = storeName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+
     return (
         <Sheet direction="right">
             <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Warehouse
+                Add Store
             </SheetTrigger>
 
             <SheetContent className="bg-white min-w-120 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle>Add new warehouse</SheetTitle>
+                    <SheetTitle>Add new store</SheetTitle>
                     <SheetDescription>
-                        Register a new data center and assign it to a brand
+                        Register a retail store and assign it to a brand
                     </SheetDescription>
                 </SheetHeader>
 
@@ -66,18 +75,20 @@ export default function AddDCForm() {
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
-                                    <FieldDescription className="text-xs">
-                                        This DC will only manage trucks and trips for this brand
-                                    </FieldDescription>
                                 </Field>
 
-                                {/* DC name + city */}
+                                {/* Store name + city */}
                                 <div className="flex gap-2">
-                                    <Field>
-                                        <FieldLabel>DC name <span className="text-red-500">*</span></FieldLabel>
-                                        <Input placeholder="e.g. Pune Warehouse DC" />
+                                    <Field className="basis-[65%]">
+                                        <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
+                                        <Input
+                                            placeholder="e.g. Westside — Koregaon Park"
+                                            value={storeName}
+                                            className="w-full"
+                                            onChange={(e) => setStoreName(e.target.value)}
+                                        />
                                     </Field>
-                                    <Field>
+                                    <Field className="basis-[35%]">
                                         <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
                                         <Select>
                                         <SelectTrigger className="w-full">
@@ -99,38 +110,57 @@ export default function AddDCForm() {
                                 {/* Full address */}
                                 <Field>
                                     <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input placeholder="Plot no., area, pincode" />
+                                    <Input placeholder="Shop no., mall/building, area, pincode" />
                                     <FieldDescription className="text-xs">
-                                        Used to geocode the DC location on the map
+                                        Used to place the store pin on the map and compute geofence
                                     </FieldDescription>
                                 </Field>
 
                                 {/* Geofence radius */}
-                                {/* <Field>
+                                <Field>
                                     <FieldLabel>Geofence radius (metres)</FieldLabel>
-                                    <Input type="number" placeholder="e.g. 300" defaultValue={300} />
+                                    <Input type="number" placeholder="e.g. 200" defaultValue={200} />
                                     <FieldDescription className="text-xs">
-                                        Truck entering this radius triggers a "returned to DC" event
+                                        Truck entering this radius triggers the "arrived" event for the store manager
                                     </FieldDescription>
-                                </Field> */}
+                                </Field>
 
-                                {/* Contact person */}
+                                {/* Public tracking slug — auto generated, editable */}
+                                <Field>
+                                    <FieldLabel>Public tracking URL slug</FieldLabel>
+                                    <div className="flex items-center border rounded-md overflow-hidden">
+                                        <span className="bg-gray-100 text-gray-500 text-xs px-3 py-2.5 border-r whitespace-nowrap">
+                                            /track/
+                                        </span>
+                                        <Input
+                                            className="border-0 rounded-none focus-visible:ring-0 font-mono text-sm"
+                                            value={slug}
+                                            placeholder="auto-generated"
+                                            readOnly
+                                        />
+                                    </div>
+                                    <FieldDescription className="text-xs">
+                                        Auto-generated from store name. Store can share this URL for public delivery tracking.
+                                    </FieldDescription>
+                                </Field>
+
+                                {/* Store manager */}
                                 <div className="flex gap-2">
                                     <Field>
-                                        <FieldLabel>Operator name</FieldLabel>
-                                        <Input placeholder="e.g. Suresh Pawar" />
+                                        <FieldLabel>Manager name</FieldLabel>
+                                        <Input placeholder="e.g. Arjun Joshi" />
                                     </Field>
                                     <Field>
-                                        <FieldLabel>Operator phone</FieldLabel>
+                                        <FieldLabel>Manager phone</FieldLabel>
                                         <Input placeholder="+91 98XXX XXXXX" />
                                     </Field>
                                 </div>
 
                                 <Field>
-                                    <FieldLabel>Operator email</FieldLabel>
-                                    <Input type="email" placeholder="operator@brand.com" />
+                                    <FieldLabel>Manager email</FieldLabel>
+                                    <Input type="email" placeholder="manager@brand.com" />
                                     <FieldDescription className="text-xs">
-                                        A user account with DC operator role will be created for this email
+                                        A user account with store manager role will be created for this email
                                     </FieldDescription>
                                 </Field>
 
@@ -141,7 +171,7 @@ export default function AddDCForm() {
 
                 <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
                     <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
-                        Add Warehouse <Warehouse className="ml-1" size={15} />
+                        Add Store <Store className="ml-1" size={15} />
                     </Button>
                     <SheetClose className="basis-1/2" asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>

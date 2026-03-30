@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { useLocation } from "react-router-dom"
 
 export default function TripsFilter() {
     const [activeStatus, setActiveStatus] = useState("All")
+    const location = useLocation()
 
     const statusTabs = ["All", "In Transit", "Completed", "Scheduled", "Cancelled"]
 
@@ -34,25 +36,11 @@ export default function TripsFilter() {
                         </InputGroupAddon>
                     </InputGroup>
 
-                    <div className="flex gap-4 w-full">
-                        <Select defaultValue="all_brands">
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select brand..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border shadow-md">
-                                <SelectGroup>
-                                    <SelectLabel>Brands</SelectLabel>
-                                    <SelectItem value="all_brands">All brands</SelectItem>
-                                    <SelectItem value="tata_westside">Tata Westside</SelectItem>
-                                    <SelectItem value="zudio">Zudio</SelectItem>
-                                    <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
-                                    <SelectItem value="tanishq">Tanishq</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-
-                        <Select defaultValue="all_dcs">
-                            <SelectTrigger className="w-full">
+                    {/* <div className="flex gap-4 w-full"> */}
+                    {
+                        location.pathname.startsWith("/admin") && (
+                            <Select defaultValue="all_dcs">
+                            <SelectTrigger className="w-56">
                                 <SelectValue placeholder="Select DC..." />
                             </SelectTrigger>
                             <SelectContent className="bg-white border shadow-md">
@@ -65,7 +53,10 @@ export default function TripsFilter() {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                    </div>
+                        )
+                    }
+                        
+                    {/* </div> */}
                 </div>
 
                 {/* Right — status tabs */}

@@ -17,6 +17,10 @@ import SuperAdminManageDrivers from "./pages/super-admin/manage-drivers/SuperAdm
 import SuperAdminManageTrucks from "./pages/super-admin/manage-trucks/SuperAdminManageTrucks";
 import SuperAdminManageDCs from "./pages/super-admin/manage-dcs/SuperAdminManageDCS";
 import TrackTrip from "./pages/track_trip/trackTrrip";
+import SuperAdminManageStores from "./pages/super-admin/manage-stores/SuperAdminManageStores";
+import SuperAdminSettings from "./pages/super-admin/settings/SuperAdminSettings";
+import SuperAdminAlerts from "./pages/super-admin/alerts/SuperAdminAlerts";
+import SuperAdminManageDevices from "./pages/super-admin/manage-devices/SuperAdminManageDevices";
 
 
 const router = createBrowserRouter([
@@ -46,6 +50,10 @@ const router = createBrowserRouter([
                 element: <SuperAdminManageDCs/>
             },
             {
+                path: "manage-gps-devices",
+                element: <SuperAdminManageDevices/>
+            },
+            {
                 path: "manage-users",
                 element: <SuperAdminManageUser/>
             },
@@ -61,6 +69,18 @@ const router = createBrowserRouter([
                 path: "manage-trucks",
                 element: <SuperAdminManageTrucks/>
             },
+            {
+                path: "manage-stores",
+                element: <SuperAdminManageStores/>
+            },
+            {
+                path: "settings",
+                element: <SuperAdminSettings/>
+            },
+            {
+                path: "alerts",
+                element: <SuperAdminAlerts/>
+            }
             //more pages
 
             

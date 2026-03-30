@@ -17,6 +17,7 @@ import SuperAdminManageDrivers from "./pages/super-admin/manage-drivers/SuperAdm
 import SuperAdminManageTrucks from "./pages/super-admin/manage-trucks/SuperAdminManageTrucks";
 import SuperAdminManageDCs from "./pages/super-admin/manage-dcs/SuperAdminManageDCS";
 import TrackTrip from "./pages/track_trip/trackTrrip";
+import SuperAdminManageBrands from "./pages/super-admin/manage-brands/SuperAdminManageBrands"
 
 
 const router = createBrowserRouter([
@@ -62,6 +63,11 @@ const router = createBrowserRouter([
                 element: <SuperAdminManageTrucks/>
             },
             //more pages
+
+            {
+                path: "manage-brands",
+                element: <SuperAdminManageBrands/>
+            }
 
             
         ]

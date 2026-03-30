@@ -1,9 +1,10 @@
 
-import express from "express";
-import cors from "cors";
-
-import dotenv from "dotenv";
-import { Server } from "socket.io";
+import dotenv from "dotenv"
+// import connectDB from "./db/index.js";
+import {app} from './app.js'
+dotenv.config({
+    path: './.env'
+})
 
 const PORT = process.env.PORT || 5000;
 
@@ -13,18 +14,18 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 // App init
-const app = express();
+// const app = express();
 
 
 // ===============================
 // Middleware
 // ===============================
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+// app.use(cors({
+//   origin: process.env.CLIENT_URL,
+//   credentials: true
+// }));
 
-app.use(express.json());
+// app.use(express.json());
 
 
 

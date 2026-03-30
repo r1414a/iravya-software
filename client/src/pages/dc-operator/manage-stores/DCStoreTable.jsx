@@ -93,7 +93,7 @@ export default function StoresPage() {
                 <DataTable
                     columns={columns}
                     data={tableData}
-                    onRowClick={(row) => setSelectedStore(row)}
+                    // onRowClick={(row) => setSelectedStore(row)}
                 />
             </section>
 

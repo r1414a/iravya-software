@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 
 
 const ITEMS = [
-  { key: "companies", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/companies" },
+  { key: "companies", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/manage-brands" },
   { key: "users", label: "Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/manage-user" },
   { key: "devices", label: "Register GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/admin/manage-devices" },
   { key: "trucks", label: "Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/admin/trucks" },

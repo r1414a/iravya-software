@@ -221,18 +221,30 @@ export const columns = [
                     {/* Quick edit button */}
                     <Button
                         size="sm"
-                        className="bg-maroon text-white h-7 px-3 text-xs flex items-center gap-1"
+                        className=" text-white h-7 px-3 text-xs flex items-center gap-1 bg-white"
                         onClick={(e) => {
                             e.stopPropagation()
                             store._onEdit?.(store)
                         }}
                     >
-                        <Pencil size={12} />
-                        Edit
+                        <Pencil size={12} color="gray"/>
+                        
+                    </Button>
+
+                    
+
+
+                    <Button
+                        size="sm"
+                        className=" text-white h-7 px-3 text-xs flex items-center gap-1 bg-white"
+                        onClick={() => store._onDelete?.(store)}
+                    >
+                        <Trash2 size={12} color="gray"/>
+                        
                     </Button>
 
                     {/* 3-dot menu */}
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreHorizontal size={16} />
@@ -264,7 +276,7 @@ export const columns = [
                                 <Trash2 size={14} /> Delete Store
                             </DropdownMenuItem>
                         </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
 
                     <ChevronRight size={16} className="text-gray-300" />
                 </div>

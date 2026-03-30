@@ -37,7 +37,7 @@ import {
     ComboboxItem,
     ComboboxList,
 } from "@/components/ui/combobox"
-import { Plus, CalendarClock, UserRound, Road ,Store } from "lucide-react"
+import { Plus, CalendarClock, UserRound, Road, Store } from "lucide-react"
 import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -78,23 +78,33 @@ const STORE_SEED = [
 ]
 
 export default function AddNewStore() {
-     const [selectedTruck, setSelectedTruck] = useState(null)
-    const [selectedDriver, setSelectedDriver] = useState(null)
-    const [selectedGps, setSelectedGps] = useState(null)
-    const [selectedStore, setSelectedStore] = useState(null)
-    const [createNewDriver, setCreateNewDriver] = useState(false)
-    const [newDriverName, setNewDriverName] = useState("")
+    const [form, setForm] = useState({
+        storeName: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "",
+        email: "",
+        contactNumber: "",
+        status: ""
+    })
 
-    const handleCreateTrip = () => {
-        const tripData = {
-            truckId: selectedTruck,
-            gpsId: selectedGps,
-            driver: createNewDriver ? { name: newDriverName, id: 'new' } : selectedDriver,
-            storeId: selectedStore,
+    const handleChange = (field, value) => {
+        setForm(prev => ({
+            ...prev,
+            [field]: value
+        }))
+    }
+
+    const handleAddStore = () => {
+        const storeData = {
+            ...form,
             createdAt: new Date().toISOString()
         }
-        console.log("Saving Trip:", tripData)
-        // Add your localStorage or API logic here
+
+        console.log("Saving Store:", storeData)
+
+        // Save to API / localStorage here
     }
 
     return (
@@ -104,6 +114,7 @@ export default function AddNewStore() {
                     <Plus className="w-4 h-4 mr-1" />
                     Add new store
                 </SheetTrigger>
+
                 <SheetContent className="bg-white min-w-125 flex flex-col">
                     <SheetHeader className="border-b border-gray-200 pb-4">
                         <SheetTitle>Add new store</SheetTitle>
@@ -116,60 +127,118 @@ export default function AddNewStore() {
                         <FieldGroup>
                             <FieldSet>
                                 <FieldGroup>
+
                                     <div className="flex gap-2">
                                         <Field>
-                                            <FieldLabel htmlFor="f_name">Store Name</FieldLabel>
-                                            <Input id="f_name" type="text" placeholder="Name" />
-                                        </Field>
-                                        
-                                    </div>
-                                    <Field>
-                                            <FieldLabel htmlFor="l_name">Address</FieldLabel>
-                                            <Textarea id="l_name" type="text" placeholder="Add address" />
-                                    </Field>
-
-                                    {/* <Field>
-                                            <FieldLabel htmlFor="l_name">Address</FieldLabel>
-                                            <Textarea id="l_name" type="text" placeholder="Add address" />
-                                    </Field> */}
-                                    <div className="flex gap-2">
-                                        <Field>
-                                                <FieldLabel htmlFor="l_name">City</FieldLabel>
-                                                <Input id="l_name" type="text" placeholder="Add city" />
-                                        </Field>
-                                        <Field>
-                                                <FieldLabel htmlFor="l_name">State</FieldLabel>
-                                                <Input id="l_name" type="text" placeholder="Add state" />
-                                        </Field>
-
-                                        <Field>
-                                                <FieldLabel htmlFor="l_name">Country</FieldLabel>
-                                                <Input id="l_name" type="text" placeholder="Add country" />
+                                            <FieldLabel>Store Name</FieldLabel>
+                                            <Input
+                                                value={form.storeName}
+                                                onChange={(e) => handleChange("storeName", e.target.value)}
+                                                placeholder="Name"
+                                            />
                                         </Field>
                                     </div>
 
                                     <Field>
-                                            <FieldLabel htmlFor="f_name">Email</FieldLabel>
-                                            <Input id="f_name" type="text" placeholder="Email" />
+                                        <FieldLabel>Address</FieldLabel>
+                                        <Textarea
+                                            value={form.address}
+                                            onChange={(e) => handleChange("address", e.target.value)}
+                                            placeholder="Add address"
+                                        />
+                                    </Field>
+
+                                    <div className="flex gap-2">
+                                        <Field>
+                                            <FieldLabel>City</FieldLabel>
+                                            <Input
+                                                value={form.city}
+                                                onChange={(e) => handleChange("city", e.target.value)}
+                                                placeholder="Add city"
+                                            />
+                                        </Field>
+
+                                        <Field>
+                                            <FieldLabel>State</FieldLabel>
+                                            <Input
+                                                value={form.state}
+                                                onChange={(e) => handleChange("state", e.target.value)}
+                                                placeholder="Add state"
+                                            />
+                                        </Field>
+
+                                        <Field>
+                                            <FieldLabel>Country</FieldLabel>
+                                            <Input
+                                                value={form.country}
+                                                onChange={(e) => handleChange("country", e.target.value)}
+                                                placeholder="Add country"
+                                            />
+                                        </Field>
+                                    </div>
+
+                                    <Field>
+                                        <FieldLabel>Email</FieldLabel>
+                                        <Input
+                                            value={form.email}
+                                            onChange={(e) => handleChange("email", e.target.value)}
+                                            placeholder="Email"
+                                        />
                                     </Field>
 
                                     <Field>
-                                            <FieldLabel htmlFor="f_name">Contact Number</FieldLabel>
-                                            <Input id="f_name" type="text" placeholder="+91 XXXXX XXXXX" />
-                                        </Field>
-                                                             
+                                        <FieldLabel>Contact Number</FieldLabel>
+                                        <Input
+                                            value={form.contactNumber}
+                                            onChange={(e) => handleChange("contactNumber", e.target.value)}
+                                            placeholder="+91 XXXXX XXXXX"
+                                        />
+                                    </Field>
+
+                                    <Field>
+                                        <FieldLabel>Status</FieldLabel>
+
+                                        <Select
+                                            value={form.status}
+                                            onValueChange={(value) => handleChange("status", value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Status</SelectLabel>
+                                                    <SelectItem value="active">Active</SelectItem>
+                                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+
+                                        </Select>
+                                    </Field>
 
                                 </FieldGroup>
                             </FieldSet>
                         </FieldGroup>
                     </div>
 
-                     <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                         <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Add store <Store  /></Button>
-                         <SheetClose className='basis-1/2' asChild>
-                             <Button className="w-full" variant="outline">Cancel</Button>
-                         </SheetClose>
-                     </SheetFooter>
+                    <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+
+                        <Button
+                            onClick={handleAddStore}
+                            className='basis-1/2 bg-maroon hover:bg-maroon-dark'
+                        >
+                            Add store <Store />
+                        </Button>
+
+                        <SheetClose className='basis-1/2' asChild>
+                            <Button className="w-full" variant="outline">
+                                Cancel
+                            </Button>
+                        </SheetClose>
+
+                    </SheetFooter>
+
                 </SheetContent>
             </Sheet>
         </div>

@@ -60,7 +60,7 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                                 <MapPin size={12} /> {dc.city} · {dc.brand}
                             </p>
                         </div>
-                        <Badge className={`${statusStyles[dc.status]} border-0 text-xs font-medium mt-1`}>
+                        <Badge className={`${statusStyles[dc.status]} border-0 text-xs font-medium mt-4`}>
                             {dc.status.charAt(0).toUpperCase() + dc.status.slice(1)}
                         </Badge>
                     </div>
@@ -91,53 +91,6 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                     </div>
                 </div>
 
-                {/* ── Contact — inline edit, same Pencil toggle as TruckDetailDrawer driver section ── */}
-                <div className="px-6 py-4 border-b">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                            DC operator contact
-                        </p>
-                        <button
-                            className="text-xs text-maroon flex items-center gap-1 hover:underline"
-                            onClick={() => setEditingContact(!editingContact)}
-                        >
-                            <Pencil size={11} />
-                            {editingContact ? "Cancel" : "Edit"}
-                        </button>
-                    </div>
-
-                    {editingContact ? (
-                        <div className="flex flex-col gap-3">
-                            <div className="flex gap-2">
-                                <div className="flex flex-col gap-1 flex-1">
-                                    <Label className="text-xs">Name</Label>
-                                    <Input defaultValue={dc.contactName} className="h-8 text-sm" />
-                                </div>
-                                <div className="flex flex-col gap-1 flex-1">
-                                    <Label className="text-xs">Phone</Label>
-                                    <Input defaultValue={dc.contactPhone} className="h-8 text-sm" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <Label className="text-xs">Email</Label>
-                                <Input defaultValue={dc.contactEmail} className="h-8 text-sm" />
-                            </div>
-                            <Button size="sm" className="bg-maroon hover:bg-maroon-dark text-white w-fit">
-                                Save
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-1.5">
-                            <p className="text-sm font-medium">{dc.contactName}</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Phone size={13} className="text-gray-400" /> {dc.contactPhone}
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Mail size={13} className="text-gray-400" /> {dc.contactEmail}
-                            </div>
-                        </div>
-                    )}
-                </div>
 
                 {/* ── Recent trips from this DC ── */}
                 <div className="px-6 py-4 flex-1">
@@ -180,21 +133,6 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                             )
                         })}
                     </div>
-                </div>
-
-                {/* ── Danger zone ── */}
-                <div className="px-6 py-4 border-t">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                        Danger zone
-                    </p>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-500 border-red-200 hover:bg-red-50 flex items-center gap-2"
-                    >
-                        <Ban size={13} />
-                        {dc.status === "active" ? "Deactivate this DC" : "Reactivate this DC"}
-                    </Button>
                 </div>
 
             </SheetContent>

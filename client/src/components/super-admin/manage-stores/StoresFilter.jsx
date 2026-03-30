@@ -4,24 +4,21 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group"
 import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
 
-export default function UsersFilter() {
-    const [role, setRole] = useState("all_roles")
+export default function StoresFilter() {
+
     return (
         <section className="mt-10 px-10">
             <div className="flex w-full justify-between">
-                <div className="basis-1/2 flex gap-4">
+
+                {/* Left — search + brand + city dropdowns */}
                     <InputGroup className="max-w-xs">
-                        <InputGroupInput placeholder="Search user by name/email..." />
+                        <InputGroupInput placeholder="Search store name, city..." />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
-                        {/* <InputGroupAddon align="inline-end">12 results</InputGroupAddon> */}
                     </InputGroup>
 
-                </div>
             </div>
         </section>
     )

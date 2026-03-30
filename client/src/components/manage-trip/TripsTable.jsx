@@ -8,6 +8,7 @@ const trips = [
         truck: "MH12AB1234",
         driver: "Ramesh K.",
         phone: "+91 98201 11234",
+        gpsDevice: "GPS-001-PUNE",
         sourceDC: "Pune Warehouse DC",
         stops: [
             {name: "Koregaon Park Store", status: "completed"},
@@ -26,6 +27,7 @@ const trips = [
         driver: "Suresh M.",
         phone: "+91 99705 44321",
         // sourceDC: "Mumbai Warehouse DC",
+        gpsDevice: "GPS-347-PUNE",
         sourceDC: "Pune Warehouse DC",
         stops: [
             {name: "Hinjawadi Store", status: "pending"},
@@ -44,6 +46,7 @@ const trips = [
         phone: "+91 91305 77654",
         // sourceDC: "Nashik DC",
         sourceDC: "Pune Warehouse DC",
+        gpsDevice: "GPS-867-PUNE",
         stops: [
             {name: "FC Road Store", status: "completed"},
             {name: "Kothrud Store", status: "completed"},
@@ -61,6 +64,7 @@ const trips = [
         truck: "MH12GH3456",
         driver: "Ankit S.",
         phone: "+91 87654 32109",
+        gpsDevice: "GPS-003-PUNE",
         sourceDC: "Pune Warehouse DC",
         stops: [
             {name: "Hinjawadi Store", status: "completed"},
@@ -77,6 +81,7 @@ const trips = [
         truck: "MH20IJ7890",
         driver: "Kiran S.",
         phone: "+91 93422 65432",
+        gpsDevice: "GPS-878-PUNE",
         sourceDC: "Pune Warehouse DC",
         stops: [
             {name: "Koregaon Park Store", status: "pending"},
@@ -93,6 +98,7 @@ const trips = [
         truck: "MH15KL2345",
         driver: "Meera A.",
         phone: "+91 73424 23432",
+        gpsDevice: "GPS-987-PUNE",
         // sourceDC: "Mumbai Warehouse DC",
         sourceDC: "Pune Warehouse DC",
         stops: [

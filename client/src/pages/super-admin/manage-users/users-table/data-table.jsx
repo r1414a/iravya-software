@@ -2,7 +2,8 @@ import {
     flexRender,
     getCoreRowModel,
     useReactTable,
-    getPaginationRowModel
+    getPaginationRowModel,
+    getFilteredRowModel
 } from "@tanstack/react-table"
 
 import {
@@ -18,19 +19,19 @@ import { useState } from "react"
 import EditUserDrawer from "./EditUserDrawer"
 
 export function DataTable({ columns, data }) {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
+    const [columnFilters, setColumnFilters] = useState([])
 const [selectedUser, setSelectedUser] = useState(null)
     const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        initialState: {
-            pagination: {
-                pageSize: 5,
-            },
-        },
-    })
+            data,
+            columns,
+            getCoreRowModel: getCoreRowModel(),
+            getFilteredRowModel: getFilteredRowModel(),
+            getPaginationRowModel: getPaginationRowModel(),
+            state: { columnFilters },
+            onColumnFiltersChange: setColumnFilters,
+            initialState: { pagination: { pageSize: 10 } },
+        })
 
     return (
         <div className="border rounded-lg">
@@ -53,12 +54,6 @@ const [selectedUser, setSelectedUser] = useState(null)
                 <TableBody>
                     {table.getRowModel().rows.map((row) => (
                         <TableRow 
-                            onClick={
-                                () => {
-                                    setOpen(true);
-                                    setSelectedUser(row.original)
-                                }
-                            }
                             key={row.id} 
                             className="hover:bg-muted">
                             {row.getVisibleCells().map((cell) => (

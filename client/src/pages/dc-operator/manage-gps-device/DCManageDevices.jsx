@@ -1,19 +1,21 @@
-import AddDeviceForm from "./AddDeviceForm"
-import DeviceFilter from "./DeviceFilter"
-import DeviceTable from "./DeviceTable"
-import AdminSubHeader from "@/components/AdminSubHeader"
 
-export default function DCManageDevices() {
+import AdminSubHeader  from "@/components/AdminSubHeader"
+import DeviceFilter from "@/components/manage-gps/DeviceFitler"
+import DeviceTable from "@/components/manage-gps/DeviceTable"
+ 
+const DCManageDevices = () => {
     return (
         <section>
             <AdminSubHeader
                 to="/dc"
                 heading="GPS Devices"
-                subh="All tracking devices registered to this DC — add, assign to trucks, monitor connectivity"
-                CreateButton={<AddDeviceForm />}
+                subh="GPS devices assigned to this DC — monitor status, check diagnostics and manage device returns from stores"
+                CreateButton={null}
             />
             <DeviceFilter />
             <DeviceTable />
         </section>
     )
 }
+ 
+export default DCManageDevices

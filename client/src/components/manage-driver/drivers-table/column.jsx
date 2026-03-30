@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter, Road } from "lucide-react"
+import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter, Road, Eye, Trash2 } from "lucide-react"
 import EditDriverSheet from "./EditDriverSheet"
 import AssignTruckSheet from "./AssignTruckSheet"
 import TripHistorySheet from "./TripHistorySheet"
@@ -61,6 +61,7 @@ function ActionsCell({ row }) {
                     truck: "MH14CD5678",
                     driver: "Suresh M.",
                     sourceDC: "Mumbai Warehouse DC",
+                    gpsDevice: "GPS-344-PUNE",
                     stops: [
                         { name: "Hinjawadi Store", status: "pending" },
                     ],
@@ -84,41 +85,47 @@ function ActionsCell({ row }) {
                 onClose={() => setHistoryOpen(false)}
             />
 
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal size={16} />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
-                    <DropdownMenuItem
+            <div className="flex items-center gap-2 justify-end">
+                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal size={16} />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
+                        {/* <DropdownMenuItem
                         className="gap-2 text-sm cursor-pointer"
                         onClick={() => setEditOpen(true)}
                     >
                         <Pencil size={14} /> Edit driver
-                    </DropdownMenuItem>
-                    {
-                        driver.currentTrip && (
-                            <DropdownMenuItem
-                                className="gap-2 text-sm cursor-pointer"
-                                onClick={() => setTripDetailsOpen(true)}
-                            >
-                                <Road size={14} /> View trip details
-                            </DropdownMenuItem>
-                        )
-                    }
+                    </DropdownMenuItem> */}
+                        {
+                            driver.currentTrip && (
+                                <DropdownMenuItem
+                                    className="gap-2 text-sm cursor-pointer"
+                                    onClick={() => setTripDetailsOpen(true)}
+                                >
+                                    <Road size={14} /> View trip details
+                                </DropdownMenuItem>
+                            )
+                        }
 
-                    <DropdownMenuItem
-                        className="gap-2 text-sm cursor-pointer"
-                        onClick={() => setHistoryOpen(true)}
-                    >
-                        <KeyRound size={14} /> View trip history
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 text-sm cursor-pointer text-red-500">
-                        <Ban size={14} /> Deactivate
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        <DropdownMenuItem
+                            className="gap-2 text-sm cursor-pointer"
+                            onClick={() => setHistoryOpen(true)}
+                        >
+                            <KeyRound size={14} /> View trip history
+                        </DropdownMenuItem>
+                        {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer text-red-500">
+                            <Ban size={14} /> Deactivate
+                        </DropdownMenuItem> */}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
         </>
     )
 }

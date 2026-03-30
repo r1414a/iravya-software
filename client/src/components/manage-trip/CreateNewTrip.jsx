@@ -69,7 +69,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
         aadhar: null,
     })
     const [truckNo, setTruckNo] = useState(truck?.regNo ?? "");
-
+    const [gpsDevice, setGpsDevice] = useState(truck?.gpsDevice ?? "")
     const [otpSent, setOtpSent] = useState(false)
     const [otp, setOtp] = useState("")
     const [stops, setStops] = useState([])
@@ -149,6 +149,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                     </Field>
                                 </div>
 
+                                <div className="flex gap-2">
                                 {/* Truck */}
                                 <Field>
                                     <FieldLabel>Truck</FieldLabel>
@@ -169,6 +170,25 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                         Only idle trucks are shown
                                     </FieldDescription>
                                 </Field>
+
+                                <Field>
+                                    <FieldLabel>GPS Device</FieldLabel>
+                                    <Select value={gpsDevice} onValueChange={setGpsDevice}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select gps device..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white border shadow-md">
+                                            <SelectGroup>
+                                                <SelectLabel>Available trucks</SelectLabel>
+                                                <SelectItem value="GPS-001-PUNE">GPS-001-PUNE</SelectItem>
+                                                <SelectItem value="GPS-002-PUNE">GPS-002-PUNE</SelectItem>
+                                                <SelectItem value="GPS-003-PUNE">GPS-003-PUNE</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+
+</div>
 
                                 {/* Driver */}
                                 <Field>

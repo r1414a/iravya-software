@@ -9,7 +9,7 @@ export default function SuperAdminManageTrips() {
             <AdminSubHeader
                 to="/admin"
                 heading="Manage Trips"
-                subh="Plan, track, and dispatch deliveries across all stores — select trucks, and schedule departures."
+                subh="Plan, track, and dispatch deliveries across all stores"
                 CreateButton={null}
             />
 

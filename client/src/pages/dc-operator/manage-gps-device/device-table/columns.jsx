@@ -216,7 +216,7 @@ export const columns = [
             return (
                 <div className="flex items-center gap-2 justify-end">
                     {/* Assign now — only for unassigned devices */}
-                    {status === "unassigned" && (
+                    {/* {status === "unassigned" && (
                         <Button
                             size="sm"
                             className="bg-[#701a40] text-white h-7 px-3 text-xs flex items-center gap-1"
@@ -225,7 +225,7 @@ export const columns = [
                             <Truck size={12} />
                             Assign
                         </Button>
-                    )}
+                    )} */}
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -242,10 +242,10 @@ export const columns = [
                             <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
                                 <Pencil size={14} /> Edit device
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
+                            {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
                                 <Truck size={14} />
                                 {assignedTruck ? "Reassign truck" : "Assign to truck"}
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                             <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
                                 <RefreshCw size={14} /> Force re-ping
                             </DropdownMenuItem>

@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, onRowClick }) {
     const [columnFilters, setColumnFilters] = useState([])
 
     const table = useReactTable({

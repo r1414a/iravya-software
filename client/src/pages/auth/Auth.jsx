@@ -234,7 +234,7 @@ export default function Auth() {
                     >
                         Use →
                     </button> */}
-                    </div>
+                    {/* </div> */}
                 {/* ))} */}
                 </div>
             </div>

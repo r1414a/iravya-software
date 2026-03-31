@@ -40,13 +40,13 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
 
                                 {/* Name + Phone */}
-                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Full name</FieldLabel>
                                         <Input
@@ -73,7 +73,7 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                                             defaultValue={driver.licenceNo}
                                             className="font-mono text-sm"
                                             placeholder="MH1220190012345"
-                                            
+
                                         />
                                     </Field>
                                     <Field>
@@ -85,11 +85,11 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                                             <SelectContent className="bg-white border shadow-md text-sm">
                                                 <SelectGroup>
                                                     <SelectLabel>Class</SelectLabel>
-                                                     <SelectItem value="all_licences">All classes</SelectItem>
-                                    <SelectItem value="lmv">LMV - light motor vehicles/cars</SelectItem>
-                                    <SelectItem value="hmv">HMV - heavy motor vehicles</SelectItem>
-                                    <SelectItem value="hgmv">HGMV - heavy goods motor vehicle</SelectItem>
-                                    <SelectItem value="htv">HTV - heavy transport vehicle</SelectItem>
+                                                    <SelectItem value="all_licences">All classes</SelectItem>
+                                                    <SelectItem value="lmv">LMV - light motor vehicles/cars</SelectItem>
+                                                    <SelectItem value="hmv">HMV - heavy motor vehicles</SelectItem>
+                                                    <SelectItem value="hgmv">HGMV - heavy goods motor vehicle</SelectItem>
+                                                    <SelectItem value="htv">HTV - heavy transport vehicle</SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
@@ -99,7 +99,7 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                                 {/* Licence expiry */}
                                 <Field>
                                     <FieldLabel>Licence expiry</FieldLabel>
-                                    <Input type="date" className="text-sm"/>
+                                    <Input type="date" className="text-sm" />
                                 </Field>
 
                                 {/* Status */}
@@ -128,14 +128,13 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                     </FieldGroup>
                 </div>
 
-                <SheetFooter className="flex flex-row sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                    <Button className="w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark">
-                        Save changes <BookUser className="ml-1" size={15} />
-                    </Button>
-                    <SheetClose className="basis-1/2" asChild>
+                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Save changes <BookUser /></Button>
+                    <SheetClose className='basis-1/2' asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>
                     </SheetClose>
                 </SheetFooter>
+
             </SheetContent>
         </Sheet>
     )

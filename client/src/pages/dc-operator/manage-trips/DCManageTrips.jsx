@@ -12,10 +12,10 @@ export default function DCManageTrips() {
                 to="/dc"
                 heading="Manage Trips"
                 subh="Plan, track, and dispatch deliveries across all stores — select trucks, and schedule departures."
-                CreateButton={<CreateNewTrip />}
+                // CreateButton={<CreateNewTrip />}
             />
 
-            <TripsFilter />
+            <TripsFilter CreateButton={<CreateNewTrip />}/>
             <TripsTable />
 
         </section>

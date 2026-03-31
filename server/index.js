@@ -2,6 +2,7 @@
 import dotenv from "dotenv"
 // import connectDB from "./db/index.js";
 import {app} from './app.js'
+import sql from "./db/database.js";
 dotenv.config({
     path: './.env'
 })
@@ -11,31 +12,35 @@ const PORT = process.env.PORT || 5000;
 
 
 // Load env
-dotenv.config();
-
-// App init
-// const app = express();
-
-
-// ===============================
-// Middleware
-// ===============================
-// app.use(cors({
-//   origin: process.env.CLIENT_URL,
-//   credentials: true
-// }));
-
-// app.use(express.json());
+// dotenv.config();
 
 
 
-// ===============================
-// Health Check
-// ===============================
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
+
+
+
+
+dotenv.config({
+  path: "./.env",
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+
+
+async function startServer() {
+  try {
+    await sql`SELECT 1`;
+    console.log("✅ Database Connected");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("❌ Database connection failed");
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+startServer();
+

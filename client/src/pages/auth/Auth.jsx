@@ -2,39 +2,6 @@
 import { Eye, EyeOff, UserRound, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-const GOOGLE_FONTS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap');`;
-
-const GlobalStyles = () => (
-    <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap');
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-down { animation: fadeDown 0.6s ease both; }
-    .animate-fade-up   { animation: fadeUp 0.55s ease 0.1s both; }
-    .input-field::placeholder { color: #b0b0c0; }
-    .input-field:focus {
-      outline: none;
-      border-color: #8b1a30 !important;
-      background: #fff !important;
-      box-shadow: 0 0 0 3px rgba(139,26,48,0.08) !important;
-    }
-    .btn-signin:hover {
-      background: linear-gradient(135deg,#a01f38,#7c1428) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(139,26,48,0.4) !important;
-    }
-    .link-action:hover { color: #c0395a !important; text-decoration: underline; }
-    .cred-card:hover   { border-color: #d0c0c8 !important; box-shadow: 0 2px 8px rgba(139,26,48,0.06); }
-    .use-btn:hover     { color: #c0395a !important; }
-  `}</style>
-);
-
 
 const credentials = [
     { role: "Super Admin", badge: "super_admin", badgeClass: "super_admin", user: "super_admin", pass: "super_admin@123456" },
@@ -75,7 +42,7 @@ export default function Auth() {
 }
     return (
         <>
-            <GlobalStyles />
+       
 
             {/* Root */}
             <div
@@ -115,18 +82,13 @@ export default function Auth() {
                     >
                         Iravya
                     </span>
-                    {/* <span className="text-[11px] font-medium tracking-[3px] uppercase text-white/55 -mt-1">
-                    Service Management
-                </span> */}
+                    
                 </div>
 
                 {/* Card */}
                 <div
-                    className="bg-white rounded-2xl w-full max-w-[420px] animate-fade-up"
-                    style={{
-                        padding: "36px 40px 32px",
-                        boxShadow: "0 32px 80px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.12)",
-                    }}
+                    className="bg-white rounded-2xl w-full max-w-[420px] animate-fade-up p-6 lg:p-8"
+                   
                 >
                     {/* Heading */}
                     <h1

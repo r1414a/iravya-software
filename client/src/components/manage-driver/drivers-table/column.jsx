@@ -140,7 +140,7 @@ export const columns = [
             const { initials, color, name, phone, email } = row.original
             return (
                 <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white`}>
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white`}>
                         {initials}
                     </div>
                     <div className="-space-y-0.5">

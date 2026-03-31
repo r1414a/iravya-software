@@ -92,7 +92,7 @@ const drivers = [
  
 export default function DriversTable() {
     return (
-        <section className="mt-6 px-10">
+        <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable columns={columns} data={drivers} />
             </div>

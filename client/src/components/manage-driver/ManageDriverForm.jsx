@@ -20,14 +20,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus, BookUser } from "lucide-react"
+import { BookUser } from "lucide-react"
 import {
     Field,
-    FieldDescription,
     FieldGroup,
     FieldLabel,
     FieldSet,
 } from "@/components/ui/field"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
 
 export default function ManageDriverForm() {
@@ -36,32 +36,31 @@ export default function ManageDriverForm() {
     return (
 
         <Sheet direction="right" className="">
-            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2"><Plus className="w-4 h-4 mr-2" />
-                Create Driver</SheetTrigger>
-            <SheetContent className="bg-white min-w-120">
+           <CreateFormSheetTrigger text='Create Driver'/>
+            <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>Create new driver</SheetTitle>
                     <SheetDescription>Add driver details and licence information</SheetDescription>
                 </SheetHeader>
-                <div className="p-4">
+                <div className="flex-1 overflow-y-auto p-4">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
-                                <div className="flex gap-2">
+                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Full name</FieldLabel>
-                                        <Input placeholder="e.g. Ravi Deshmukh" />
+                                        <Input placeholder="e.g. Ravi Deshmukh" className="placeholder:text-sm"/>
                                     </Field>
                                     <Field>
                                         <FieldLabel>Phone number</FieldLabel>
-                                        <Input placeholder="+91 98XXX XXXXX" />
+                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm"/>
                                     </Field>
                                 </div>
 
-                                <div className="flex gap-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Licence number</FieldLabel>
-                                        <Input placeholder="e.g. MH1220190012345" className="font-mono" />
+                                        <Input placeholder="e.g. MH1220190012345" className="placeholder:text-sm" />
                                     </Field>
 
 
@@ -87,32 +86,16 @@ export default function ManageDriverForm() {
 
                                 <Field>
                                     <FieldLabel>Licence expiry</FieldLabel>
-                                    <Input type="date" />
+                                    <Input type="date" className="text-sm"/>
                                 </Field>
 
-                                {/* <Field>
-                                    <FieldLabel>Assign to truck <span className="text-gray-400 font-normal">(optional)</span></FieldLabel>
-                                    <Select>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select idle truck..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Idle trucks</SelectLabel>
-                                                <SelectItem value="MH12AB1234">MH12AB1234</SelectItem>
-                                                <SelectItem value="MH14CD5678">MH14CD5678</SelectItem>
-                                                <SelectItem value="MH12XY9090">MH12XY9090</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </Field> */}
                             </FieldGroup>
                         </FieldSet>
                     </FieldGroup>
                 </div>
 
-                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                    <Button className='basis-1/2 bg-maroon hover:bg-maroon-dark'>Add Driver <BookUser /></Button>
+                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Add Driver <BookUser /></Button>
                     <SheetClose className='basis-1/2' asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>
                     </SheetClose>

@@ -10,7 +10,7 @@ export default function SuperAdminHome() {
         {/* <h1 className="text-3xl font-light text-white">
           Welcome to dashboard!.
         </h1> */}
-        <p className="text-white/70 text-xl mt-2">
+        <p className="text-white/70 text-lg lg:text-xl mt-2 leading-6 tracking-tight">
           Manage platform, brands, warehouses, and devices
         </p>
       </div>

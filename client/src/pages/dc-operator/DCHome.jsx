@@ -10,7 +10,7 @@ export default function DCHome() {
         {/* <h1 className="text-3xl font-light text-white">
           Welcome to dashboard!.
         </h1> */}
-        <p className="text-white/70 text-xl mt-2">
+        <p className="text-white/70 text-lg lg:text-xl mt-2 leading-6 tracking-tight">
           Manage trucks, drivers, stores, trips, gps devices.
         </p>
       </div>

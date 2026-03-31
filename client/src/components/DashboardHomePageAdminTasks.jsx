@@ -1,75 +1,34 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 
-
-function MenuCard({ item, index }) {
-  const [hovered, setHovered] = useState(false);
- 
+function MenuCard({ item }) {
   return (
-    <Link
-        to={item.path}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="flex flex-col items-center justify-center gap-4 rounded-2xl border-0 outline-none cursor-pointer transition-all duration-200 h-38"
-      style={{
-        background: hovered ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.93)",
-        boxShadow: hovered
-          ? "0 20px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.1)"
-          : "0 4px 24px rgba(0,0,0,0.10)",
-        transform: hovered ? "translateY(-4px) scale(1.03)" : "translateY(0) scale(1)",
-        minWidth: 0,
-        width: "100%",
-       
-        animationDelay: `${index * 80}ms`,
-        animation: "fadeUp 0.45s ease both",
-      }}
-    >
-      {/* Icon tile */}
-      <div
-        className={`w-17 h-17 rounded-2xl ${item.bg} flex items-center justify-center transition-transform duration-200`}
-        style={{
-          background: item.gradient,
-          boxShadow: `0 8px 24px ${item.shadow}`,
-          transform: hovered ? "scale(1.08)" : "scale(1)",
-        }}
-      >
-        {item.icon}
-      </div>
- 
-      {/* Label */}
-      <span
-        className="text-base text-xs font-semibold  text-gray-600"
-        
-      >
-        {item.label}
-      </span>
-    </Link>
+    <Card className="group transition-all duration-200 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.03] bg-white/95 hover:bg-white">
+      <Link to={item.path}>
+        <CardContent className="flex flex-col items-center justify-center gap-3 p-3 lg:p-4">
+          <div
+            className={`w-14 h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center ${item.bg} shadow-md transition-transform duration-200 group-hover:scale-110`}
+          >
+            {item.icon}
+          </div>
+
+          <span className="text-xs font-semibold text-gray-600 text-center">
+            {item.label}
+          </span>
+        </CardContent>
+      </Link>
+    </Card>
   );
 }
-export default function DashboardHomePageAdminTask({tasks}){
-    return(
-    <main className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
-      <div
-          className="grid gap-5 w-full grid-cols-1 md:grid-cols-3 max-w-[600px]  items-center justify-center content-center"
-          // style={{
-          //   maxWidth: "600px",
-          //   gridTemplateColumns: "repeat(3, 1fr)",
-          // }}
-        >
-          {/* Row 1: 3 cards */}
-          {tasks.slice(0, 3).map((item, i) => (
-            <MenuCard key={item.label} item={item} index={i} />
-          ))}
- 
-          {/* Row 2: 2 cards centered */}
-          <div className="col-span-3 grid gap-5 justify-center " style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-             {/* spacer to push cards to center visually */}
-            {tasks.slice(3).map((item, i) => (
-              <MenuCard key={item.label} item={item} index={i + 3} />
-            ))}
-            
-          </div>
-        </div>
-    </main> 
-    )
+
+export default function DashboardHomePageAdminTask({ tasks = [] }) {
+  return (
+    <main className="flex-1 flex items-center justify-center lg:px-6 pb-6">
+      <div className="w-full max-w-150 grid gap-3 lg:gap-5 grid-cols-2 sm:grid-cols-3">
+        {tasks.map((item, index) => (
+          <MenuCard key={item.label || index} item={item} />
+        ))}
+      </div>
+    </main>
+  );
 }

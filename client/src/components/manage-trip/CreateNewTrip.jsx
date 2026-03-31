@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Plus, Route, X, GripVertical } from "lucide-react"
 import { useState, useEffect } from "react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
 // Stops are added dynamically and can be reordered
 function StopsList({ stops, onRemove }) {
@@ -45,7 +46,7 @@ function StopsList({ stops, onRemove }) {
                 >
                     <GripVertical size={14} className="text-gray-400 cursor-grab" />
                     <span className="text-xs font-medium text-gray-500 w-5">{index + 1}.</span>
-                    <span className="text-sm flex-1">{stop}</span>
+                    <span className="text-xs flex-1">{stop}</span>
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
@@ -60,7 +61,7 @@ function StopsList({ stops, onRemove }) {
 }
 
 export default function CreateTripModal({ truck, open, onClose }) {
-  
+
     const [driverAdded, setDriverAdded] = useState(false)
     const [aadharPreview, setAadharPreview] = useState(null)
     const [driverData, setDriverData] = useState({
@@ -100,14 +101,12 @@ export default function CreateTripModal({ truck, open, onClose }) {
                 truck ?
                     null
                     :
-                    <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Dispatch Trip
-                    </SheetTrigger>
+                    <CreateFormSheetTrigger text='Dispatch Trip' />
+              
             }
 
 
-            <SheetContent className="bg-white min-w-120">
+            <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>Dispatch new trip</SheetTitle>
                     <SheetDescription>
@@ -115,11 +114,11 @@ export default function CreateTripModal({ truck, open, onClose }) {
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="p-4 overflow-y-auto">
+                <div className="px-3 pb-3 sm:p-4 overflow-y-auto">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
-                                <div className="flex gap-5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
                                     {/* Brand */}
                                     <Field>
@@ -141,7 +140,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                     </Field>
 
                                     {/* Source DC */}
-                                    
+
                                     {/* source dc will automatically comes from logged in account */}
                                     <Field>
                                         <FieldLabel>Source data center</FieldLabel>
@@ -149,46 +148,46 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                     </Field>
                                 </div>
 
-                                <div className="flex gap-2">
-                                {/* Truck */}
-                                <Field>
-                                    <FieldLabel>Truck</FieldLabel>
-                                    <Select value={truckNo} onValueChange={setTruckNo}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select idle truck..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Available trucks</SelectLabel>
-                                                <SelectItem value="MH04EF3344">MH04EF3344</SelectItem>
-                                                <SelectItem value="MH14CD5678">MH14CD5678</SelectItem>
-                                                <SelectItem value="MH20GH7788">MH20GH7788</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FieldDescription className="text-xs">
-                                        Only idle trucks are shown
-                                    </FieldDescription>
-                                </Field>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {/* Truck */}
+                                    <Field>
+                                        <FieldLabel>Truck</FieldLabel>
+                                        <Select value={truckNo} onValueChange={setTruckNo}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select idle truck..."/>
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Available trucks</SelectLabel>
+                                                    <SelectItem value="MH04EF3344" className="text-xs">MH04EF3344</SelectItem>
+                                                    <SelectItem value="MH14CD5678" className="text-xs">MH14CD5678</SelectItem>
+                                                    <SelectItem value="MH20GH7788" className="text-xs">MH20GH7788</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        <FieldDescription className="text-xs">
+                                            Only idle trucks are shown
+                                        </FieldDescription>
+                                    </Field>
 
-                                <Field>
-                                    <FieldLabel>GPS Device</FieldLabel>
-                                    <Select value={gpsDevice} onValueChange={setGpsDevice}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select gps device..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Available trucks</SelectLabel>
-                                                <SelectItem value="GPS-001-PUNE">GPS-001-PUNE</SelectItem>
-                                                <SelectItem value="GPS-002-PUNE">GPS-002-PUNE</SelectItem>
-                                                <SelectItem value="GPS-003-PUNE">GPS-003-PUNE</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </Field>
+                                    <Field>
+                                        <FieldLabel>GPS Device</FieldLabel>
+                                        <Select value={gpsDevice} onValueChange={setGpsDevice}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select gps device..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Available trucks</SelectLabel>
+                                                    <SelectItem value="GPS-001-PUNE">GPS-001-PUNE</SelectItem>
+                                                    <SelectItem value="GPS-002-PUNE">GPS-002-PUNE</SelectItem>
+                                                    <SelectItem value="GPS-003-PUNE">GPS-003-PUNE</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </Field>
 
-</div>
+                                </div>
 
                                 {/* Driver */}
                                 <Field>
@@ -199,7 +198,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowAddDriver(!showAddDriver)}
-                                                className="text-maroon hover:underline text-sm"
+                                                className="text-maroon hover:underline text-xs sm:text-sm"
                                             >
                                                 {showAddDriver ? '- Select existing' : '+ Add new driver'}
                                             </button>
@@ -209,13 +208,14 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                     {driverAdded ? (
                                         <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
 
-                                            <div className="flex gap-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <Input
                                                     value={driverData.name}
                                                     onChange={(e) =>
                                                         setDriverData({ ...driverData, name: e.target.value })
                                                     }
                                                     placeholder="Driver name"
+                                                    className="text-sm"
                                                 />
 
                                                 <Input
@@ -224,6 +224,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                                         setDriverData({ ...driverData, phone: e.target.value })
                                                     }
                                                     placeholder="Phone number"
+                                                    className="text-sm"
                                                 />
                                             </div>
 
@@ -231,7 +232,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                                 <label className="text-xs text-gray-500">
                                                     Aadhar card
                                                 </label>
-                                                <Input type="file" className="mt-1" />
+                                                <Input type="file" className="mt-1 text-xs" />
                                                 {aadharPreview && (
                                                     <img
                                                         src={aadharPreview}
@@ -250,9 +251,10 @@ export default function CreateTripModal({ truck, open, onClose }) {
 
                                         /* ─────────────── 2. ADD DRIVER FORM ─────────────── */
                                         <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
-                                            <div className="flex gap-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <Input
                                                     placeholder="Driver name"
+                                                    className="placeholder:text-sm text-sm"
                                                     value={driverData.name}
                                                     onChange={(e) =>
                                                         setDriverData({ ...driverData, name: e.target.value })
@@ -261,6 +263,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
 
                                                 <Input
                                                     placeholder="Phone number"
+                                                    className="placeholder:text-sm text-sm"
                                                     type="tel"
                                                     value={driverData.phone}
                                                     onChange={(e) =>
@@ -275,7 +278,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                                 </label>
                                                 <Input
                                                     type="file"
-                                                    className="mt-1"
+                                                    className="mt-1 placeholder:text-xs text-xs"
                                                     accept="image/*"
                                                     onChange={(e) => {
                                                         const file = e.target.files[0]
@@ -378,7 +381,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                 {/* Scheduled departure */}
                                 <Field>
                                     <FieldLabel>Scheduled departure</FieldLabel>
-                                    <Input type="datetime-local" />
+                                    <Input type="datetime-local" className="text-sm"/>
                                     <FieldDescription className="text-xs">
                                         Leave blank to dispatch immediately
                                     </FieldDescription>
@@ -395,10 +398,11 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                         Send OTP
                                     </Button>
                                 ) : (
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         <Input
                                             placeholder="Enter OTP"
                                             value={otp}
+                                            className="w-full placeholder:text-sm text-sm"
                                             onChange={(e) => setOtp(e.target.value)}
                                         />
                                         <Button className="bg-green-600 text-white">
@@ -412,11 +416,10 @@ export default function CreateTripModal({ truck, open, onClose }) {
                     </FieldGroup>
                 </div>
 
-                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                    <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
-                        Dispatch Trip <Route size={15} className="ml-1" />
-                    </Button>
-                    <SheetClose className="basis-1/2" asChild>
+
+                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Dispatch Trip <Route /></Button>
+                    <SheetClose className='basis-1/2' asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>
                     </SheetClose>
                 </SheetFooter>

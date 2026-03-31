@@ -28,7 +28,7 @@ export default function TripDetailSheet({ trip, open, onClose }) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="p-4 flex flex-col gap-6 text-sm flex-1 overflow-y-auto" >
+        <div className="p-3 sm:p-4 flex flex-col gap-6 text-sm flex-1 overflow-y-auto" >
 
           {/* Top Info */}
           <div className="flex justify-between items-center">
@@ -51,7 +51,7 @@ export default function TripDetailSheet({ trip, open, onClose }) {
           </div>
 
           {/* Truck + Driver */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
               <Truck size={16} />
               <div>

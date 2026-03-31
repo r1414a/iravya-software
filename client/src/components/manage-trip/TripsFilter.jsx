@@ -13,30 +13,28 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 
-export default function TripsFilter() {
+export default function TripsFilter({CreateButton}) {
     const [activeStatus, setActiveStatus] = useState("All")
     const location = useLocation()
 
     const statusTabs = ["All", "In Transit", "Completed", "Scheduled", "Cancelled"]
 
     return (
-        <section className="mt-10 px-10">
-            <div className="flex w-full justify-between">
+        <section className="mt-6 px-4 lg:px-10">
+            <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
 
                 {/* Left — search + dropdowns */}
-                <div className="basis-1/2 flex gap-4">
-                    <InputGroup className="max-w-xs">
-                        <InputGroupInput placeholder="Search trip ID, truck, driver..." />
+                <div className="w-full sm:max-w-sm order-2 sm:order-1">
+                    <InputGroup >
+                        <InputGroupInput placeholder="Search trip ID, truck, driver..." className="placeholder:text-xs lg:placeholder:text-sm"/>
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
                     </InputGroup>
 
-                    {/* <div className="flex gap-4 w-full"> */}
                     {
                         location.pathname.startsWith("/admin") && (
                             <Select defaultValue="all_dcs">
@@ -56,25 +54,12 @@ export default function TripsFilter() {
                         )
                     }
                         
-                    {/* </div> */}
                 </div>
-
-                {/* Right — status tabs */}
-                {/* <div className="basis-1/2 flex gap-2 justify-end">
-                    {statusTabs.map((tab) => (
-                        <Button
-                            key={tab}
-                            onClick={() => setActiveStatus(tab)}
-                            className={`px-3 text-xs ${
-                                activeStatus === tab
-                                    ? "bg-[#701a40] text-white"
-                                    : "bg-gray-200 text-black hover:bg-gray-300"
-                            }`}
-                        >
-                            {tab}
-                        </Button>
-                    ))}
-                </div> */}
+                    {CreateButton && (
+                    <div className="flex justify-end order-1 sm:order-2">
+                        {CreateButton}
+                    </div>
+                )}
 
             </div>
         </section>

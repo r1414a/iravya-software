@@ -42,25 +42,25 @@ export default function ManageDriverForm() {
                     <SheetTitle>Create new driver</SheetTitle>
                     <SheetDescription>Add driver details and licence information</SheetDescription>
                 </SheetHeader>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
                                 <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Full name</FieldLabel>
-                                        <Input placeholder="e.g. Ravi Deshmukh" className="placeholder:text-sm"/>
+                                        <Input placeholder="e.g. Ravi Deshmukh" className="placeholder:text-sm text-sm sm:text-md"/>
                                     </Field>
                                     <Field>
                                         <FieldLabel>Phone number</FieldLabel>
-                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm"/>
+                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
                                     </Field>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Licence number</FieldLabel>
-                                        <Input placeholder="e.g. MH1220190012345" className="placeholder:text-sm" />
+                                        <Input placeholder="e.g. MH1220190012345" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
 
 
@@ -86,7 +86,7 @@ export default function ManageDriverForm() {
 
                                 <Field>
                                     <FieldLabel>Licence expiry</FieldLabel>
-                                    <Input type="date" className="text-sm"/>
+                                    <Input type="date" className="text-xs"/>
                                 </Field>
 
                             </FieldGroup>

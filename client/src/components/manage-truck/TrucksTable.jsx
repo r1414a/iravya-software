@@ -86,25 +86,16 @@ const trucks = [
 ]
  
 export default function TrucksTable() {
-    // const [selectedTruck, setSelectedTruck] = useState(null)
  
     return (
-        <section className="mt-6 px-10">
+        <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable
                     columns={columns}
                     data={trucks}
-                    // onRowClick={(row) => setSelectedTruck(row)}
                 />
             </div>
  
-            {/* Detail drawer — opens on row click */}
-            
-            {/* <TruckDetailDrawer
-                truck={selectedTruck}
-                open={!!selectedTruck}
-                onClose={() => setSelectedTruck(null)}
-            /> */}
         </section>
     )
 }

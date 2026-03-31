@@ -9,12 +9,12 @@ export default function DCManageTrucks() {
             <AdminSubHeader
                 to="/dc"
                 heading="Trucks at this DC"
-                subh="All trucks assigned to Pune Warehouse — view status, trip status, details, history, dispatch idle trucks"
-                CreateButton={<AddTruckForm />}
+                subh="All trucks assigned to Pune Warehouse — view status, trip status, details, history, dispatch idle trucks "
+                // CreateButton={<AddTruckForm />}
             />
 
 
-            <TrucksFilter />
+            <TrucksFilter CreateButton={<AddTruckForm />}/>
             <TrucksTable />
         </section>
     )

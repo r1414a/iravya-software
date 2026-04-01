@@ -1,7 +1,9 @@
 
 import AdminSubHeader from "@/components/AdminSubHeader"
+import AddTruckForm from "@/components/manage-truck/AddTruckForm"
 import TrucksFilter from "@/components/manage-truck/TrucksFilter"
 import TrucksTable from "@/components/manage-truck/TrucksTable"
+
 
 export default function SuperAdminManageTrucks() {
     return (
@@ -14,7 +16,7 @@ export default function SuperAdminManageTrucks() {
             />
 
 
-            <TrucksFilter />
+            <TrucksFilter CreateButton={<AddTruckForm />}/>
             <TrucksTable />
         </section>
     )

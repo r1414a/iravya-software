@@ -1,5 +1,3 @@
-import { useState } from "react"
-import DCDetailDrawer from "./DcDetailDrawer"
 import { DataTable } from "./dc-table/data-table"
 import { columns } from "./dc-table/columns"
 
@@ -10,8 +8,6 @@ const dcs = [
         name: "Pune Warehouse DC",
         city: "Pune",
         address: "Plot 14, Bhosari MIDC, Pune 411026",
-        brand: "Tata Westside",
-        brandSlug: "tata_westside",
         contactName: "Suresh Pawar",
         contactPhone: "+91 98201 11234",
         contactEmail: "suresh.pawar@westside.com",
@@ -30,8 +26,6 @@ const dcs = [
         name: "Mumbai Warehouse DC",
         city: "Mumbai",
         address: "Shed 7B, Bhiwandi Logistics Park, Mumbai 421302",
-        brand: "Zudio",
-        brandSlug: "zudio",
         contactName: "Meera Joshi",
         contactPhone: "+91 99705 44321",
         contactEmail: "meera.j@zudio.com",
@@ -50,8 +44,6 @@ const dcs = [
         name: "Nashik DC",
         city: "Nashik",
         address: "Gat No. 22, Sinnar Industrial Area, Nashik 422103",
-        brand: "Tata Cliq",
-        brandSlug: "tata_cliq",
         contactName: "Anil Bhosale",
         contactPhone: "+91 91305 77654",
         contactEmail: "anil.b@tatacliq.com",
@@ -70,8 +62,6 @@ const dcs = [
         name: "Nagpur Warehouse DC",
         city: "Nagpur",
         address: "Plot 88, Butibori MIDC, Nagpur 441108",
-        brand: "Tanishq",
-        brandSlug: "tanishq",
         contactName: "Vijay Deshmukh",
         contactPhone: "+91 87654 32109",
         contactEmail: "vijay.d@tanishq.com",
@@ -90,8 +80,6 @@ const dcs = [
         name: "Kolhapur DC",
         city: "Kolhapur",
         address: "Survey 101, Gokul Shirgaon, Kolhapur 416234",
-        brand: "Tata Westside",
-        brandSlug: "tata_westside",
         contactName: "Priya Kulkarni",
         contactPhone: "+91 93422 65432",
         contactEmail: "priya.k@westside.com",
@@ -108,23 +96,15 @@ const dcs = [
 ]
 
 export default function DCsTable() {
-    const [selectedDC, setSelectedDC] = useState(null)
 
     return (
-        <section className="mt-6 px-10">
+        <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable
                     columns={columns}
                     data={dcs}
-                    onRowClick={(row) => setSelectedDC(row)}
                 />
             </div>
-
-            {/* <DCDetailDrawer
-                dc={selectedDC}
-                open={!!selectedDC}
-                onClose={() => setSelectedDC(null)}
-            /> */}
         </section>
     )
 }

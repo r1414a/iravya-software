@@ -110,7 +110,7 @@ export const columns = [
             const cfg = TYPE_CONFIG[type] ?? TYPE_CONFIG.speeding
             const Icon = cfg.icon
             return (
-                <div className="flex items-start gap-3 w-[400px]">
+                <div className="flex items-start gap-3 w-100">
                     {/* Unread dot */}
                     <div className="mt-1 shrink-0">
                         {isRead
@@ -125,7 +125,7 @@ export const columns = [
                     {/* Text */}
                     <div className="-space-y-0.5">
                         <p className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</p>
-                        <p className={`text-sm ${isRead ? "text-gray-500" : "font-medium text-gray-800"} text-wrap`}>
+                        <p className={`text-xs sm:text-sm ${isRead ? "text-gray-500" : "font-medium text-gray-800"} text-wrap`}>
                             {description}
                         </p>
                     </div>
@@ -238,7 +238,7 @@ export const columns = [
         cell: ({ row }) => (
             <div className="flex items-start gap-1.5 max-w-48">
                 <MapPin size={11} className="text-gray-400 mt-0.5 shrink-0" />
-                <span className="text-xs text-gray-500 leading-relaxed">{row.getValue("location")}</span>
+                <span className="text-xs text-gray-500 leading-snug text-wrap">{row.getValue("location")}</span>
             </div>
         ),
     },
@@ -248,7 +248,7 @@ export const columns = [
         accessorKey: "time",
         header: "Time",
         cell: ({ row }) => (
-            <span className="text-sm text-gray-500 whitespace-nowrap">{row.getValue("time")}</span>
+            <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">{row.getValue("time")}</span>
         ),
     },
     {

@@ -58,25 +58,6 @@ export default function AddStoreForm() {
                         <FieldSet>
                             <FieldGroup>
 
-                                {/* Brand */}
-                                <Field>
-                                    <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select brand..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Brands</SelectLabel>
-                                                <SelectItem value="tata_westside">Tata Westside</SelectItem>
-                                                <SelectItem value="zudio">Zudio</SelectItem>
-                                                <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
-                                                <SelectItem value="tanishq">Tanishq</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </Field>
-
                                 {/* Store name + city */}
                                 <div className="flex gap-2">
                                     <Field className="basis-[65%]">
@@ -117,13 +98,13 @@ export default function AddStoreForm() {
                                 </Field>
 
                                 {/* Geofence radius */}
-                                <Field>
+                                {/* <Field>
                                     <FieldLabel>Geofence radius (metres)</FieldLabel>
                                     <Input type="number" placeholder="e.g. 200" defaultValue={200} />
                                     <FieldDescription className="text-xs">
                                         Truck entering this radius triggers the "arrived" event for the store manager
                                     </FieldDescription>
-                                </Field>
+                                </Field> */}
 
                                 {/* Public tracking slug — auto generated, editable */}
                                 <Field>

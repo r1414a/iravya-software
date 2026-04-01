@@ -16,7 +16,7 @@ import {
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 
-export default function TripsFilter({CreateButton}) {
+export default function TripsFilter({ CreateButton }) {
     const [activeStatus, setActiveStatus] = useState("All")
     const location = useLocation()
 
@@ -27,9 +27,9 @@ export default function TripsFilter({CreateButton}) {
             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
 
                 {/* Left — search + dropdowns */}
-                <div className="w-full sm:max-w-sm order-2 sm:order-1">
+                <div className="w-full sm:max-w-sm order-2 sm:order-1 space-y-2">
                     <InputGroup >
-                        <InputGroupInput placeholder="Search trip ID, truck, driver..." className="placeholder:text-xs lg:placeholder:text-sm"/>
+                        <InputGroupInput placeholder="Search trip ID, truck, driver..." className="placeholder:text-xs lg:placeholder:text-sm" />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
@@ -38,24 +38,24 @@ export default function TripsFilter({CreateButton}) {
                     {
                         location.pathname.startsWith("/admin") && (
                             <Select defaultValue="all_dcs">
-                            <SelectTrigger className="w-56">
-                                <SelectValue placeholder="Select DC..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border shadow-md">
-                                <SelectGroup>
-                                    <SelectLabel>Data Centers</SelectLabel>
-                                    <SelectItem value="all_dcs">All DCs</SelectItem>
-                                    <SelectItem value="pune_dc">Pune Warehouse DC</SelectItem>
-                                    <SelectItem value="mumbai_dc">Mumbai Warehouse DC</SelectItem>
-                                    <SelectItem value="nashik_dc">Nashik DC</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                                <SelectTrigger className="w-40 sm:w-56">
+                                    <SelectValue placeholder="Select DC..." />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border shadow-md">
+                                    <SelectGroup>
+                                        <SelectLabel>Data Centers</SelectLabel>
+                                        <SelectItem value="all_dcs">All DCs</SelectItem>
+                                        <SelectItem value="pune_dc">Pune Warehouse DC</SelectItem>
+                                        <SelectItem value="mumbai_dc">Mumbai Warehouse DC</SelectItem>
+                                        <SelectItem value="nashik_dc">Nashik DC</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                         )
                     }
-                        
+
                 </div>
-                    {CreateButton && (
+                {CreateButton && (
                     <div className="flex justify-end order-1 sm:order-2">
                         {CreateButton}
                     </div>

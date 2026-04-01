@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
-export function DataTable({ columns, data, onRowClick }) {
+export function DataTable({ columns, data }) {
     const [columnFilters, setColumnFilters] = useState([])
 
     const table = useReactTable({
@@ -54,7 +54,6 @@ export function DataTable({ columns, data, onRowClick }) {
                     {table.getRowModel().rows.map((row) => (
                         <TableRow
                             key={row.id}
-                            // onClick={() => onRowClick?.(row.original)}
                             className="hover:bg-muted cursor-pointer"
                         >
                             {row.getVisibleCells().map((cell) => (

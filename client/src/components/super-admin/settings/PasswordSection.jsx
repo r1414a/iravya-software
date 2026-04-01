@@ -10,7 +10,7 @@ function PasswordInput({ label, description, placeholder }) {
         <Field>
             <FieldLabel>{label}</FieldLabel>
             <div className="relative">
-                <Input type={show ? "text" : "password"} placeholder={placeholder} className="pr-10" />
+                <Input type={show ? "text" : "password"} placeholder={placeholder} className="pr-10 placeholder:text-sm text-sm sm:text-md"/>
                 <button
                     type="button"
                     onClick={() => setShow(s => !s)}

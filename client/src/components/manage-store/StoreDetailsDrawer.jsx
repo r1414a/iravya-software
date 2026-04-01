@@ -72,7 +72,7 @@ export default function StoreDetailDrawer({ store, open, onClose }) {
                 </SheetHeader>
 
                 {/* ── Stats grid — same 2-col pattern as DCDetailDrawer ── */}
-                <div className="px-6 py-4 border-b">
+                {/* <div className="px-6 py-4 border-b">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                         Store overview
                     </p>
@@ -93,7 +93,7 @@ export default function StoreDetailDrawer({ store, open, onClose }) {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> */}
 
                 {/* ── Public tracking URL ── */}
                 <div className="px-6 py-4 border-b">

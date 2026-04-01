@@ -4,17 +4,14 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group"
 import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
 
-export default function UsersFilter() {
-    const [role, setRole] = useState("all_roles")
+export default function UsersFilter({CreateButton}) {
     return (
-        <section className="mt-10 px-10">
-            <div className="flex w-full justify-between">
-                <div className="basis-1/2 flex gap-4">
-                    <InputGroup className="max-w-xs">
-                        <InputGroupInput placeholder="Search user by name/email..." />
+        <section className="mt-6 px-4 lg:px-10">
+             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
+                <div className="w-full sm:max-w-sm order-2 sm:order-1">
+                    <InputGroup >
+                        <InputGroupInput placeholder="Search user by name/email..." className="placeholder:text-xs lg:placeholder:text-sm"/>
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
@@ -22,6 +19,12 @@ export default function UsersFilter() {
                     </InputGroup>
 
                 </div>
+
+                {CreateButton && (
+                    <div className="flex justify-end order-1 sm:order-2">
+                        {CreateButton}
+                    </div>
+                )}
             </div>
         </section>
     )

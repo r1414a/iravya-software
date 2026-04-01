@@ -11,7 +11,7 @@ function DangerCard({ icon: Icon, title, desc, buttonLabel, onClick }) {
                 <Icon size={15} className="text-red-500 mt-0.5 shrink-0" />
                 <div>
                     <p className="text-sm font-semibold text-red-700">{title}</p>
-                    <p className="text-xs text-red-500 mt-0.5 leading-relaxed">{desc}</p>
+                    <p className="text-xs text-red-500 mt-0.5 leading-snug">{desc}</p>
                 </div>
             </div>
             <Button
@@ -26,24 +26,24 @@ function DangerCard({ icon: Icon, title, desc, buttonLabel, onClick }) {
     )
 }
  
-function SessionRow({ device, location, time, current }) {
-    return (
-        <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-            <div className="-space-y-0.5">
-                <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{device}</p>
-                    {current && (
-                        <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">Current</span>
-                    )}
-                </div>
-                <p className="text-xs text-gray-400">{location} · {time}</p>
-            </div>
-            {!current && (
-                <button className="text-xs text-red-500 hover:underline">Revoke</button>
-            )}
-        </div>
-    )
-}
+// function SessionRow({ device, location, time, current }) {
+//     return (
+//         <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+//             <div className="-space-y-0.5">
+//                 <div className="flex items-center gap-2">
+//                     <p className="text-sm font-medium">{device}</p>
+//                     {current && (
+//                         <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">Current</span>
+//                     )}
+//                 </div>
+//                 <p className="text-xs text-gray-400">{location} · {time}</p>
+//             </div>
+//             {!current && (
+//                 <button className="text-xs text-red-500 hover:underline">Revoke</button>
+//             )}
+//         </div>
+//     )
+// }
  
 export function DangerSection() {
     const [confirmDelete, setConfirmDelete] = useState(false)
@@ -58,7 +58,7 @@ export function DangerSection() {
             </div>
  
             {/* Active sessions */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Active sessions</p>
                 <div className="bg-gray-50 border border-gray-100 rounded-lg px-4">
                     <SessionRow device="Chrome on macOS"  location="Pune, Maharashtra"   time="Now"         current />
@@ -68,16 +68,16 @@ export function DangerSection() {
                 <button className="text-xs text-red-500 hover:underline mt-3 flex items-center gap-1">
                     <MonitorX size={12} /> Revoke all other sessions
                 </button>
-            </div>
+            </div> */}
  
             {/* Danger action cards */}
             <div className="flex flex-col gap-4">
-                <DangerCard
+                {/* <DangerCard
                     icon={LogOut}
                     title="Sign out everywhere"
                     desc="Immediately invalidates all active sessions across all devices. You will need to log in again."
                     buttonLabel="Sign out all"
-                />
+                /> */}
                 <DangerCard
                     icon={RefreshCw}
                     title="Reset platform settings"
@@ -101,7 +101,7 @@ export function DangerSection() {
                     </p>
                     <div className="flex gap-3">
                         <Field className="flex-1">
-                            <Input placeholder="Type DELETE" className="border-red-300 focus-visible:ring-red-300" />
+                            <Input placeholder="Type DELETE" className="border-red-300 focus-visible:ring-red-300 placeholder:text-sm text-sm sm:text-md" />
                         </Field>
                         <Button className="bg-red-600 hover:bg-red-700 text-white shrink-0">Confirm</Button>
                         <Button variant="outline" onClick={() => setConfirmDelete(false)} className="shrink-0">Cancel</Button>

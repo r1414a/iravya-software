@@ -121,7 +121,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
                                     {/* Brand */}
-                                    <Field>
+                                    {/* <Field>
                                         <FieldLabel>Brand</FieldLabel>
                                         <Select>
                                             <SelectTrigger className="w-full">
@@ -137,7 +137,7 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
-                                    </Field>
+                                    </Field> */}
 
                                     {/* Source DC */}
 

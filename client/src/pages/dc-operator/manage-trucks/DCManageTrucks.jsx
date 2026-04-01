@@ -14,7 +14,7 @@ export default function DCManageTrucks() {
             />
 
 
-            <TrucksFilter CreateButton={<AddTruckForm />}/>
+            <TrucksFilter />
             <TrucksTable />
         </section>
     )

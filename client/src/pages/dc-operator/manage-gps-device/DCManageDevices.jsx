@@ -12,7 +12,7 @@ const DCManageDevices = () => {
                 subh="GPS devices assigned to this DC — monitor status, check diagnostics and manage device returns from stores"
                 CreateButton={null}
             />
-            <DeviceFilter />
+            <DeviceFilter CreateButton={null}/>
             <DeviceTable />
         </section>
     )

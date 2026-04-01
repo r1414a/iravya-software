@@ -5,7 +5,7 @@ import TrucksTable from "@/components/manage-truck/TrucksTable"
 
 export default function DCManageTrucks() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to="/dc"
                 heading="Trucks at this DC"

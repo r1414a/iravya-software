@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Plus, Store } from "lucide-react"
 import { useState } from "react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
 export default function AddStoreForm() {
     // Auto-generate slug from store name
@@ -40,12 +41,13 @@ export default function AddStoreForm() {
 
     return (
         <Sheet direction="right">
-            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
+            <CreateFormSheetTrigger text={'Add Store'}/>
+            {/* <SheetTrigger className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Store
-            </SheetTrigger>
+            </SheetTrigger> */}
 
-            <SheetContent className="bg-white min-w-120 flex flex-col">
+            <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>Add new store</SheetTitle>
                     <SheetDescription>
@@ -53,19 +55,19 @@ export default function AddStoreForm() {
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
 
                                 {/* Store name + city */}
-                                <div className="flex gap-2">
+                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field className="basis-[65%]">
                                         <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
                                         <Input
-                                            placeholder="e.g. Westside — Koregaon Park"
+                                            placeholder="Westside — Koregaon Park"
                                             value={storeName}
-                                            className="w-full"
+                                            className="w-full placeholder:text-sm text-sm sm:text-md"
                                             onChange={(e) => setStoreName(e.target.value)}
                                         />
                                     </Field>
@@ -91,7 +93,7 @@ export default function AddStoreForm() {
                                 {/* Full address */}
                                 <Field>
                                     <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input placeholder="Shop no., mall/building, area, pincode" />
+                                    <Input placeholder="Shop no., mall/building, area, pincode" className="placeholder:text-sm text-sm sm:text-md"/>
                                     <FieldDescription className="text-xs">
                                         Used to place the store pin on the map and compute geofence
                                     </FieldDescription>
@@ -114,7 +116,7 @@ export default function AddStoreForm() {
                                             /track/
                                         </span>
                                         <Input
-                                            className="border-0 rounded-none focus-visible:ring-0 font-mono text-sm"
+                                            className="border-0 rounded-none focus-visible:ring-0 font-mono text-sm placeholder:text-sm sm:text-md"
                                             value={slug}
                                             placeholder="auto-generated"
                                             readOnly
@@ -126,20 +128,20 @@ export default function AddStoreForm() {
                                 </Field>
 
                                 {/* Store manager */}
-                                <div className="flex gap-2">
+                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Manager name</FieldLabel>
-                                        <Input placeholder="e.g. Arjun Joshi" />
+                                        <Input placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md"/>
                                     </Field>
                                     <Field>
                                         <FieldLabel>Manager phone</FieldLabel>
-                                        <Input placeholder="+91 98XXX XXXXX" />
+                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
                                     </Field>
                                 </div>
 
                                 <Field>
                                     <FieldLabel>Manager email</FieldLabel>
-                                    <Input type="email" placeholder="manager@brand.com" />
+                                    <Input type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md"/>
                                     <FieldDescription className="text-xs">
                                         A user account with store manager role will be created for this email
                                     </FieldDescription>

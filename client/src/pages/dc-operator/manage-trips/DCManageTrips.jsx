@@ -6,7 +6,7 @@ import TripsFilter from "@/components/manage-trip/TripsFilter"
 
 export default function DCManageTrips() {
     return (
-        <section>
+        <section className="mb-10">
 
             <AdminSubHeader
                 to="/dc"

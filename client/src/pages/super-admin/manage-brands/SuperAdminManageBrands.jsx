@@ -8,7 +8,7 @@ AdminSubHeader
 
 export default function SuperAdminManageBrands() {
     return (
-        <section>
+        <section className="mb-10">
 
             <AdminSubHeader
                 to={'/admin'}

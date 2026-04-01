@@ -27,9 +27,9 @@ export default function TripsFilter({ CreateButton }) {
             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
 
                 {/* Left — search + dropdowns */}
-                <div className="w-full sm:max-w-sm order-2 sm:order-1 space-y-2">
+                <div className="w-full flex flex-col sm:flex-row gap-0 sm:gap-4 sm:max-w-lg order-2 sm:order-1 space-y-2">
                     <InputGroup >
-                        <InputGroupInput placeholder="Search trip ID, truck, driver..." className="placeholder:text-xs lg:placeholder:text-sm" />
+                        <InputGroupInput placeholder="Search trip ID, truck, driver..." className="placeholder:text-xs lg:placeholder:text-sm"/>
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
@@ -38,7 +38,7 @@ export default function TripsFilter({ CreateButton }) {
                     {
                         location.pathname.startsWith("/admin") && (
                             <Select defaultValue="all_dcs">
-                                <SelectTrigger className="w-40 sm:w-56">
+                                <SelectTrigger className="w-56">
                                     <SelectValue placeholder="Select DC..." />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white border shadow-md">

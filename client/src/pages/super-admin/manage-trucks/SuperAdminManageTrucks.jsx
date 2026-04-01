@@ -7,7 +7,7 @@ import TrucksTable from "@/components/manage-truck/TrucksTable"
 
 export default function SuperAdminManageTrucks() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to="/admin"
                 heading="Manage Trucks"

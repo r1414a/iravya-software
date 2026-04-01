@@ -5,7 +5,7 @@ import CreateUserModal from "./CreateUserModal"
 
 export default function SuperAdminManageUser() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to={'/admin'}
                 heading="Manage Users"

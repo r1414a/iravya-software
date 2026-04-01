@@ -103,7 +103,7 @@ const stores = [
 export default function StoresTable() {
 
     return (
-        <section className="mt-6 px-10">
+        <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable
                     columns={columns}

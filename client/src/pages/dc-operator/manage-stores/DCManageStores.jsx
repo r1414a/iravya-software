@@ -6,7 +6,7 @@ import StoresTable from "@/components/manage-store/StoresTable"
 
 export default function DCManageStores() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to="/dc"
                 heading="Manage Stores"

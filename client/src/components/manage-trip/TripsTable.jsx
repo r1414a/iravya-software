@@ -4,7 +4,6 @@ import { columns } from "./trips-table/columns"
 const trips = [
     {
         id: "TRP-2841",
-        brand: "Tata Westside",
         truck: "MH12AB1234",
         driver: "Ramesh K.",
         phone: "+91 98201 11234",
@@ -22,7 +21,6 @@ const trips = [
     },
     {
         id: "TRP-2840",
-        brand: "Zudio",
         truck: "MH14CD5678",
         driver: "Suresh M.",
         phone: "+91 99705 44321",
@@ -40,7 +38,6 @@ const trips = [
     },
     {
         id: "TRP-2839",
-        brand: "Tata Cliq",
         truck: "MH04EF9012",
         driver: "Vijay P.",
         phone: "+91 91305 77654",
@@ -60,7 +57,6 @@ const trips = [
     },
     {
         id: "TRP-2838",
-        brand: "Tanishq",
         truck: "MH12GH3456",
         driver: "Ankit S.",
         phone: "+91 87654 32109",
@@ -77,7 +73,6 @@ const trips = [
     },
     {
         id: "TRP-2837",
-        brand: "Tata Westside",
         truck: "MH20IJ7890",
         driver: "Kiran S.",
         phone: "+91 93422 65432",
@@ -94,7 +89,6 @@ const trips = [
     },
     {
         id: "TRP-2836",
-        brand: "Zudio",
         truck: "MH15KL2345",
         driver: "Meera A.",
         phone: "+91 73424 23432",

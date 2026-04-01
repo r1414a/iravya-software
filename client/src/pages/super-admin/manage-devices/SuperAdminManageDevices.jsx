@@ -6,18 +6,16 @@ import DeviceTable from "@/components/manage-gps/DeviceTable"
  
 export default function SuperAdminManageDevices() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to={'/admin'}
                 heading={'GPS Devices'}
                 subh="All tracking devices across every brand and DC — register, assign to DCs, monitor health"
-                CreateButton={<AddGPSDeviceModal/>}
+                // CreateButton={<AddGPSDeviceModal/>}
             />
            
-           <DeviceFilter />
+           <DeviceFilter CreateButton={<AddGPSDeviceModal/>}/>
                        <DeviceTable />
-            {/* <GpsDeviceFilter showBrandFilter />
-            <DeviceTable showBrandColumn /> */}
         </section>
     )
 }

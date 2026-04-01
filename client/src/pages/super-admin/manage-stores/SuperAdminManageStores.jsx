@@ -5,7 +5,7 @@ import StoresTable from "@/components/manage-store/StoresTable"
 
 export default function SuperAdminManageStores() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to={'/admin'}
                 heading="Manage Stores"

@@ -5,7 +5,7 @@ import ManageDriverForm from "@/components/manage-driver/ManageDriverForm"
 
 export default function DCManageDrivers() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to="/dc"
                 heading="Manage Drivers"

@@ -4,7 +4,7 @@ import AlertsTable from "@/components/super-admin/alerts/AlertsTable"
  
 export default function SuperAdminAlerts() {
     return (
-        <section>
+        <section className="mb-10">
             <AdminSubHeader
                 to={'/admin'}
                 heading="Alerts"

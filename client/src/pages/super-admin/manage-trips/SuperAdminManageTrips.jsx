@@ -4,7 +4,7 @@ import TripsTable from "@/components/manage-trip/TripsTable"
 
 export default function SuperAdminManageTrips() {
     return (
-        <section>
+        <section className="mb-10">
 
             <AdminSubHeader
                 to="/admin"

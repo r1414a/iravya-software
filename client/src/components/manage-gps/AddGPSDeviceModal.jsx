@@ -12,16 +12,18 @@ import {
     SelectItem, SelectLabel, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Plus, Cpu } from "lucide-react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
  
 export default function AddGPSDeviceModal() {
     return (
         <Sheet direction="right">
-            <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
+            <CreateFormSheetTrigger text='Register Device'/>
+            {/* <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
                 <Plus className="w-4 h-4 mr-2" />
                 Register Device
-            </SheetTrigger>
+            </SheetTrigger> */}
  
-            <SheetContent className="bg-white min-w-120 flex flex-col">
+            <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
                     <SheetTitle>Register GPS device</SheetTitle>
                     <SheetDescription>
@@ -29,28 +31,28 @@ export default function AddGPSDeviceModal() {
                     </SheetDescription>
                 </SheetHeader>
  
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                     <FieldGroup>
                         <FieldSet>
                             <FieldGroup>
  
                                 {/* Device ID + IMEI */}
-                                <div className="flex gap-2">
+                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Device ID</FieldLabel>
-                                        <Input placeholder="e.g. GPS-006-PUNE" className="font-mono uppercase" />
+                                        <Input placeholder="GPS-006-PUNE" className="font-mono uppercase placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                     <Field>
                                         <FieldLabel>IMEI number</FieldLabel>
-                                        <Input placeholder="15-digit IMEI" className="font-mono" maxLength={15} />
+                                        <Input placeholder="15-digit IMEI" className="font-mono placeholder:text-sm text-sm sm:text-md" maxLength={15} />
                                     </Field>
                                 </div>
  
                                 {/* SIM + firmware */}
-                                <div className="flex gap-2">
+                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>SIM card number</FieldLabel>
-                                        <Input placeholder="e.g. 9833012345" className="font-mono" />
+                                        <Input placeholder="9833012345" className="font-mono placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                     <Field>
                                         <FieldLabel>Firmware version</FieldLabel>
@@ -71,7 +73,7 @@ export default function AddGPSDeviceModal() {
                                 </div>
  
                                 {/* Brand */}
-                                <Field>
+                                {/* <Field>
                                     <FieldLabel>Brand</FieldLabel>
                                     <Select>
                                         <SelectTrigger className="w-full">
@@ -87,7 +89,7 @@ export default function AddGPSDeviceModal() {
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
-                                </Field>
+                                </Field> */}
  
                                 {/* Assign to DC — super admin assigns device to a DC, not to a truck */}
                                 <Field>
@@ -114,7 +116,7 @@ export default function AddGPSDeviceModal() {
                                 {/* Install date */}
                                 <Field>
                                     <FieldLabel>Install date</FieldLabel>
-                                    <Input type="date" />
+                                    <Input type="date" placeholder:text-sm text-sm sm:text-md/>
                                 </Field>
  
                                 {/* Info note */}
@@ -131,15 +133,23 @@ export default function AddGPSDeviceModal() {
                         </FieldSet>
                     </FieldGroup>
                 </div>
+
+
+                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Register <Cpu /></Button>
+                    <SheetClose className='basis-1/2' asChild>
+                        <Button className="w-full" variant="outline">Cancel</Button>
+                    </SheetClose>
+                </SheetFooter>
  
-                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+                {/* <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
                     <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
                         Register <Cpu className="ml-1" size={15} />
                     </Button>
                     <SheetClose className="basis-1/2" asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>
                     </SheetClose>
-                </SheetFooter>
+                </SheetFooter> */}
             </SheetContent>
         </Sheet>
     )

@@ -1,7 +1,5 @@
-import { useState } from "react"
-import { DataTable } from "@/components/super-admin/manage-stores/store-table/data-table"
+import { DataTable } from "./store-table/data-table"
 import { columns } from "./store-table/columns"
-import StoreDetailDrawer from "./StoreDetailsDrawer"
 
 const stores = [
     {
@@ -9,11 +7,9 @@ const stores = [
         name: "Westside — Koregaon Park",
         city: "Pune",
         address: "Shop 12, Phoenix Market City, Nagar Rd, Pune 411006",
-        brand: "Tata Westside",
         managerName: "Arjun Joshi",
         managerPhone: "+91 98201 44321",
         managerEmail: "arjun.j@westside.com",
-        geofenceRadius: 200,
         publicTrackingSlug: "westside-koregaon",
         deliveriesToday: 2,
         totalDeliveries: 184,
@@ -27,11 +23,9 @@ const stores = [
         name: "Zudio — Hinjawadi",
         city: "Pune",
         address: "G-14, Xion Mall, Hinjawadi Phase 1, Pune 411057",
-        brand: "Zudio",
         managerName: "Neha Patil",
         managerPhone: "+91 99705 12345",
         managerEmail: "neha.p@zudio.com",
-        geofenceRadius: 150,
         publicTrackingSlug: "zudio-hinjawadi",
         deliveriesToday: 1,
         totalDeliveries: 97,
@@ -45,11 +39,9 @@ const stores = [
         name: "Tata Cliq — FC Road",
         city: "Pune",
         address: "1st Floor, Westend Mall, FC Road, Pune 411004",
-        brand: "Tata Cliq",
         managerName: "Sunita Mehta",
         managerPhone: "+91 91305 67890",
         managerEmail: "sunita.m@tatacliq.com",
-        geofenceRadius: 200,
         publicTrackingSlug: "tatacliq-fcroad",
         deliveriesToday: 0,
         totalDeliveries: 122,
@@ -63,11 +55,9 @@ const stores = [
         name: "Westside — Baner",
         city: "Pune",
         address: "Shop 4, Balewadi High St, Baner, Pune 411045",
-        brand: "Tata Westside",
         managerName: "Kiran Sawant",
         managerPhone: "+91 87654 09876",
         managerEmail: "kiran.s@westside.com",
-        geofenceRadius: 200,
         publicTrackingSlug: "westside-baner",
         deliveriesToday: 1,
         totalDeliveries: 78,
@@ -81,11 +71,9 @@ const stores = [
         name: "Tanishq — Kothrud",
         city: "Pune",
         address: "Dahanukar Colony, Kothrud, Pune 411029",
-        brand: "Tanishq",
         managerName: "Vijay Jadhav",
         managerPhone: "+91 93422 11234",
         managerEmail: "vijay.j@tanishq.com",
-        geofenceRadius: 100,
         publicTrackingSlug: "tanishq-kothrud",
         deliveriesToday: 0,
         totalDeliveries: 43,
@@ -99,11 +87,9 @@ const stores = [
         name: "Zudio — Wakad",
         city: "Pune",
         address: "Spectrum Mall, Wakad, Pune 411057",
-        brand: "Zudio",
         managerName: "Meera Agarwal",
         managerPhone: "+91 98765 43210",
         managerEmail: "meera.a@zudio.com",
-        geofenceRadius: 150,
         publicTrackingSlug: "zudio-wakad",
         deliveriesToday: 0,
         totalDeliveries: 61,
@@ -115,7 +101,6 @@ const stores = [
 ]
 
 export default function StoresTable() {
-    const [selectedStore, setSelectedStore] = useState(null)
 
     return (
         <section className="mt-6 px-10">
@@ -123,15 +108,9 @@ export default function StoresTable() {
                 <DataTable
                     columns={columns}
                     data={stores}
-                    // onRowClick={(row) => setSelectedStore(row)}
                 />
             </div>
 
-            <StoreDetailDrawer
-                store={selectedStore}
-                open={!!selectedStore}
-                onClose={() => setSelectedStore(null)}
-            />
         </section>
     )
 }

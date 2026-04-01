@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Sheet,
@@ -8,7 +7,6 @@ import {
     SheetFooter,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import {
@@ -31,11 +29,10 @@ import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
 
 export default function ManageDriverForm() {
-    const [open, setOpen] = useState(false)
 
     return (
 
-        <Sheet direction="right" className="">
+        <Sheet direction="right">
            <CreateFormSheetTrigger text='Create Driver'/>
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
@@ -49,7 +46,7 @@ export default function ManageDriverForm() {
                                 <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Full name</FieldLabel>
-                                        <Input placeholder="e.g. Ravi Deshmukh" className="placeholder:text-sm text-sm sm:text-md"/>
+                                        <Input placeholder="Ravi Deshmukh" className="placeholder:text-sm text-sm sm:text-md"/>
                                     </Field>
                                     <Field>
                                         <FieldLabel>Phone number</FieldLabel>
@@ -60,7 +57,7 @@ export default function ManageDriverForm() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Licence number</FieldLabel>
-                                        <Input placeholder="e.g. MH1220190012345" className="placeholder:text-sm text-sm sm:text-md" />
+                                        <Input placeholder="MH1220190012345" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
 
 

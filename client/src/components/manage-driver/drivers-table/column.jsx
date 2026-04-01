@@ -2,18 +2,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter, Road, Eye, Trash2 } from "lucide-react"
 import EditDriverSheet from "./EditDriverSheet"
-import AssignTruckSheet from "./AssignTruckSheet"
 import TripHistorySheet from "./TripHistorySheet"
 import { useState } from "react"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,6 +17,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { FieldLabel } from "@/components/ui/field"
 import TripDetailSheet from "../../manage-trip/TripDetailSheet"
+import { useLocation } from "react-router-dom"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -41,6 +32,9 @@ const statusStyles = {
 
 function ActionsCell({ row }) {
     const driver = row.original
+    const {pathname} = useLocation();
+    console.log(pathname);
+    
     const [editOpen, setEditOpen] = useState(false)
     const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
     const [historyOpen, setHistoryOpen] = useState(false)
@@ -74,11 +68,7 @@ function ActionsCell({ row }) {
                 open={tripDetailsOpen}
                 onClose={setTripDetailsOpen}
             />
-            {/* <AssignTruckSheet
-                driver={driver}
-                open={assignOpen}
-                onClose={() => setAssignOpen(false)}
-            /> */}
+           
             <TripHistorySheet
                 driver={driver}
                 open={historyOpen}
@@ -86,8 +76,15 @@ function ActionsCell({ row }) {
             />
 
             <div className="flex items-center gap-2 justify-end">
-                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-                <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+
+                {
+                    pathname.startsWith('/admin') &&  (
+                        <>
+                    <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                    <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+                    </>
+                    )
+                }
 
 
                 <DropdownMenu>

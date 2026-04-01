@@ -1,26 +1,20 @@
-import { ArrowLeft } from "lucide-react"
-import { Link } from "react-router-dom"
-import ManageUserForm from "./CreateUserModal"
 import UsersFilter from "./UsersFilter"
 import UsersTable from "./UsersTable"
+import AdminSubHeader from "@/components/AdminSubHeader"
+import CreateUserModal from "./CreateUserModal"
 
 export default function SuperAdminManageUser() {
     return (
         <section>
-            <div className="h-18 px-10 flex gap-4 items-center shadow-md ">
-                <Link to={'/admin'} className="bg-gold hover:bg-gold-dark p-2 rounded-full">
-                    <ArrowLeft size={18} className="text-maroon"/>
-                </Link>
-                <div className="flex items-center justify-between w-full">
-                    <div className="-space-y-1">
-                        <h1 className="text-lg">Manage Users</h1>
-                        <p className="text-sm text-gray-500">Manage users across all brands — invite, edit roles, deactivate and reset passwords</p>
-                    </div>
-                    <ManageUserForm />
-                </div>
-            </div>
+            <AdminSubHeader
+                to={'/admin'}
+                heading="Manage Users"
+                subh="Manage users across all brands — invite, edit roles, deactivate and reset passwords"
+                // CreateButton={<CreateUserModal />}
+            />
+           
 
-            <UsersFilter/>
+            <UsersFilter CreateButton={<CreateUserModal />}/>
             <UsersTable/>
 
 

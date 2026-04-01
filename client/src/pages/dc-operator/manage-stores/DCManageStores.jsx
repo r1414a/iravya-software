@@ -1,8 +1,7 @@
 
-import AddNewStore from "./AddNewStores"
-import DCStoreTable from './DCStoreTable'
-import DCStoreFilter from "./DCStoreFilter"
 import AdminSubHeader from "@/components/AdminSubHeader"
+import StoresFilter from "@/components/manage-store/StoresFilter"
+import StoresTable from "@/components/manage-store/StoresTable"
 
 
 export default function DCManageStores() {
@@ -11,11 +10,11 @@ export default function DCManageStores() {
             <AdminSubHeader
                 to="/dc"
                 heading="Manage Stores"
-                subh="View and add stores"
-                CreateButton={<AddNewStore />}
+                subh="Stores this DC delivers to — track incoming deliveries, devices held and manager contacts"
+                // CreateButton={null}
             />
-            <DCStoreFilter />
-            <DCStoreTable />
+            <StoresFilter CreateButton={null}/>
+            <StoresTable />
         </section>
     )
 }

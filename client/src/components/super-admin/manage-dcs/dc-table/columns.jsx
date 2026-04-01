@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import DCDetailDrawer from "../DcDetailDrawer"
+import EditDCDrawer from "../EditDCDrawer"
 
 const statusStyles = {
     active: "bg-green-100 text-green-700",
@@ -32,8 +33,9 @@ const statusStyles = {
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
 
 function ActionsCell({ row }) {
-    const dc = row.original;
-    const [viewDetails, setViewDetails] = useState(false);
+      const dc = row.original
+    const [viewDetails, setViewDetails] = useState(false)
+    const [editOpen,    setEditOpen]    = useState(false)
     return (
         <>
             <DCDetailDrawer
@@ -41,39 +43,19 @@ function ActionsCell({ row }) {
                 open={viewDetails}
                 onClose={() => setViewDetails(false)}
             />
+
+             <EditDCDrawer
+                dc={dc}
+                open={editOpen}
+                onClose={() => setEditOpen(false)}
+            />
         
         <div className="flex items-center gap-2 justify-end">
             <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16}/></Button>
-            <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+            <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
             <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
-            {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <MoreHorizontal size={16} />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    align="end"
-                    className="bg-white border shadow-md w-44"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-                        <Pencil size={14} /> Edit DC details
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className={`gap-2 text-sm cursor-pointer ${dc.status === "active" ? "text-red-500" : "text-green-600"}`}>
-                        <Ban size={14} />
-                        {dc.status === "active" ? "Deactivate DC" : "Reactivate DC"}
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            <ChevronRight size={16} className="text-gray-300" /> */}
+            
         </div>
         </>
     )
@@ -100,44 +82,44 @@ export const columns = [
     },
 
     // Brand — column header has radio filter dropdown
-    {
-        accessorKey: "brand",
-        header: ({ column }) => {
-            const current = column.getFilterValue() || "all"
-            return (
-                <div className="flex items-center gap-2">
-                    <span>Brand</span>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                                {current === "all" ? "All" : current.split(" ")[1] ?? current}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-40 bg-white border shadow-md">
-                            <DropdownMenuRadioGroup
-                                value={current}
-                                onValueChange={(val) =>
-                                    column.setFilterValue(val === "all" ? undefined : val)
-                                }
-                            >
-                                <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-                                {BRANDS.map((b) => (
-                                    <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
-                                ))}
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            )
-        },
-        cell: ({ row }) => (
-            <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
-        ),
-        filterFn: (row, id, value) => {
-            if (!value) return true
-            return row.getValue(id) === value
-        },
-    },
+    // {
+    //     accessorKey: "brand",
+    //     header: ({ column }) => {
+    //         const current = column.getFilterValue() || "all"
+    //         return (
+    //             <div className="flex items-center gap-2">
+    //                 <span>Brand</span>
+    //                 <DropdownMenu>
+    //                     <DropdownMenuTrigger asChild>
+    //                         <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+    //                             {current === "all" ? "All" : current.split(" ")[1] ?? current}
+    //                         </Button>
+    //                     </DropdownMenuTrigger>
+    //                     <DropdownMenuContent className="w-40 bg-white border shadow-md">
+    //                         <DropdownMenuRadioGroup
+    //                             value={current}
+    //                             onValueChange={(val) =>
+    //                                 column.setFilterValue(val === "all" ? undefined : val)
+    //                             }
+    //                         >
+    //                             <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
+    //                             {BRANDS.map((b) => (
+    //                                 <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
+    //                             ))}
+    //                         </DropdownMenuRadioGroup>
+    //                     </DropdownMenuContent>
+    //                 </DropdownMenu>
+    //             </div>
+    //         )
+    //     },
+    //     cell: ({ row }) => (
+    //         <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
+    //     ),
+    //     filterFn: (row, id, value) => {
+    //         if (!value) return true
+    //         return row.getValue(id) === value
+    //     },
+    // },
 
     // Contact person
     {

@@ -1,5 +1,3 @@
-import { useState } from "react"
-import AlertDetailDrawer from "./AlertDetailDrawer"
 import { columns } from "./alert-table/columns"
 import { DataTable } from "./alert-table/data-table"
  
@@ -105,15 +103,15 @@ const alerts = [
 ]
  
 export default function AlertsTable() {
-    const [selectedAlert, setSelectedAlert] = useState(null)
+    // const [selectedAlert, setSelectedAlert] = useState(null)
  
     return (
-        <section className="mt-6 px-10">
+        <section className="my-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable
                     columns={columns}
                     data={alerts}
-                    onRowClick={(row) => setSelectedAlert(row)}
+                    // onRowClick={(row) => setSelectedAlert(row)}
                 />
             </div>
 

@@ -14,7 +14,7 @@ import { useState } from "react"
 import { Pencil } from "lucide-react"
 
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
-const ROLES = ["Brand Manager", "DC Operator", "Store Manager"]
+const ROLES = ["DC Operator", "Store Manager"]
 const STATUS_COLOR = {
   active: "bg-green-100  border-green-200 text-green-700",
   inactive: "bg-red-100  border-red-200 text-red-700",
@@ -103,7 +103,6 @@ export const columns = [
       const role = row.getValue("role")
 
       const ROLE_COLOR = {
-        "brand manager": "bg-teal-100  border-teal-200 text-teal-700",
         "dc operator": "bg-orange-100  border-orange-200 text-orange-700",
         "store manager": "bg-yellow-100  border-yellow-200 text-yellow-700",
       }
@@ -117,41 +116,41 @@ export const columns = [
     filterFn: (row, id, value) =>
       !value || row.getValue(id).toLowerCase() === value.toLowerCase(),
   },
-  {
-    accessorKey: "brand",
-    header: ({ column }) => {
-      const current = column.getFilterValue() || "all"
-      return (
-        <div className="flex items-center gap-2">
-          <span>Brand</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                {current === "all" ? "All" : current.split(" ")[1] ?? current}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 bg-white border shadow-md">
-              <DropdownMenuRadioGroup
-                value={current}
-                onValueChange={(val) =>
-                  column.setFilterValue(val === "all" ? undefined : val)
-                }
-              >
-                <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-                {BRANDS.map((b) => (
-                  <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
-    ),
-    filterFn: (row, id, value) => !value || row.getValue(id) === value,
-  },
+  // {
+  //   accessorKey: "brand",
+  //   header: ({ column }) => {
+  //     const current = column.getFilterValue() || "all"
+  //     return (
+  //       <div className="flex items-center gap-2">
+  //         <span>Brand</span>
+  //         <DropdownMenu>
+  //           <DropdownMenuTrigger asChild>
+  //             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+  //               {current === "all" ? "All" : current.split(" ")[1] ?? current}
+  //             </Button>
+  //           </DropdownMenuTrigger>
+  //           <DropdownMenuContent className="w-40 bg-white border shadow-md">
+  //             <DropdownMenuRadioGroup
+  //               value={current}
+  //               onValueChange={(val) =>
+  //                 column.setFilterValue(val === "all" ? undefined : val)
+  //               }
+  //             >
+  //               <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
+  //               {BRANDS.map((b) => (
+  //                 <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
+  //               ))}
+  //             </DropdownMenuRadioGroup>
+  //           </DropdownMenuContent>
+  //         </DropdownMenu>
+  //       </div>
+  //     )
+  //   },
+  //   cell: ({ row }) => (
+  //     <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
+  //   ),
+  //   filterFn: (row, id, value) => !value || row.getValue(id) === value,
+  // },
   {
     accessorKey: "scope",
     header: "SCOPE",

@@ -11,7 +11,7 @@ export default function DCManageDrivers() {
                 heading="Manage Drivers"
                 subh="Manage drivers at this DC — add, edit, trip status, details, history, and deactivate"
             />
-            <DriversFilter CreateButton={<ManageDriverForm />}/>
+            <DriversFilter CreateButton={null}/>
             <DriversTable />
         </section>
     )

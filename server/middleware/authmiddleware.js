@@ -1,6 +1,9 @@
-const jwt = require('jsonwebtoken');
-const asyncHandler = require('express-async-handler');
-const sql = require('../config/db'); // your postgres connection
+// const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken"
+// const asyncHandler = require('express-async-handler');
+import asyncHandler from "../utils/asyncHandler.js"
+import sql from "../db/database.js"// your postgres connection
+import  ApiError  from "../utils/ApiError.js";
 
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -10,15 +13,19 @@ const protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      token = req.headers.authorization.split(' ')[1];
+      token = req.cookies['token'];
+
+      if (!token){
+        throw new ApiError(401,"token not found")
+      }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // PostgreSQL Query instead of User.findById
       const users = await sql`
-        SELECT id, fisrt_name, last_name, last_login, status,  email, created_at, role,updated_at 
-        FROM users 
-        WHERE id = ${decoded.id}
+        SELECT "id", "first_name", "last_name", "last_login", "status",  "email", "created_at", "role","updated_at" 
+        FROM "User" 
+        WHERE "id" = ${decoded.id}
       `;
 
       if (!users.length) {
@@ -42,4 +49,4 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { protect };
+export { protect };

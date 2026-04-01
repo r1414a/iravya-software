@@ -6,14 +6,17 @@ import ApiResponse  from "../utils/ApiResponse.js";
 import {registerUserService, 
     loginUserService, 
     deleteUserService,
-    userExistService}  from "../services/auth.service.js";
+    userExistbyemailService,
+    userExistbyidService,
+    resetPasswordService
+}  from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log(req.body)
     const { email, password } = req.body
 
-    const userExists = await userExistService(email)
+    const userExists = await userExistbyemailService(email)
     if (userExists.length) {
         res.status(200)
         .json(
@@ -58,6 +61,20 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { email, password } = req.body
 
+    const userExists = await userExistbyemailService(email)
+    if (userExists.length) {
+        res.status(200)
+        .json(
+            new ApiResponse(
+                200, 
+                {
+                    user: userExists[0],
+                },
+                "User already exist"
+            )
+        )
+    }
+
     const user = await loginUserService(email, password)
 
     const token = generateToken(user.id)
@@ -100,6 +117,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async(req, res) => {
 
+    
     const options = {
         httpOnly: true,
         secure: true
@@ -120,6 +138,19 @@ const logoutUser = asyncHandler(async(req, res) => {
 
 const deleteUser = asyncHandler(async(req, res)=>{
     const { id } = req.params
+    const userExists = await userExistbyidService(id)
+    if (!userExists.length) {
+        res.status(200)
+        .json(
+            new ApiResponse(
+                404, 
+                {
+                    user: userExists[0],
+                },
+                "User does not exist"
+            )
+        )
+    }
     const user = await deleteUserService(id)
     res
     .status(200)
@@ -135,8 +166,23 @@ const deleteUser = asyncHandler(async(req, res)=>{
 
 const resetPassword = asyncHandler(async(req, res)=>{
     const {id, old_pass , new_pass} = req.body;
+    const userExists = await userExistbyidService(id)
+    if (!userExists.length) {
+        res.status(200)
+        .json(
+            new ApiResponse(
+                404, 
+                {
+                    user: userExists[0],
+                },
+                "User does not exist"
+            )
+        )
+    }
+    const user = userExists[0]
+    const isMatch = await bcrypt.compare(old_pass, user.password)
 
-    if(old_pass === new_pass){
+    if(old_pass === new_pass || isMatch){
         res
         .status(200)
         .json(
@@ -148,7 +194,16 @@ const resetPassword = asyncHandler(async(req, res)=>{
         )
     }
 
-    
+    const user_ = await resetPasswordService(id, old_pass, new_pass)
+    res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user,
+                "New password reset successfully."
+            )
+        )    
 }) 
 
 
@@ -158,5 +213,6 @@ export {
   registerUser,
   loginUser,
   logoutUser,
-  deleteUser
+  deleteUser,
+  resetPassword
 }

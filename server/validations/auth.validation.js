@@ -47,3 +47,17 @@ export const loginValidation = [
         .notEmpty()
         .withMessage("Password is required")
 ]
+
+export const resetPasswordValidation = [
+    body("old_pass")
+        .notEmpty()
+        .withMessage("Old password is required")
+        .isLength({ min: 6 })
+        .withMessage("Old password must be at least 6 characters"),
+
+    body("new_pass")
+        .notEmpty()
+        .withMessage("New password is required")
+        .isLength({ min: 6 })
+        .withMessage("New password must be at least 6 characters")
+]

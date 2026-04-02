@@ -1,7 +1,8 @@
 import { registerUser ,
     loginUser,
     logoutUser,
-    deleteUser
+    deleteUser,
+    resetPassword
 } from "../controller/userController.js";
 import { protect } from "../middleware/authmiddleware.js";
 
@@ -11,7 +12,8 @@ import validate from "../middleware/validate.js";
 
 import {
   registerValidation,
-  loginValidation
+  loginValidation,
+  resetPasswordValidation
 } from "../validations/auth.validation.js"
  
 
@@ -36,7 +38,7 @@ router.post(
 
 router.post("/signout", protect, logoutUser);
 router.delete("/delete_user/:id", protect, deleteUser)
-
+router.delete("/reset_pass/:id", protect, resetPasswordValidation, validate, resetPassword)
 
 
 export default router

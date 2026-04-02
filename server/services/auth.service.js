@@ -30,7 +30,7 @@ const registerUserService = async (userData) => {
             <p>Email: ${email}</p>
             <p>Password: ${password}</p>
             <div >
-                <a href="https://iravya-software-eight.vercel.app/">Login to Your Account →</a>
+                <a href="https://iravya-software-eight.vercel.app/">Signin to Your Account →</a>
             </div>
         `
     })
@@ -61,19 +61,26 @@ const deleteUserService= async(user_id) =>{
     return user[0]
 }
 
-const userExistService = async (email) =>{
+const userExistbyemailService = async (email) =>{
     const userExists = await sql`
         SELECT * FROM "User" WHERE "email" = ${email}
     `
     return userExists
 }
 
+const userExistbyidService = async (id) =>{
+    const userExists = await sql`
+        SELECT * FROM "User" WHERE "id" = ${id}
+    `
+    return userExists
+}
+
+
+
 const resetPasswordService = async (id, old_pass , new_pass)=>{
-    
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(new_pass, salt)
-
-    const newUser = await sql`
+    const user = await sql`
         UPDATE "User"
         SET "password" = ${hashedPassword}
         WHERE "id" = ${id}
@@ -86,12 +93,31 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             "status",
             "last_login"
     `
-    return newUser[0]
+    await sendEmail({
+        to: user.email,
+        subject: "Welcome to Iravya | Password changed",
+        html: `
+
+            <p>Hi ${user.first_name},<br/>
+            We wanted to let you know that your password has been changed,
+            you can now log in to your account using your new password. </p>
+            <p>Account Details:</p>
+            <p>Name: ${user.first_name} ${user.last_name}</p>
+            <p>Email: ${user.email}</p>
+            <p>Password: ${user.password}</p>
+            <div >
+                <a href="https://iravya-software-eight.vercel.app/">Signin to Your Account →</a>
+            </div>
+        `
+    })
+    return user[0]
 }
 
 export {
     registerUserService,
     loginUserService, 
     deleteUserService,
-    userExistService
+    userExistbyemailService,
+    userExistbyidService,
+    resetPasswordService
 }

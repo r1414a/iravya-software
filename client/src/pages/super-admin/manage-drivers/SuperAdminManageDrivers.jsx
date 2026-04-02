@@ -10,7 +10,6 @@ export default function SuperAdminManageDrivers() {
                 to="/admin"
                 heading="Manage Drivers"
                 subh="Manage drivers — view, edit, trip status, details, history, and deactivate"
-                CreateButton={null}
             />
             <DriversFilter CreateButton={<ManageDriverForm />}/>
             <DriversTable />

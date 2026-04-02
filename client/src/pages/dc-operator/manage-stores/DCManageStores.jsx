@@ -11,7 +11,6 @@ export default function DCManageStores() {
                 to="/dc"
                 heading="Manage Stores"
                 subh="Stores this DC delivers to — track incoming deliveries, devices held and manager contacts"
-                // CreateButton={null}
             />
             <StoresFilter CreateButton={null}/>
             <StoresTable />

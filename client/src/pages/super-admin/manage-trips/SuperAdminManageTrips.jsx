@@ -10,7 +10,6 @@ export default function SuperAdminManageTrips() {
                 to="/admin"
                 heading="Manage Trips"
                 subh="Plan, track, and dispatch deliveries across all stores"
-                CreateButton={null}
             />
 
             <TripsFilter />

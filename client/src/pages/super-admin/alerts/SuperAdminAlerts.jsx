@@ -9,7 +9,7 @@ export default function SuperAdminAlerts() {
                 to={'/admin'}
                 heading="Alerts"
                 subh="All system alerts across every brand — speeding, long stops, route deviations and device issues"
-                CreateButton={null}
+                
             />
            
  

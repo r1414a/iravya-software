@@ -11,7 +11,6 @@ export default function SuperAdminManageDevices() {
                 to={'/admin'}
                 heading={'GPS Devices'}
                 subh="All tracking devices across every brand and DC — register, assign to DCs, monitor health"
-                // CreateButton={<AddGPSDeviceModal/>}
             />
            
            <DeviceFilter CreateButton={<AddGPSDeviceModal/>}/>

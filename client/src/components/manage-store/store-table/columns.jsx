@@ -136,41 +136,41 @@ export const columns = [
     },
 
     // Brand — radio filter in header
-    // {
-    //     accessorKey: "brand",
-    //     header: ({ column }) => {
-    //         const current = column.getFilterValue() || "all"
-    //         return (
-    //             <div className="flex items-center gap-2">
-    //                 <span>Brand</span>
-    //                 <DropdownMenu>
-    //                     <DropdownMenuTrigger asChild>
-    //                         <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-    //                             {current === "all" ? "All" : current.split(" ")[1] ?? current}
-    //                         </Button>
-    //                     </DropdownMenuTrigger>
-    //                     <DropdownMenuContent className="w-40 bg-white border shadow-md">
-    //                         <DropdownMenuRadioGroup
-    //                             value={current}
-    //                             onValueChange={(val) =>
-    //                                 column.setFilterValue(val === "all" ? undefined : val)
-    //                             }
-    //                         >
-    //                             <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-    //                             {BRANDS.map((b) => (
-    //                                 <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
-    //                             ))}
-    //                         </DropdownMenuRadioGroup>
-    //                     </DropdownMenuContent>
-    //                 </DropdownMenu>
-    //             </div>
-    //         )
-    //     },
-    //     cell: ({ row }) => (
-    //         <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
-    //     ),
-    //     filterFn: (row, id, value) => !value || row.getValue(id) === value,
-    // },
+    {
+        accessorKey: "brand",
+        header: ({ column }) => {
+            const current = column.getFilterValue() || "all"
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Brand</span>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
+                                {current === "all" ? "All" : current.split(" ")[1] ?? current}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-40 bg-white border shadow-md">
+                            <DropdownMenuRadioGroup
+                                value={current}
+                                onValueChange={(val) =>
+                                    column.setFilterValue(val === "all" ? undefined : val)
+                                }
+                            >
+                                <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
+                                {BRANDS.map((b) => (
+                                    <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            )
+        },
+        cell: ({ row }) => (
+            <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
+        ),
+        filterFn: (row, id, value) => !value || row.getValue(id) === value,
+    },
 
     // City — radio filter in header
     {

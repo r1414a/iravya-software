@@ -60,6 +60,25 @@ export default function AddStoreForm() {
                         <FieldSet>
                             <FieldGroup>
 
+                                {/* Brand */}
+                                <Field>
+                                    <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
+                                    <Select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select brand..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white border shadow-md">
+                                            <SelectGroup>
+                                                <SelectLabel>Brands</SelectLabel>
+                                                <SelectItem value="tata_westside">Tata Westside</SelectItem>
+                                                <SelectItem value="zudio">Zudio</SelectItem>
+                                                <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
+                                                <SelectItem value="tanishq">Tanishq</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+                                
                                 {/* Store name + city */}
                                 <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field className="basis-[65%]">

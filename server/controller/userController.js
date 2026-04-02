@@ -8,7 +8,8 @@ import {registerUserService,
     deleteUserService,
     userExistbyemailService,
     userExistbyidService,
-    resetPasswordService
+    resetPasswordService,
+    setUserStatusService
 }  from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 
@@ -29,6 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
             )
         )
     }
+    else{
     const user = await registerUserService(req.body)
     const token = generateToken(user.id, email, user.role)
 
@@ -53,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
             },
             "User registered successfully"
         )
-    )
+    )}
 
 })
 
@@ -62,7 +64,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
 
     const userExists = await userExistbyemailService(email)
-    if (userExists.length) {
+    if (!userExists.length) {
         res.status(200)
         .json(
             new ApiResponse(
@@ -70,59 +72,58 @@ const loginUser = asyncHandler(async (req, res) => {
                 {
                     user: userExists[0],
                 },
-                "User already exist"
+                "User does bot exist"
+            )
+        )
+    }
+    else{
+
+        const user = await loginUserService(email, password)
+
+        const token = generateToken(user.id)
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+            maxAege: 24 *60*60*1000
+        }
+
+        // res
+        // .status(200)
+        // .cookie("token", token, options)
+        // .json({
+        //     success: true,
+        //     message: "User logged in successfully",
+        //     _id: user.id,
+        //     email: user.email,
+        //     first_name: user.first_name,
+        //     last_name: user.last_name,
+        //     role: user.role,
+        //     token
+        // })
+
+
+        res
+        .status(200)
+        .cookie("token", token, options)
+        .json(
+            new ApiResponse(
+                200, 
+                {
+                    user: user,
+                },
+                "User loged in successfully"
             )
         )
     }
 
-    const user = await loginUserService(email, password)
-
-    const token = generateToken(user.id)
-
-    const options = {
-        httpOnly: true,
-        secure: true,
-        maxAege: 24 *60*60*1000
-    }
-
-    // res
-    // .status(200)
-    // .cookie("token", token, options)
-    // .json({
-    //     success: true,
-    //     message: "User logged in successfully",
-    //     _id: user.id,
-    //     email: user.email,
-    //     first_name: user.first_name,
-    //     last_name: user.last_name,
-    //     role: user.role,
-    //     token
-    // })
-
-
-    res
-    .status(200)
-    .cookie("token", token, options)
-    .json(
-        new ApiResponse(
-            200, 
-            {
-                user: user, token,
-            },
-            "User loged in successfully"
-        )
-    )
-
 })
 
 const logoutUser = asyncHandler(async(req, res) => {
-
-    
     const options = {
         httpOnly: true,
         secure: true
     }
-
     return res
     .status(200)
     .clearCookie("token", options)
@@ -133,7 +134,6 @@ const logoutUser = asyncHandler(async(req, res) => {
     .json(
         new ApiResponse(200,{},"User logged out successfully")
     )
-
 })
 
 const deleteUser = asyncHandler(async(req, res)=>{
@@ -151,21 +151,28 @@ const deleteUser = asyncHandler(async(req, res)=>{
             )
         )
     }
-    const user = await deleteUserService(id)
-    res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200,
-            user,
-            "User deleted successfully"
+    else{
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        const user = await deleteUserService(id)
+        res
+        .clearCookie('token', options)
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user,
+                "User deleted successfully"
+            )
         )
-    )
-
+    }
 })
 
 const resetPassword = asyncHandler(async(req, res)=>{
-    const {id, old_pass , new_pass} = req.body;
+    const {id} = req.params;
+    const { old_pass , new_pass} = req.body;
     const userExists = await userExistbyidService(id)
     if (!userExists.length) {
         res.status(200)
@@ -180,7 +187,7 @@ const resetPassword = asyncHandler(async(req, res)=>{
         )
     }
     const user = userExists[0]
-    const isMatch = await bcrypt.compare(old_pass, user.password)
+    const isMatch = await bcrypt.compare(old_pass, new_pass)
 
     if(old_pass === new_pass || isMatch){
         res
@@ -193,20 +200,48 @@ const resetPassword = asyncHandler(async(req, res)=>{
             )
         )
     }
-
-    const user_ = await resetPasswordService(id, old_pass, new_pass)
-    res
-        .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                user,
-                "New password reset successfully."
-            )
-        )    
+    else{
+        const user_ = await resetPasswordService(id, old_pass, new_pass)
+        res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    user_,
+                    "New password reset successfully."
+                )
+            ) 
+    }   
 }) 
 
-
+const setUserStatus = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    const {status} = req.body
+    const userExists = await userExistbyidService(id)
+    if (!userExists.length) {
+        res.status(200)
+        .json(
+            new ApiResponse(
+                404, 
+                {
+                    user: userExists[0],
+                },
+                "User does not exist"
+            )
+        )
+    }
+    else{
+        const updated_user = await setUserStatusService(id,status)
+        res.status(200)
+        .json(
+            new ApiResponse(200, 
+                updated_user,
+                "User status changed sucessfully"
+            )
+        )
+    }
+    
+})
 
 
 export {
@@ -214,5 +249,6 @@ export {
   loginUser,
   logoutUser,
   deleteUser,
-  resetPassword
+  resetPassword,
+  setUserStatus
 }

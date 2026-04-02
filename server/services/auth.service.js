@@ -49,6 +49,12 @@ const loginUserService = async (email, password) => {
         throw new ApiError(401,"Invalid credentials")
     }
 
+    await sql`
+        UPDATE "User"
+        SET "last_login" = NOW()
+        WHERE "id" = ${user.id}
+    `
+
     return user
 }
 
@@ -69,6 +75,7 @@ const userExistbyemailService = async (email) =>{
 }
 
 const userExistbyidService = async (id) =>{
+    console.log(id)
     const userExists = await sql`
         SELECT * FROM "User" WHERE "id" = ${id}
     `
@@ -80,7 +87,7 @@ const userExistbyidService = async (id) =>{
 const resetPasswordService = async (id, old_pass , new_pass)=>{
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(new_pass, salt)
-    const user = await sql`
+    const user = (await sql`
         UPDATE "User"
         SET "password" = ${hashedPassword}
         WHERE "id" = ${id}
@@ -92,7 +99,7 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             "role",
             "status",
             "last_login"
-    `
+    `)[0]
     await sendEmail({
         to: user.email,
         subject: "Welcome to Iravya | Password changed",
@@ -104,7 +111,7 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             <p>Account Details:</p>
             <p>Name: ${user.first_name} ${user.last_name}</p>
             <p>Email: ${user.email}</p>
-            <p>Password: ${user.password}</p>
+            <p>Password: ${new_pass}</p>
             <div >
                 <a href="https://iravya-software-eight.vercel.app/">Signin to Your Account →</a>
             </div>
@@ -113,11 +120,31 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
     return user[0]
 }
 
+const setUserStatusService = async(id, status)=>{
+
+    const user = (await sql`
+        UPDATE "User"
+        SET "status" = ${status}
+        WHERE "id" = ${id}
+        RETURNING 
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "status",
+            "last_login"
+    `)[0]
+
+    return user
+}
+
 export {
     registerUserService,
     loginUserService, 
     deleteUserService,
     userExistbyemailService,
     userExistbyidService,
-    resetPasswordService
+    resetPasswordService,
+    setUserStatusService
 }

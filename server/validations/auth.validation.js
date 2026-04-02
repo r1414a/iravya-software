@@ -22,7 +22,9 @@ export const registerValidation = [
         .notEmpty()
         .withMessage("Password is required")
         .isLength({ min: 6 })
-        .withMessage("Password must be at least 6 characters"),
+        .withMessage("Password must be at least 6 characters")
+        .matches(/^(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+        .withMessage("Password must contain at least one uppercase letter and one special character"),
 
     body("role")
         .optional()
@@ -60,4 +62,13 @@ export const resetPasswordValidation = [
         .withMessage("New password is required")
         .isLength({ min: 6 })
         .withMessage("New password must be at least 6 characters")
+]
+
+export const setUserStatusValidator = [
+
+    body("status")
+        .notEmpty()
+        .withMessage("Status is required")
+        .isBoolean()
+        .withMessage("Status must be boolean (true/false)")
 ]

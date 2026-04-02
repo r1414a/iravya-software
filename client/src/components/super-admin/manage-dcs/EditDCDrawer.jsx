@@ -29,7 +29,7 @@ import { Warehouse, Ban } from "lucide-react"
 import { useState } from "react"
  
 export default function EditDCDrawer({ dc, open, onClose }) {
-    const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false)
+    // const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false)
  
     if (!dc) return null
  
@@ -168,7 +168,7 @@ export default function EditDCDrawer({ dc, open, onClose }) {
                                 </Field>
  
                                 {/* Danger zone — same red/green card as EditUserDrawer */}
-                                <div className="pt-2">
+                                {/* <div className="pt-2">
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                                         Danger zone
                                     </p>
@@ -206,7 +206,6 @@ export default function EditDCDrawer({ dc, open, onClose }) {
                                         </Button>
                                     </div>
  
-                                    {/* Inline confirm — same pattern as EditUserDrawer */}
                                     {showDeactivateConfirm && (
                                         <div className={`mt-2 px-3 py-2.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                                             isActive ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"
@@ -239,7 +238,7 @@ export default function EditDCDrawer({ dc, open, onClose }) {
                                             </div>
                                         </div>
                                     )}
-                                </div>
+                                </div> */}
  
                             </FieldGroup>
                         </FieldSet>

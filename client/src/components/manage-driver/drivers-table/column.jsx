@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FieldLabel } from "@/components/ui/field"
 import TripDetailSheet from "../../manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
+import DeleteModal from "@/components/DeleteModal"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -81,7 +82,12 @@ function ActionsCell({ row }) {
                     pathname.startsWith('/admin') &&  (
                         <>
                     <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-                    <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+
+                    <DeleteModal
+                                           who={driver.name}
+                                           m1active="Driver will not be assignable to any trip"
+                                         />
+                    {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
                     </>
                     )
                 }

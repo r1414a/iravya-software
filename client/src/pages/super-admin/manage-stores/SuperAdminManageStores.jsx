@@ -1,5 +1,5 @@
 import AdminSubHeader from "@/components/AdminSubHeader"
-import AddStoreForm from "@/components/manage-store/AddStoreForm"
+import StoreForm from "@/components/manage-store/StoreForm"
 import StoresFilter from "@/components/manage-store/StoresFilter"
 import StoresTable from "@/components/manage-store/StoresTable"
 
@@ -13,7 +13,7 @@ export default function SuperAdminManageStores() {
             />
             
 
-            <StoresFilter CreateButton={<AddStoreForm />}/>
+            <StoresFilter CreateButton={<StoreForm mode="add"/>}/>
             <StoresTable />
         </section>
     )

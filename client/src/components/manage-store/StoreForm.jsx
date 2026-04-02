@@ -26,14 +26,48 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus, Store } from "lucide-react"
+import { Plus, Store, Pencil } from "lucide-react"
 import { useState } from "react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
-export default function AddStoreForm() {
+export default function StoreForm({ mode, store }) {
+    const isEdit = mode === "edit"
     // Auto-generate slug from store name
-    const [storeName, setStoreName] = useState("")
-    const slug = storeName
+    //  {
+    //     id: 1,
+    //     name: "Westside — Koregaon Park",
+    //     city: "Pune",
+    //     address: "Shop 12, Phoenix Market City, Nagar Rd, Pune 411006",
+    //     brand: "Tata Westside",
+    //     managerName: "Arjun Joshi",
+    //     managerPhone: "+91 98201 44321",
+    //     managerEmail: "arjun.j@westside.com",
+    //     publicTrackingSlug: "westside-koregaon",
+    //     deliveriesToday: 2,
+    //     totalDeliveries: 184,
+    //     currentDevices: ["GPS-003-PUNE"],
+    //     lastDelivery: "Today, 10:45 AM",
+    //     status: "active",
+    //     createdAt: "Jan 2023",
+    // },
+    const [form, setForm] = useState({
+        brand: store?.brand || "",
+        name: store?.name || "",
+        city: store?.city || "",
+        address: store?.address || "",
+        publicTrackingSlug: store?.publicTrackingSlug || "",
+        managerName: store?.managerName || "",
+        managerPhone: store?.managerPhone || "",
+        managerEmail: store?.managerEmail || "",
+    })
+    console.log(form);
+    
+
+    function handleFieldChange(name, value) {
+        setForm(prev => ({ ...prev, [name]: value }))
+    }
+
+    const slug = form.name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
         .trim()
@@ -41,17 +75,23 @@ export default function AddStoreForm() {
 
     return (
         <Sheet direction="right">
-            <CreateFormSheetTrigger text={'Add Store'}/>
-            {/* <SheetTrigger className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Store
-            </SheetTrigger> */}
+            {
+                isEdit ? (
+                    <SheetTrigger asChild>
+                        <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                    </SheetTrigger>
+                ) : (
+                    <CreateFormSheetTrigger text={'Add Store'} />
+                )
+            }
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle>Add new store</SheetTitle>
+                    <SheetTitle> {isEdit ? "Edit store" : "Add new store"}</SheetTitle>
                     <SheetDescription>
-                        Register a retail store and assign it to a brand
+                        {isEdit
+                            ? "Update store details"
+                            : "Register a retail store and assign it to a brand"}
                     </SheetDescription>
                 </SheetHeader>
 
@@ -63,56 +103,63 @@ export default function AddStoreForm() {
                                 {/* Brand */}
                                 <Field>
                                     <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
-                                    <Select>
+                                    <Select value={form.brand} onValueChange={(value) => console.log(value)
+                                    }>
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select brand..." />
                                         </SelectTrigger>
                                         <SelectContent className="bg-white border shadow-md">
                                             <SelectGroup>
                                                 <SelectLabel>Brands</SelectLabel>
-                                                <SelectItem value="tata_westside">Tata Westside</SelectItem>
-                                                <SelectItem value="zudio">Zudio</SelectItem>
-                                                <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
-                                                <SelectItem value="tanishq">Tanishq</SelectItem>
+                                                <SelectItem value="Tata Westside">Tata Westside</SelectItem>
+                                                <SelectItem value="Zudio">Zudio</SelectItem>
+                                                <SelectItem value="Tata Cliq">Tata Cliq</SelectItem>
+                                                <SelectItem value="Tanishq">Tanishq</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
                                 </Field>
-                                
+
                                 {/* Store name + city */}
-                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field className="basis-[65%]">
                                         <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
                                         <Input
+                                            name="name"
                                             placeholder="Westside — Koregaon Park"
-                                            value={storeName}
+                                            value={form.name}
                                             className="w-full placeholder:text-sm text-sm sm:text-md"
-                                            onChange={(e) => setStoreName(e.target.value)}
+                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)}
                                         />
                                     </Field>
                                     <Field className="basis-[35%]">
                                         <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
-                                        <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select city..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Cities</SelectLabel>
-                                                <SelectItem value="pune">Pune</SelectItem>
-                                                <SelectItem value="mumbai">Mumbai</SelectItem>
-                                                <SelectItem value="nashik">Nashik</SelectItem>
-                                                <SelectItem value="nagpur">Nagpur</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
+                                        <Select value={form.city} onValueChange={(value) => handleFieldChange('city', value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select city..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Cities</SelectLabel>
+                                                    <SelectItem value="Pune">Pune</SelectItem>
+                                                    <SelectItem value="Mumbai">Mumbai</SelectItem>
+                                                    <SelectItem value="Nashik">Nashik</SelectItem>
+                                                    <SelectItem value="Nagpur">Nagpur</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
                                     </Field>
                                 </div>
 
                                 {/* Full address */}
                                 <Field>
                                     <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input placeholder="Shop no., mall/building, area, pincode" className="placeholder:text-sm text-sm sm:text-md"/>
+                                    <Input 
+                                        name="address"
+                                        value={form.address} 
+                                        onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="Shop no., mall/building, area, pincode" 
+                                        className="placeholder:text-sm text-sm sm:text-md" 
+                                    />
                                     <FieldDescription className="text-xs">
                                         Used to place the store pin on the map and compute geofence
                                     </FieldDescription>
@@ -147,20 +194,30 @@ export default function AddStoreForm() {
                                 </Field>
 
                                 {/* Store manager */}
-                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Manager name</FieldLabel>
-                                        <Input placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md"/>
+                                        <Input 
+                                            name="managerName"
+                                            value={form.managerName} 
+                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                     <Field>
                                         <FieldLabel>Manager phone</FieldLabel>
-                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
+                                        <Input 
+                                            name="managerPhone"
+                                            value={form.managerPhone} 
+                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                 </div>
 
                                 <Field>
                                     <FieldLabel>Manager email</FieldLabel>
-                                    <Input type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md"/>
+                                    <Input 
+                                        name="managerEmail"
+                                        value={form.managerEmail} 
+                                        onChange={({target: {name, value}}) => handleFieldChange(name,value)}  
+                                        type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
                                     <FieldDescription className="text-xs">
                                         A user account with store manager role will be created for this email
                                     </FieldDescription>
@@ -173,7 +230,7 @@ export default function AddStoreForm() {
 
                 <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
                     <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
-                        Add Store <Store className="ml-1" size={15} />
+                        {isEdit ? "Save Changes" : "Add Store"} <Store className="ml-1" size={15} />
                     </Button>
                     <SheetClose className="basis-1/2" asChild>
                         <Button className="w-full" variant="outline">Cancel</Button>

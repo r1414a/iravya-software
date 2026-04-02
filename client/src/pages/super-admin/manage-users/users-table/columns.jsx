@@ -12,6 +12,7 @@ import {
 import EditUserDrawer from "./EditUserDrawer"
 import { useState } from "react"
 import { Pencil } from "lucide-react"
+import DeleteModal from "@/components/DeleteModal"
 
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
 const ROLES = ["DC Operator", "Store Manager"]
@@ -21,20 +22,23 @@ const STATUS_COLOR = {
   // pending: "bg-yellow-100 border border-yellow-600 text-yellow-600",
 }
 
-function ActionsCell({row}){
+function ActionsCell({ row }) {
   const user = row.original;
   const [editUser, setEditUser] = useState(false);
-  return(
+  return (
     <>
-    <EditUserDrawer
-      open={editUser} setOpen={setEditUser} selectedUser={user}
-    />
+      <EditUserDrawer
+        open={editUser} setOpen={setEditUser} selectedUser={user}
+      />
 
       <div className="flex items-center gap-2 justify-end">
-                <Button variant="outline" size="xs" onClick={() => setEditUser(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Pencil size={16}/></Button>
+        <Button variant="outline" size="xs" onClick={() => setEditUser(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Pencil size={16} /></Button>
+        <DeleteModal
+          who={user.name}
+          m1active="User will immediately lose access to the platform"
+        />
 
-
-            </div>
+      </div>
     </>
   )
 }
@@ -215,8 +219,8 @@ export const columns = [
       return row.getValue(id) === value
     }
   },
-    {
-        id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
-    },
+  {
+    id: "actions",
+    cell: ({ row }) => <ActionsCell row={row} />,
+  },
 ]

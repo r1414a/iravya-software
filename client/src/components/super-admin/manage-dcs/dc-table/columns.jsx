@@ -24,6 +24,7 @@ import {
 import { useState } from "react"
 import DCDetailDrawer from "../DcDetailDrawer"
 import EditDCDrawer from "../EditDCDrawer"
+import DeleteModal from "@/components/DeleteModal"
 
 const statusStyles = {
     active: "bg-green-100 text-green-700",
@@ -49,12 +50,18 @@ function ActionsCell({ row }) {
                 open={editOpen}
                 onClose={() => setEditOpen(false)}
             />
+
+           
         
         <div className="flex items-center gap-2 justify-end">
             <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16}/></Button>
             <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
-            <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+             <DeleteModal
+                       who={dc.name}
+                       m1active="No new trips can be dispatched from this DC"
+                     />
+            {/* <Button variant="outline" size="xs" onClose={() => setDeleteOpen(true)} className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
             
         </div>
         </>

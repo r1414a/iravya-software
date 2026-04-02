@@ -103,7 +103,7 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                                 </Field>
 
                                 {/* Status */}
-                                <Field>
+                                {/* <Field>
                                     <FieldLabel>Status</FieldLabel>
                                     <Select defaultValue={driver.status}>
                                         <SelectTrigger>
@@ -121,7 +121,7 @@ export default function EditDriverSheet({ driver, open, onClose }) {
                                     <FieldDescription className="text-xs">
                                         Setting to inactive hides this driver from dispatch forms
                                     </FieldDescription>
-                                </Field>
+                                </Field> */}
 
                             </FieldGroup>
                         </FieldSet>

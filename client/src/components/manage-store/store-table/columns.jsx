@@ -24,6 +24,7 @@ import {
 import StoreDetailDrawer from "../StoreDetailsDrawer"
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
+import StoreForm from "../StoreForm"
 
 const statusStyles = {
     active:   "bg-green-100 text-green-700",
@@ -46,6 +47,8 @@ function ActionsCell({ row }) {
                 open={viewDetails} 
                 onClose={() => setViewDetails(false)} 
             />
+
+            
     
         
         <div className="flex items-center gap-2 justify-end">
@@ -53,7 +56,7 @@ function ActionsCell({ row }) {
             {
                 pathname.startsWith('/admin') && (
                     <>
-                    <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                    <StoreForm mode={'edit'} store={store} />
                     <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
                     
                     </>

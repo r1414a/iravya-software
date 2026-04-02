@@ -61,10 +61,8 @@ const ROLE_HINT = {
 }
 
 export default function EditUserDrawer({ open, setOpen, selectedUser }) {
-    const [activeTab, setActiveTab] = useState("details")
     const [selectedRole, setSelectedRole] = useState(selectedUser?.role ?? "")
     const [showResetConfirm, setShowResetConfirm] = useState(false)
-    const [showDeactivate, setShowDeactivate] = useState(false)
 
     // Keep local role in sync when a different row is clicked
     const role = selectedRole || selectedUser?.role || ""
@@ -77,7 +75,6 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetContent className="bg-white w-full max-w-full sm:max-w-md lg:max-w-lg flex flex-col p-0">
 
-            <div className="overflow-y-auto">
                 {/* ── Header — same border-b border-gray-200 style ── */}
                 <SheetHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-gray-200">
                     <SheetTitle className="text-base sm:text-lg">Edit user</SheetTitle>
@@ -85,194 +82,216 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                         {selectedUser.email}
                     </SheetDescription>
                 </SheetHeader>
+                <div className="overflow-y-auto">
 
-                {/* ── User identity card — same bg-gray-100 rounded-md style as your draft ── */}
-                <div className="px-4 sm:px-6 pt-4">
-                    <div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-gray-100 rounded-md sm:items-start">
+                    {/* ── User identity card — same bg-gray-100 rounded-md style as your draft ── */}
+                    <div className="px-4 sm:px-6 pt-4">
+                        <div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-gray-100 rounded-md sm:items-start">
 
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gold flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
-                            {selectedUser.initials}
-                        </div>
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gold flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
+                                {selectedUser.initials}
+                            </div>
 
-                        <div className="flex-1 min-w-0">
-                            <h2 className="text-sm sm:text-base font-semibold truncate">
-                                {selectedUser.name}
-                            </h2>
-                            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                                {selectedUser.email}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                                <h2 className="text-sm sm:text-base font-semibold truncate">
+                                    {selectedUser.name}
+                                </h2>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                                    {selectedUser.email}
+                                </p>
 
-                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                <span className={`${ROLE_COLOR[selectedUser.role]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
-                                    {selectedUser.role}
-                                </span>
-                                <span className={`${STATUS_COLOR[selectedUser.status]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
-                                    {selectedUser.status}
-                                </span>
+                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                    <span className={`${ROLE_COLOR[selectedUser.role]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
+                                        {selectedUser.role}
+                                    </span>
+                                    <span className={`${STATUS_COLOR[selectedUser.status]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
+                                        {selectedUser.status}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="text-left sm:text-right shrink-0">
+                                <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider">
+                                    Last login
+                                </p>
+                                <p className="text-xs font-medium text-gray-600 mt-0.5">
+                                    {selectedUser.lastLogin}
+                                </p>
+                                <p className="text-[10px] text-gray-400">
+                                    {selectedUser.loginDate}
+                                </p>
                             </div>
                         </div>
-
-                        <div className="text-left sm:text-right shrink-0">
-                            <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider">
-                                Last login
-                            </p>
-                            <p className="text-xs font-medium text-gray-600 mt-0.5">
-                                {selectedUser.lastLogin}
-                            </p>
-                            <p className="text-[10px] text-gray-400">
-                                {selectedUser.loginDate}
-                            </p>
-                        </div>
                     </div>
-                </div>
 
 
-                <div className="px-4 sm:px-6 py-4 flex-1">
-                    <FieldGroup>
-                        <FieldSet>
-                            <FieldGroup>
+                    <div className="px-4 sm:px-6 py-4 flex-1">
+                        <FieldGroup>
+                            <FieldSet>
+                                <FieldGroup>
 
-                                {/* Name */}
-                                <div className="flex flex-col sm:flex-row gap-2">
+                                    {/* Name */}
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <Field>
+                                            <FieldLabel>First name</FieldLabel>
+                                            <Input
+                                                defaultValue={selectedUser.name.split(" ")[0]}
+                                                placeholder="First name"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                        </Field>
+                                        <Field>
+                                            <FieldLabel>Last name</FieldLabel>
+                                            <Input
+                                                defaultValue={selectedUser.name.split(" ").slice(1).join(" ")}
+                                                placeholder="Last name"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                        </Field>
+                                    </div>
+
+                                    {/* Email */}
                                     <Field>
-                                        <FieldLabel>First name</FieldLabel>
+                                        <FieldLabel>Email address</FieldLabel>
                                         <Input
-                                            defaultValue={selectedUser.name.split(" ")[0]}
-                                            placeholder="First name"
+                                            type="email"
+                                            defaultValue={selectedUser.email}
+                                            placeholder="user@brand.com"
                                             className="placeholder:text-sm text-sm sm:text-md"
                                         />
                                     </Field>
+
+                                    {/* Role */}
                                     <Field>
-                                        <FieldLabel>Last name</FieldLabel>
-                                        <Input
-                                            defaultValue={selectedUser.name.split(" ").slice(1).join(" ")}
-                                            placeholder="Last name"
-                                            className="placeholder:text-sm text-sm sm:text-md"
-                                        />
-                                    </Field>
-                                </div>
-
-                                {/* Email */}
-                                <Field>
-                                    <FieldLabel>Email address</FieldLabel>
-                                    <Input
-                                        type="email"
-                                        defaultValue={selectedUser.email}
-                                        placeholder="user@brand.com"
-                                        className="placeholder:text-sm text-sm sm:text-md"
-                                    />
-                                </Field>
-
-                                {/* Role */}
-                                <Field>
-                                    <FieldLabel>Role</FieldLabel>
-                                    <Select
-                                        defaultValue={selectedUser.role}
-                                        onValueChange={(val) => setSelectedRole(val)}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select a role..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Role</SelectLabel>
-                                                <SelectItem value="DC operator">DC Operator</SelectItem>
-                                                <SelectItem value="Store manager">Store Manager</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-
-                                    {role && (
-                                        <FieldDescription className="text-xs break-words">
-                                            {ROLE_HINT[role]}
-                                        </FieldDescription>
-                                    )}
-                                </Field>
-
-                                {/* Scope */}
-                                {showScope && (
-                                    <Field>
-                                        <FieldLabel>
-                                            {role === "DC operator" ? "Assigned DC" : "Assigned store"}
-                                        </FieldLabel>
-
-                                        <Select defaultValue={selectedUser.scope}>
+                                        <FieldLabel>Role</FieldLabel>
+                                        <Select
+                                            defaultValue={selectedUser.role}
+                                            onValueChange={(val) => setSelectedRole(val)}
+                                        >
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={`Select ${role === "DC operator" ? "data center" : "store"}...`} />
+                                                <SelectValue placeholder="Select a role..." />
                                             </SelectTrigger>
                                             <SelectContent className="bg-white border shadow-md">
                                                 <SelectGroup>
-                                                    <SelectLabel>
-                                                        {role === "DC operator" ? "Data Centers" : "Stores"}
-                                                    </SelectLabel>
-                                                    {(SCOPE_OPTIONS[role] ?? []).map((opt) => (
-                                                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                                                    ))}
+                                                    <SelectLabel>Role</SelectLabel>
+                                                    <SelectItem value="DC operator">DC Operator</SelectItem>
+                                                    <SelectItem value="Store manager">Store Manager</SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
 
-                                        <FieldDescription className="text-xs break-words">
-                                            {role === "DC operator"
-                                                ? "User will only see trucks and trips from this DC"
-                                                : "User will only see deliveries coming to this store"}
-                                        </FieldDescription>
+                                        {role && (
+                                            <FieldDescription className="text-xs break-words">
+                                                {ROLE_HINT[role]}
+                                            </FieldDescription>
+                                        )}
                                     </Field>
-                                )}
 
-                                {/* Account actions */}
-                                <div className="pt-2">
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                                        Account actions
-                                    </p>
+                                    {/* Scope */}
+                                    {showScope && (
+                                        <Field>
+                                            <FieldLabel>
+                                                {role === "DC operator" ? "Assigned DC" : "Assigned store"}
+                                            </FieldLabel>
 
-                                    {/* Reset */}
-                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 mb-2">
-                                        <div className="flex items-start gap-2">
-                                            <KeyRound size={14} className="text-gray-500 mt-0.5 shrink-0" />
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-700">Reset password</p>
-                                                <p className="text-xs text-gray-400 mt-0.5 break-words">
-                                                    Send a password reset link to {selectedUser.email}
-                                                </p>
-                                            </div>
-                                        </div>
+                                            <Select defaultValue={selectedUser.scope}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder={`Select ${role === "DC operator" ? "data center" : "store"}...`} />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border shadow-md">
+                                                    <SelectGroup>
+                                                        <SelectLabel>
+                                                            {role === "DC operator" ? "Data Centers" : "Stores"}
+                                                        </SelectLabel>
+                                                        {(SCOPE_OPTIONS[role] ?? []).map((opt) => (
+                                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                                        ))}
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
 
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="w-full sm:w-auto text-xs"
-                                            onClick={() => setShowResetConfirm(!showResetConfirm)}
-                                        >
-                                            Reset
-                                        </Button>
-                                    </div>
-
-                                    {/* Reset confirm */}
-                                    {showResetConfirm && (
-                                        <div className="mb-2 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                            <p className="text-xs text-blue-700 break-words">
-                                                Send reset link to <span className="font-medium">{selectedUser.email}</span>?
-                                            </p>
-
-                                            <div className="flex gap-2 w-full sm:w-auto">
-                                                <Button size="sm" className="w-1/2 sm:w-auto bg-maroon hover:bg-maroon-dark text-white text-xs h-7">
-                                                    Send link
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="w-1/2 sm:w-auto text-xs h-7"
-                                                    onClick={() => setShowResetConfirm(false)}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </div>
+                                            <FieldDescription className="text-xs break-words">
+                                                {role === "DC operator"
+                                                    ? "User will only see trucks and trips from this DC"
+                                                    : "User will only see deliveries coming to this store"}
+                                            </FieldDescription>
+                                        </Field>
                                     )}
 
-                                    {/* Deactivate */}
-                                    <div className={`flex flex-col sm:flex-row items-start justify-between gap-3 p-3 rounded-lg border ${selectedUser.status === "active"
+
+                                    {/* Status */}
+                                    <Field>
+                                        <FieldLabel>Status</FieldLabel>
+                                        <Select defaultValue={selectedUser.status}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white border shadow-md">
+                                                <SelectGroup>
+                                                    <SelectLabel>Status</SelectLabel>
+                                                    <SelectItem value="active" className="text-sm">Active</SelectItem>
+                                                    <SelectItem value="inactive" className="text-sm">Inactive</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        <FieldDescription className="text-xs">
+                                            Inactive users cannot log in or access any data until reactivated
+                                        </FieldDescription>
+                                    </Field>
+
+                                    {/* Account actions */}
+                                    <div className="pt-2">
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                                            Account actions
+                                        </p>
+
+                                        {/* Reset */}
+                                        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 mb-2">
+                                            <div className="flex items-start gap-2">
+                                                <KeyRound size={14} className="text-gray-500 mt-0.5 shrink-0" />
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-700">Reset password</p>
+                                                    <p className="text-xs text-gray-400 mt-0.5 break-words">
+                                                        Send a password reset link to {selectedUser.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full sm:w-auto text-xs"
+                                                onClick={() => setShowResetConfirm(!showResetConfirm)}
+                                            >
+                                                Reset
+                                            </Button>
+                                        </div>
+
+                                        {/* Reset confirm */}
+                                        {showResetConfirm && (
+                                            <div className="mb-2 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <p className="text-xs text-blue-700 break-words">
+                                                    Send reset link to <span className="font-medium">{selectedUser.email}</span>?
+                                                </p>
+
+                                                <div className="flex gap-2 w-full sm:w-auto">
+                                                    <Button size="sm" className="w-1/2 sm:w-auto bg-maroon hover:bg-maroon-dark text-white text-xs h-7">
+                                                        Send link
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="w-1/2 sm:w-auto text-xs h-7"
+                                                        onClick={() => setShowResetConfirm(false)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Deactivate */}
+                                        {/* <div className={`flex flex-col sm:flex-row items-start justify-between gap-3 p-3 rounded-lg border ${selectedUser.status === "active"
                                         ? "border-red-200 bg-red-50"
                                         : "border-green-200 bg-green-50"
                                         }`}>
@@ -301,10 +320,10 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                         >
                                             {selectedUser.status === "active" ? "Deactivate" : "Reactivate"}
                                         </Button>
-                                    </div>
+                                    </div> */}
 
-                                    {/* Deactivate confirm */}
-                                    {showDeactivate && (
+                                        {/* Deactivate confirm */}
+                                        {/* {showDeactivate && (
                                         <div className="mt-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                             <p className="text-xs text-red-700 break-words">
                                                 {selectedUser.status === "active"
@@ -333,27 +352,27 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                                 </Button>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
+                                    )} */}
+                                    </div>
 
-                            </FieldGroup>
-                        </FieldSet>
-                    </FieldGroup>
+                                </FieldGroup>
+                            </FieldSet>
+                        </FieldGroup>
+                    </div>
+
                 </div>
-
                 {/* ── Footer — only shown on details tab ── */}
-                {activeTab === "details" && (
-                    <SheetFooter className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full border-t border-gray-200 px-4 sm:px-6 py-4">
-                        <Button className="w-full sm:basis-1/2 bg-maroon hover:bg-maroon-dark">
-                            Save changes <UserRound className="ml-1" size={15} />
-                        </Button>
 
-                        <SheetClose className="w-full sm:basis-1/2" asChild>
-                            <Button className="w-full" variant="outline">Cancel</Button>
-                        </SheetClose>
-                    </SheetFooter>
-                )}
-                </div>
+                <SheetFooter className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full border-t border-gray-200 px-4 sm:px-6 py-4">
+                    <Button className="w-full sm:basis-1/2 bg-maroon hover:bg-maroon-dark">
+                        Save changes <UserRound className="ml-1" size={15} />
+                    </Button>
+
+                    <SheetClose className="w-full sm:basis-1/2" asChild>
+                        <Button className="w-full" variant="outline">Cancel</Button>
+                    </SheetClose>
+                </SheetFooter>
+
 
             </SheetContent>
         </Sheet>

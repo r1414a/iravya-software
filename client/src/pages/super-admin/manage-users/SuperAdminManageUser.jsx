@@ -10,7 +10,6 @@ export default function SuperAdminManageUser() {
                 to={'/admin'}
                 heading="Manage Users"
                 subh="Manage users across all brands — invite, edit roles, deactivate and reset passwords"
-                // CreateButton={<CreateUserModal />}
             />
            
 

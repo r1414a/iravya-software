@@ -2,7 +2,7 @@ import { BookUser, Building2, ChartNoAxesCombined, LocateFixed, Road, Settings, 
 
 
 export const SUPER_ADMIN_TASKS = [
-  { key: "brands", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/manage-brands" },
+  // { key: "brands", label: "Brands", icon: <Building2 size={35} color="white"strokeWidth={1}/>, bg: "bg-pink-700 shadow-lg shadow-pink-500/40", path: "/admin/manage-brands" },
   { key: "users", label: "Users", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg: "bg-sky-700 shadow-lg shadow-sky-700/40", path: "/admin/manage-users" },
   { key: "devices", label: "Register GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/admin/manage-gps-devices" },
   { key: "drivers", label: "Drivers", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg:  "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/admin/manage-drivers" },

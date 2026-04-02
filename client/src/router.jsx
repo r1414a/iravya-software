@@ -151,18 +151,6 @@ const router = createBrowserRouter([
             //more pages
         ]
     }
-
-    // {
-    //     path: '/brand',
-    //     element: <AdminLayout/>,
-    //     children: [
-    //         {
-    //             index: true,
-    //             element: <BrandManagerHome/>
-    //         },
-    //         //more pages
-    //     ]
-    // }
 ])
 
 export default router;

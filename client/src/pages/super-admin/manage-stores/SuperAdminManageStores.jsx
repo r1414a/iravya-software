@@ -10,7 +10,6 @@ export default function SuperAdminManageStores() {
                 to={'/admin'}
                 heading="Manage Stores"
                 subh="All retail stores across all brands — add, edit, manage geofence and public tracking"
-                // CreateButton={<AddStoreForm/>}
             />
             
 

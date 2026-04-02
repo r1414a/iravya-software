@@ -25,9 +25,21 @@ export default function DashboardHomePageAdminTask({ tasks = [] }) {
   return (
     <main className="flex-1 flex items-center justify-center lg:px-6 pb-6">
       <div className="w-full max-w-150 grid gap-3 lg:gap-5 grid-cols-2 sm:grid-cols-3">
-        {tasks.map((item, index) => (
-          <MenuCard key={item.label || index} item={item} />
-        ))}
+        {tasks.map((item, index) => {
+          const isLast = index === tasks.length - 1;
+          return (
+            <div 
+              key={item.key || index} 
+              className={isLast ? "col-span-2 sm:col-span-3 flex justify-center" : ""}
+            >
+              <div className={isLast ? "w-full sm:w-1/3" : "w-full"}>
+              <MenuCard key={item.label || index} item={item} />
+                {/* <MenuCard item={item} /> */}
+              </div>
+            </div>
+          )
+        }
+        )}
       </div>
     </main>
   );

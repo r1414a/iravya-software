@@ -12,7 +12,6 @@ export default function SuperAdminManageTrucks() {
                 to="/admin"
                 heading="Manage Trucks"
                 subh="All trucks — view status, trip status, details, history"
-                CreateButton={null}
             />
 
 

@@ -3,7 +3,8 @@ import { Truck } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+
+const position = [18.5204, 73.8567]
 
 function SectionLabel({ children }) {
     return <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-3">{children}</div>;
@@ -40,6 +41,7 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
     const [refId] = useState(() => `RPT-${Math.floor(Math.random() * 90000 + 10000)}`);
 
 
+
     const handleTrack = () => {
         if (!tripIdInput.trim()) { setError("Please enter a Trip ID to continue."); return; }
         setLoading(true); setError(""); setActiveTrip(null);
@@ -69,10 +71,10 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
     ];
 
     return (<>
-        <div className="px-10 my-5 ">
-            <div className="flex flex-row gap-8">
-                <div className="w-120">
-                    <Card className="p-4 mb-3">
+        <div className="mb-10">
+            <div className="relative">
+                <div className="absolute top-5 left-16 z-20">
+                    <Card className="p-3">
                         <label className="block text-sm font-semibold text-slate-700 mb-3">Enter Trip ID to track your delivery</label>
                         <div className="flex gap-3 flex-wrap">
                             <Input
@@ -84,9 +86,6 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
                                 placeholder="e.g. TRP-001"
                                 className={`flex-1 text-md border-2 outline-none bg-slate-50 text-slate-800 transition-colors ${focused ? "border-sky-400" : "border-slate-200"}`}
                             />
-                            {/* <input
-                                
-                            /> */}
                             <Button
                                 onClick={handleTrack}
                                 disabled={loading}
@@ -106,6 +105,60 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
                         {error && <p className="mt-3 text-sm text-red-600 flex items-center gap-1.5"><span>⚠️</span>{error}</p>}
                         <p className="mt-2.5 text-xs text-slate-400">Demo IDs: <span className="font-mono text-slate-500">TRP-001</span> · <span className="font-mono text-slate-500">TRP-002</span> · <span className="font-mono text-slate-500">TRP-003</span></p>
                     </Card>
+                </div>
+                <MapContainer
+                    center={position}
+                    zoom={13}
+                    dragging={true}
+                    tap={true}
+                    touchZoom={true}
+                    scrollWheelZoom={true}
+                    style={{ height: "80vh", width: "100%", zIndex: 10 }} // Required: Map must have a defined height
+                >
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={position}>
+                        <Popup>
+                            A basic Leaflet marker.
+                        </Popup>
+                    </Marker>
+                </MapContainer>
+            </div>
+            <div className="flex flex-row gap-8 px-10 mt-8">
+                <div className="w-120">
+                    {/* <Card className="p-4 mb-3">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">Enter Trip ID to track your delivery</label>
+                        <div className="flex gap-3 flex-wrap">
+                            <Input
+                                value={tripIdInput}
+                                onChange={e => { setTripIdInput(e.target.value); setError(""); }}
+                                onKeyDown={e => e.key === "Enter" && handleTrack()}
+                                onFocus={() => setFocused(true)}
+                                onBlur={() => setFocused(false)}
+                                placeholder="e.g. TRP-001"
+                                className={`flex-1 text-md border-2 outline-none bg-slate-50 text-slate-800 transition-colors ${focused ? "border-sky-400" : "border-slate-200"}`}
+                            />
+                            <Button
+                                onClick={handleTrack}
+                                disabled={loading}
+                                className={` font-semibold text-white text-sm transition-all ${loading ? "bg-slate-400 cursor-wait" : "bg-maroon hover:bg-maroon-dark active:scale-95"}`}
+                            >
+                                {loading ? (
+                                    <span className="flex items-center gap-2">
+                                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" strokeOpacity="0.3" />
+                                            <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
+                                        </svg>
+                                        Searching…
+                                    </span>
+                                ) : "Track Shipment"}
+                            </Button>
+                        </div>
+                        {error && <p className="mt-3 text-sm text-red-600 flex items-center gap-1.5"><span>⚠️</span>{error}</p>}
+                        <p className="mt-2.5 text-xs text-slate-400">Demo IDs: <span className="font-mono text-slate-500">TRP-001</span> · <span className="font-mono text-slate-500">TRP-002</span> · <span className="font-mono text-slate-500">TRP-003</span></p>
+                    </Card> */}
                     {activeTrip && (
                         <>
                             <div>
@@ -201,7 +254,7 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
                             <div>
 
 
-                                <div className="p-5 border border-transparent border border-b-gray-400">
+                                <div className="p-5 border border-transparent border-b-gray-400">
                                     <SectionLabel>Driver Details</SectionLabel>
                                     <div className="flex items-center gap-4 mb-5">
                                         <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
@@ -247,16 +300,7 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
                         </div>
                     </>)}
                 </div>
-                <div className="flex items-center justify-center">
-                    <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: '500px' }}>
-                        <TileLayer
-                            attribution='&copy; OpenStreetMap contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <Marker position={[51.505, -0.09]}>
-                            <Popup>A popup example.</Popup>
-                        </Marker>
-                    </MapContainer>
+                {/* <div className="flex items-center justify-center">
                     {!activeTrip && !loading && (
 
                         <div className="text-center py-16 text-slate-400">
@@ -265,7 +309,7 @@ export default function TrackingForm({ MOCK_TRIPS, STATUS_CONFIG, ISSUE_TYPES })
                             <p className="text-sm">Enter your Trip ID above to get started</p>
                         </div>
                     )}
-                </div>
+                </div> */}
 
             </div>
         </div>

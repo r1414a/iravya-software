@@ -1,7 +1,6 @@
 import AdminSubHeader from "@/components/AdminSubHeader"
 import DriversFilter from "@/components/manage-driver/DriversFilter"
 import DriversTable from "@/components/manage-driver/DriversTable"
-import ManageDriverForm from "@/components/manage-driver/ManageDriverForm"
 
 export default function DCManageDrivers() {
     return (

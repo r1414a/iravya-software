@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 
 
-export default function AdminSubHeader({to, heading,subh, CreateButton}){
+export default function AdminSubHeader({to, heading,subh}){
     return(
          <div className="min-h-20 lg:min-h-18 py-2 px-4 lg:px-10 flex gap-3 lg:gap-4 items-center shadow-md">
                 <Link to={to} className="bg-gold hover:bg-gold-dark p-1 rounded-full">
@@ -15,7 +15,6 @@ export default function AdminSubHeader({to, heading,subh, CreateButton}){
                             {subh}
                         </p>
                     </div>
-                    {CreateButton}
                 </div>
             </div>
     )

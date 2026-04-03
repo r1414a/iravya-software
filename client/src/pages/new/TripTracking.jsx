@@ -5,7 +5,8 @@ export default function TripTracking() {
 
       {/* MAP */}
       <div className="h-full w-full">
-        <MapViewTrip />
+        <h1>map</h1>
+        {/* <MapViewTrip /> */}
       </div>
 
       {/* BOTTOM CARD */}

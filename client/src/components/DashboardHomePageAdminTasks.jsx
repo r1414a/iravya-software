@@ -31,7 +31,7 @@ export default function DashboardHomePageAdminTask({ tasks = [] }) {
           return (
             <div 
               key={item.key || index} 
-              className={isLast ? "col-span-2 sm:col-span-3 flex justify-center" : ""}
+              className={isLast ? "col-span-1 sm:col-span-3 flex justify-center" : ""}
             >
               <div className={isLast ? "w-full sm:w-1/3" : "w-full"}>
               <MenuCard key={item.label || index} item={item} />

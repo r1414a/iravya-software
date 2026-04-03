@@ -59,8 +59,9 @@ export default function StoreForm({ mode, store }) {
         managerName: store?.managerName || "",
         managerPhone: store?.managerPhone || "",
         managerEmail: store?.managerEmail || "",
+        status: store?.status || ""
     })
-    console.log(form);
+    // console.log(form);
     
 
     function handleFieldChange(name, value) {
@@ -220,6 +221,26 @@ export default function StoreForm({ mode, store }) {
                                         type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
                                     <FieldDescription className="text-xs">
                                         A user account with store manager role will be created for this email
+                                    </FieldDescription>
+                                </Field>
+
+                                {/* Status */}
+                                <Field>
+                                    <FieldLabel>Status</FieldLabel>
+                                    <Select defaultValue={form.status}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white border shadow-md">
+                                            <SelectGroup>
+                                                <SelectLabel>Status</SelectLabel>
+                                                <SelectItem value="active">Active</SelectItem>
+                                                <SelectItem value="inactive">Inactive</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FieldDescription className="text-xs">
+                                        Inactive stores won't appear in new trip assignments.
                                     </FieldDescription>
                                 </Field>
 

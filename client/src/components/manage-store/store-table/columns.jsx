@@ -25,6 +25,7 @@ import StoreDetailDrawer from "../StoreDetailsDrawer"
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import StoreForm from "../StoreForm"
+import DeleteModal from "@/components/DeleteModal"
 
 const statusStyles = {
     active:   "bg-green-100 text-green-700",
@@ -57,7 +58,11 @@ function ActionsCell({ row }) {
                 pathname.startsWith('/admin') && (
                     <>
                     <StoreForm mode={'edit'} store={store} />
-                    <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+                    <DeleteModal
+                                                                                           who={store.name}
+                                                                                           m1active="Store will no longer be available for trip scheduling or fleet tracking."
+                                                                                         />
+                    {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
                     
                     </>
                 )

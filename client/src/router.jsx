@@ -24,6 +24,7 @@ import SuperAdminAlerts from "./pages/super-admin/alerts/SuperAdminAlerts";
 import SuperAdminManageDevices from "./pages/super-admin/manage-devices/SuperAdminManageDevices";
 
 import SuperAdminManageBrands from "./pages/super-admin/manage-brands/SuperAdminManageBrands"
+import TripTracking from "./pages/new/TripTracking";
 
 
 
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
             }
             //more pages
         ]
+    },
+    {
+        path: "/new",
+        element: <TripTracking/>
     },
     {
         path: '/track',

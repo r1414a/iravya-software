@@ -31,6 +31,7 @@ import TruckDetailDrawer from "../TruckDetailDrawer"
 import AddTruckModal from "../AddTruckForm"
 import TripDetailSheet from "@/components/manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
+import DeleteModal from "@/components/DeleteModal"
 
 
 // Truck type icon colours — a small coloured square instead of avatar initials
@@ -133,7 +134,11 @@ function ActionsCell({ row }) {
                     location.pathname.startsWith('/admin') &&  (
                         <>
                             <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-                <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button>
+                            <DeleteModal
+                                                                       who={truck.regNo}
+                                                                       m1active="Truck will not be assignable to any trip"
+                                                                     />
+                {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
                         </>
                     )
 }

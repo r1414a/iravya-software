@@ -62,7 +62,7 @@ export default function StoreForm({ mode, store }) {
         status: store?.status || ""
     })
     // console.log(form);
-    
+
 
     function handleFieldChange(name, value) {
         setForm(prev => ({ ...prev, [name]: value }))
@@ -130,7 +130,7 @@ export default function StoreForm({ mode, store }) {
                                             placeholder="Westside — Koregaon Park"
                                             value={form.name}
                                             className="w-full placeholder:text-sm text-sm sm:text-md"
-                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)}
+                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)}
                                         />
                                     </Field>
                                     <Field className="basis-[35%]">
@@ -155,11 +155,11 @@ export default function StoreForm({ mode, store }) {
                                 {/* Full address */}
                                 <Field>
                                     <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input 
+                                    <Input
                                         name="address"
-                                        value={form.address} 
-                                        onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="Shop no., mall/building, area, pincode" 
-                                        className="placeholder:text-sm text-sm sm:text-md" 
+                                        value={form.address}
+                                        onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="Shop no., mall/building, area, pincode"
+                                        className="placeholder:text-sm text-sm sm:text-md"
                                     />
                                     <FieldDescription className="text-xs">
                                         Used to place the store pin on the map and compute geofence
@@ -198,26 +198,26 @@ export default function StoreForm({ mode, store }) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <Field>
                                         <FieldLabel>Manager name</FieldLabel>
-                                        <Input 
+                                        <Input
                                             name="managerName"
-                                            value={form.managerName} 
-                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
+                                            value={form.managerName}
+                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                     <Field>
                                         <FieldLabel>Manager phone</FieldLabel>
-                                        <Input 
+                                        <Input
                                             name="managerPhone"
-                                            value={form.managerPhone} 
-                                            onChange={({target: {name, value}}) => handleFieldChange(name,value)} placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
+                                            value={form.managerPhone}
+                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
                                     </Field>
                                 </div>
 
                                 <Field>
                                     <FieldLabel>Manager email</FieldLabel>
-                                    <Input 
+                                    <Input
                                         name="managerEmail"
-                                        value={form.managerEmail} 
-                                        onChange={({target: {name, value}}) => handleFieldChange(name,value)}  
+                                        value={form.managerEmail}
+                                        onChange={({ target: { name, value } }) => handleFieldChange(name, value)}
                                         type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
                                     <FieldDescription className="text-xs">
                                         A user account with store manager role will be created for this email
@@ -225,24 +225,29 @@ export default function StoreForm({ mode, store }) {
                                 </Field>
 
                                 {/* Status */}
-                                <Field>
-                                    <FieldLabel>Status</FieldLabel>
-                                    <Select defaultValue={form.status}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Status</SelectLabel>
-                                                <SelectItem value="active">Active</SelectItem>
-                                                <SelectItem value="inactive">Inactive</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FieldDescription className="text-xs">
-                                        Inactive stores won't appear in new trip assignments.
-                                    </FieldDescription>
-                                </Field>
+                                {
+                                    isEdit && (
+                                        <Field>
+                                            <FieldLabel>Status</FieldLabel>
+                                            <Select defaultValue={form.status}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border shadow-md">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Status</SelectLabel>
+                                                        <SelectItem value="active">Active</SelectItem>
+                                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                            <FieldDescription className="text-xs">
+                                                Inactive stores won't appear in new trip assignments.
+                                            </FieldDescription>
+                                        </Field>
+                                    )
+                                }
+
 
                             </FieldGroup>
                         </FieldSet>

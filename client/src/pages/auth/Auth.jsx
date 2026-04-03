@@ -1,13 +1,12 @@
 
+import { Input } from '@/components/ui/input';
+import { CREDENTIALS } from '@/constants/credentials';
 import { Eye, EyeOff, UserRound, Lock } from 'lucide-react';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-
-const credentials = [
-    { role: "Super Admin", badge: "super_admin", badgeClass: "super_admin", user: "super_admin", pass: "super_admin@123456" },
-    { role: "DC Operator", badge: "dc_operator", badgeClass: "dc_operator", user: "dc_operator", pass: "dc_operator@123456" },
-];
-
+import z from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod"
 
 function EyeIcon({ show }) {
     return show ? (
@@ -17,13 +16,28 @@ function EyeIcon({ show }) {
     );
 }
 
-
-
+const signInSchema = z.object({
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(6, "Password must be at least 6 characters")
+})
 
 export default function Auth() {
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors }
+    } = useForm({
+        resolver: zodResolver(signInSchema),
+        defaultValues: { username: "", password: "" }
+    })
+
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const navigate = useNavigate();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+
+    console.log(watch("username"), watch("password"));
+
     const [showPw, setShowPw] = useState(false);
 
     const handleUse = (cred) => {
@@ -31,42 +45,52 @@ export default function Auth() {
         setPassword(cred.pass);
     };
 
-    function handleSignIn(){
+    // function handleFieldChange(e) {
+    //     const {name, value} = e.target;
+    //     setForm(prev => ({...prev, [name]: value}))
+    // }
+
+    function onSubmit(data) {
+        console.log(data);
+
+    }
+
+    function handleSignIn() {
         console.log(username);
-        if(username === 'super_admin'){
-            navigate('/admin', {replace: true})
-        }else{
-            navigate('/dc', {replace: true})
+        if (username === 'super_admin') {
+            navigate('/admin', { replace: true })
+        } else {
+            navigate('/dc', { replace: true })
         }
-        
-}
+
+    }
     return (
         <>
-       
+
 
             {/* Root */}
             <div
-                className="w-full min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-6"
-                style={{ background: "#5c1a2e" }}
+                className="w-full min-h-screen flex flex-col items-center justify-center bg-maroon relative overflow-hidden px-4 py-6"
+
             >
                 {/* Background orbs */}
                 <div
                     className="absolute rounded-full pointer-events-none"
-                    style={{ width: 480, height: 480, background: "#c0395a", filter: "blur(90px)", opacity: 0.18, top: -120, left: -80 }}
+                    style={{ width: 480, height: 480, background: "#ffab25", filter: "blur(90px)", opacity: 0.18, top: -120, left: -80 }}
                 />
                 <div
                     className="absolute rounded-full pointer-events-none"
-                    style={{ width: 360, height: 360, background: "#8b1a30", filter: "blur(90px)", opacity: 0.18, bottom: -60, right: -60 }}
+                    style={{ width: 360, height: 360, background: "#ffab25", filter: "blur(90px)", opacity: 0.18, bottom: -60, right: -60 }}
                 />
                 <div
                     className="absolute rounded-full pointer-events-none"
-                    style={{ width: 220, height: 220, background: "#e8506a", filter: "blur(90px)", opacity: 0.18, top: "40%", left: "60%" }}
+                    style={{ width: 220, height: 220, background: "#ffab25", filter: "blur(90px)", opacity: 0.18, top: "40%", left: "60%" }}
                 />
 
                 {/* Brand */}
                 <div className="flex flex-col items-center gap-2.5 mb-7 animate-fade-down">
                     <div
-                        className="w-14 h-14 flex items-center justify-center rounded-2xl text-[22px] font-semibold text-[#5c1a2e]"
+                        className="w-14 h-14 flex items-center justify-center rounded-2xl text-[22px] font-semibold text-maroon"
                         style={{
 
                             background: "linear-gradient(145deg, #f5a623, #e8903a)",
@@ -82,13 +106,13 @@ export default function Auth() {
                     >
                         Iravya
                     </span>
-                    
+
                 </div>
 
                 {/* Card */}
                 <div
-                    className="bg-white rounded-2xl w-full max-w-[420px] animate-fade-up p-6 lg:p-8"
-                   
+                    className="bg-white rounded-2xl w-full max-w-105 animate-fade-up p-6 lg:p-8"
+
                 >
                     {/* Heading */}
                     <h1
@@ -101,77 +125,65 @@ export default function Auth() {
                         Enter your credentials to continue
                     </p>
 
-                    {/* Username */}
-                    <div className="relative mb-3.5">
-                        <UserRound className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            autoComplete="username"
-                            className="input-field w-full pl-10 pr-10 py-3 border border-[#e8e8f0] rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200"
-                            style={{ fontFamily: "'DM Sans', sans-serif" }}
-                        />
-                    </div>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {/* Username */}
+                        <div className="relative">
+                            <UserRound className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
+                            <Input
+                                type="text"
+                                name="username"
+                                placeholder="Username"
+                                // value={form.username}
+                                {...register("username")}
+                                // onChange={(e) => handleFieldChange(e)}
+                                className={`input-field w-full pl-10 pr-10 h-11 border ${errors.username ? 'border-red-500' : 'border-[#e8e8f0]'}  rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
+                            />
 
-                    {/* Password */}
-                    <div className="relative mb-3.5">
-                        <Lock className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
-                        <input
-                            type={showPw ? "text" : "password"}
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            autoComplete="current-password"
-                            className="input-field w-full pl-10 pr-10 py-3 border border-[#e8e8f0] rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200"
-                            style={{ fontFamily: "'DM Sans', sans-serif" }}
-                        />
+                        </div>
+                        {errors.username && (
+                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.username.message}</span>
+                        )}
+
+                        {/* Password */}
+                        <div className="relative mt-2">
+                            <Lock className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
+                            <Input
+                                type={showPw ? "text" : "password"}
+                                name="password"
+                                placeholder="Password"
+                                // value={form.password}
+                                {...register("password")}
+                                // onChange={(e) => handleFieldChange(e)}
+                                className={`input-field w-full pl-10 pr-10 h-11 border ${errors.username ? 'border-red-500' : 'border-[#e8e8f0]'} rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPw((v) => !v)}
+                                tabIndex={-1}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center text-[#b0b0c0] hover:text-[#8b1a30] transition-colors duration-150 bg-transparent border-none cursor-pointer p-0"
+                            >
+                                <EyeIcon show={showPw} size={16} />
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.password.message}</span>
+                        )}
+
+                        {/* Sign In button */}
                         <button
-                            type="button"
-                            onClick={() => setShowPw((v) => !v)}
-                            tabIndex={-1}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center text-[#b0b0c0] hover:text-[#8b1a30] transition-colors duration-150 bg-transparent border-none cursor-pointer p-0"
+                            type="submit"
+                            className="btn-signin w-full py-3.5 text-white text-[15px] font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
+                            // onClick={handleSignIn}
+                            style={{
+                                background: "linear-gradient(135deg, #8b1a30, #6b1223)",
+                                boxShadow: "0 4px 18px rgba(139,26,48,0.32)",
+                                fontFamily: "'DM Sans', sans-serif",
+                            }}
                         >
-                            <EyeIcon show={showPw} size={16}/>
+                            Sign In
                         </button>
-                    </div>
 
-                    {/* Sign In button */}
-                    <button
-                        type="button"
-                        className="btn-signin w-full py-3.5 text-white text-[15px] font-semibold rounded-[10px] mt-1.5 tracking-wide cursor-pointer border-none transition-all duration-150"
-                        onClick={handleSignIn}
-                        style={{
-                            background: "linear-gradient(135deg, #8b1a30, #6b1223)",
-                            boxShadow: "0 4px 18px rgba(139,26,48,0.32)",
-                            fontFamily: "'DM Sans', sans-serif",
-                        }}
-                    >
-                        Sign In
-                    </button>
-
-                    {/* Links */}
-                    {/* <div className="flex flex-col items-center gap-1.5 mt-5">
-                    <span className="text-[13px] text-[#8e8e97]">
-                    Customer?{" "}
-                    <a
-                        href="#"
-                        className="link-action font-semibold cursor-pointer transition-colors duration-150 no-underline"
-                        style={{ color: "#8b1a30" }}
-                    >
-                        Submit a request →
-                    </a>
-                    </span>
-                    <a
-                    href="#"
-                    className="link-action text-[13px] font-semibold no-underline cursor-pointer transition-colors duration-150"
-                    style={{ color: "#8b1a30" }}
-                    >
-                    <Search />Track ticket →
-                    </a>
-                </div> */}
-
+                    </form>
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-5">
                         <div className="flex-1 h-px bg-[#e8e8f0]" />
@@ -182,7 +194,7 @@ export default function Auth() {
                     </div>
 
                     {/* Credential cards */}
-                    {credentials.map((cred) => (
+                    {CREDENTIALS.map((cred) => (
                         <div
                             key={cred.role}
                             className="cred-card flex items-center justify-between bg-[#f7f7fb] border border-[#ececf5] rounded-[10px] px-3.5 py-3 mb-2.5 transition-all duration-150 cursor-default"
@@ -192,7 +204,6 @@ export default function Auth() {
                                     <span className="text-[13.5px] font-semibold text-[#1a1a2e]">{cred.role}</span>
                                     <span
                                         className={`text-[10px] font-semibold px-2 py-0.5 rounded-[5px] tracking-wide border ${cred.badgeClass}`}
-                                        style={{ borderWidth: "1.5px" }}
                                     >
                                         {cred.badge}
                                     </span>
@@ -204,8 +215,7 @@ export default function Auth() {
                             <button
                                 type="button"
                                 onClick={() => handleUse(cred)}
-                                className="use-btn text-[12.5px] font-semibold bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
-                                style={{ color: "#8b1a30" }}
+                                className="use-btn text-[12.5px] font-semibold text-maroon-dark bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
                             >
                                 Use →
                             </button>

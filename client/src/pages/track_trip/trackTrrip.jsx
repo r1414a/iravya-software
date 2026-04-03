@@ -133,9 +133,6 @@ export default function TrackTrip (){
                 CreateButton={<></>}
             />
             <TrackingForm 
-              MOCK_TRIPS={MOCK_TRIPS}
-              STATUS_CONFIG={STATUS_CONFIG}
-              ISSUE_TYPES ={ISSUE_TYPES}
             />
             
         </section>

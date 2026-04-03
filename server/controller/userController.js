@@ -9,7 +9,10 @@ import {registerUserService,
     userExistbyemailService,
     userExistbyidService,
     resetPasswordService,
-    setUserStatusService
+    setUserStatusService,
+    getAllUserService,
+    updateUserService,
+    getUserbySearchService
 }  from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 
@@ -243,6 +246,81 @@ const setUserStatus = asyncHandler(async (req, res) => {
     
 })
 
+const getAllUser = asyncHandler(async(req, res)=>{
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const users = await getAllUserService(page, limit)
+    res.status(201)
+    .json(new ApiResponse(
+        201,
+        users,
+        "All users fetch successfully."
+    ))
+})
+
+const getUserbySearch = asyncHandler(async (req,res) => {
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const {slug} = req.body
+    const users = await getUserbySearchService(page, limit, slug)
+    res.status(201)
+    .json(new ApiResponse(
+        201,
+        users,
+        "User found"
+    ))
+})
+
+const getUserID = asyncHandler(async(req, res)=>{
+    const {id} = req.params
+    const user = await userExistbyidService(id)
+    if(user.length){
+        res.status(201)
+        .json(
+            new ApiResponse(201, 
+                user,
+                "Found User"
+            )
+        )
+    }else{
+        res.status(201)
+        .json(
+            new ApiResponse(404, 
+                {},
+                "User does not exist"
+            )
+        )
+    }
+})
+
+const updateUser = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    console.log(req.body)
+    const userExists = await userExistbyidService(id)
+    if (!userExists.length) {
+        res.status(200)
+        .json(
+            new ApiResponse(
+                404, 
+                {
+                    user: userExists[0],
+                },
+                "User does not exist"
+            )
+        )
+    }else{
+        const user = await updateUserService(id, req.body)
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                user,
+                "User data is updated successfully"
+            )
+        );
+    }
+    
+})
+
 
 export {
   registerUser,
@@ -250,5 +328,9 @@ export {
   logoutUser,
   deleteUser,
   resetPassword,
-  setUserStatus
+  setUserStatus,
+  getAllUser,
+  getUserID,
+  updateUser,
+  getUserbySearch
 }

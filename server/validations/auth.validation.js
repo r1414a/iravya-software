@@ -32,9 +32,10 @@ export const registerValidation = [
         .withMessage("Invalid role"),
 
     body("status")
-        .optional()
-        .isIn(["TRUE", "FALSE"])
-        .withMessage("Invalid status")
+        .notEmpty()
+        .withMessage("Status is required")
+        .isBoolean()
+        .withMessage("Status must be boolean (true/false)")
 ]
 
 
@@ -65,6 +66,36 @@ export const resetPasswordValidation = [
 ]
 
 export const setUserStatusValidator = [
+
+    body("status")
+        .notEmpty()
+        .withMessage("Status is required")
+        .isBoolean()
+        .withMessage("Status must be boolean (true/false)")
+]
+
+export const updateUserValidation = [
+    body("first_name")
+        .trim()
+        .isLength({ min: 2 })
+        .withMessage("First name must be at least 2 characters"),
+
+    body("last_name")
+        .trim()
+        ,
+
+    body("email")
+        .trim()
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Invalid email format"),
+
+
+    body("role")
+        .optional()
+        .isIn(["super_admin", "dc_manager", "driver","store_manager"])
+        .withMessage("Invalid role"),
 
     body("status")
         .notEmpty()

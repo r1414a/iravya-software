@@ -83,7 +83,6 @@ const userExistbyidService = async (id) =>{
 }
 
 
-
 const resetPasswordService = async (id, old_pass , new_pass)=>{
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(new_pass, salt)
@@ -139,6 +138,71 @@ const setUserStatusService = async(id, status)=>{
     return user
 }
 
+const getAllUserService = async(page = 1, limit = 10)=>{
+    const offset = (page - 1) * limit
+    const users = await sql
+        `SELECT * FROM "User"
+        ORDER BY "created_at" DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+        `
+    const [{ count }] = await sql`
+        SELECT COUNT(*) FROM "User"
+    `
+    
+    return {
+        users,
+        page,
+        limit,
+        total: Number(count),
+        totalPages: Math.ceil(count / limit)
+    }
+}
+
+const getUserbySearchService = async(page = 1, limit = 10, search) =>{
+    const offset = (page - 1) * limit
+
+    const users = await sql`
+    SELECT *
+    FROM "User"
+    WHERE 
+        "first_name" ILIKE ${'%' + search + '%'}
+        OR "last_name" ILIKE ${'%' + search + '%'}
+        OR "email" ILIKE ${'%' + search + '%'}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+    `
+    const [{ count }] = await sql`
+        SELECT COUNT(*) FROM "User"
+    `
+    return {
+        users,
+        page,
+        limit,
+        total: Number(count),
+        totalPages: Math.ceil(count / limit)
+    }
+}
+
+const updateUserService = async(id, data)=>{
+     
+    const user = (await sql`
+            UPDATE "User"
+            SET
+                "first_name" = ${data.first_name},
+                "last_name" = ${data.last_name},
+                "email" = ${data.email},
+                "role" = ${data.role},
+                "status" = ${data.status}
+            WHERE id = ${id}
+            RETURNING *
+                
+        `)[0]
+
+        return user
+}
+
 export {
     registerUserService,
     loginUserService, 
@@ -146,5 +210,8 @@ export {
     userExistbyemailService,
     userExistbyidService,
     resetPasswordService,
-    setUserStatusService
+    setUserStatusService,
+    getAllUserService,
+    updateUserService,
+    getUserbySearchService
 }

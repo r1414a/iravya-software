@@ -15,6 +15,13 @@ import {registerUserService,
     getUserbySearchService
 }  from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
+import sendResponse from "../utils/sendResponse.js";
+
+const getMe = asyncHandler(async (req,res) => {
+    sendResponse(res, 200, req.user, "")
+})
+
+
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log(req.body)
@@ -22,16 +29,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const userExists = await userExistbyemailService(email)
     if (userExists.length) {
-        res.status(200)
-        .json(
-            new ApiResponse(
-                200, 
-                {
-                    user: userExists[0],
-                },
-                "User already exist"
-            )
-        )
+        throw new ApiError(200, "Email already in use");
+        // res.status(200)
+        // .json(
+        //     new ApiResponse(
+        //         200, 
+        //         {
+        //             user: userExists[0],
+        //         },
+        //         "User already exist"
+        //     )
+        // )
     }
     else{
     const user = await registerUserService(req.body)
@@ -48,17 +56,21 @@ const registerUser = asyncHandler(async (req, res) => {
     //     token: generateToken(user.id)
     // })
 
-    res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200, 
-            {
-                user: user,
-            },
-            "User registered successfully"
-        )
-    )}
+
+    sendResponse(res,201, user, "User registered successfully");
+    // res
+    // .status(200)
+    // .json(
+    //     new ApiResponse(
+    //         200, 
+    //         {
+    //             user: user,
+    //         },
+    //         "User registered successfully"
+    //     )
+    // )
+
+}
 
 })
 
@@ -68,16 +80,17 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const userExists = await userExistbyemailService(email)
     if (!userExists.length) {
-        res.status(200)
-        .json(
-            new ApiResponse(
-                200, 
-                {
-                    user: userExists[0],
-                },
-                "User does bot exist"
-            )
-        )
+        throw new ApiError(401, "We couldn't find that account.")
+        // res.status(200)
+        // .json(
+        //     new ApiResponse(
+        //         200, 
+        //         {
+        //             user: userExists[0],
+        //         },
+        //         "We couldn't find that account."
+        //     )
+        // )
     }
     else{
 
@@ -88,36 +101,26 @@ const loginUser = asyncHandler(async (req, res) => {
         const options = {
             httpOnly: true,
             secure: true,
+            sameSite: 'None',
             maxAege: 24 *60*60*1000
         }
 
+       res.cookie("token", token, options)
+
+
+        sendResponse(res, 200, user, `Welcome back, ${user.first_name} - (${user.role === 'super_admin' ? 'Super admin' : 'DC manager'})`)
         // res
         // .status(200)
         // .cookie("token", token, options)
-        // .json({
-        //     success: true,
-        //     message: "User logged in successfully",
-        //     _id: user.id,
-        //     email: user.email,
-        //     first_name: user.first_name,
-        //     last_name: user.last_name,
-        //     role: user.role,
-        //     token
-        // })
-
-
-        res
-        .status(200)
-        .cookie("token", token, options)
-        .json(
-            new ApiResponse(
-                200, 
-                {
-                    user: user,
-                },
-                "User loged in successfully"
-            )
-        )
+        // .json(
+        //     new ApiResponse(
+        //         200, 
+        //         {
+        //             user: user,
+        //         },
+        //         "User loged in successfully"
+        //     )
+        // )
     }
 
 })
@@ -323,6 +326,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
 
 export {
+    getMe,
   registerUser,
   loginUser,
   logoutUser,

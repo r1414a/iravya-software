@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import  {createProxyMiddleware} from 'http-proxy-middleware'
 import userRoutes from './routes/userRoutes.js'
+import { globalErrorHandler } from "./middleware/globalErrorHandler.js"
 
 
 
@@ -12,7 +13,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CLIENT_DEV_URL,
     credentials: true
 }))
 
@@ -28,7 +29,7 @@ app.use(cookieParser())
 app.use('/api/v1/users',userRoutes)
 
 
-
+app.use(globalErrorHandler);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });

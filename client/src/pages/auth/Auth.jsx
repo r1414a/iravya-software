@@ -1,12 +1,17 @@
 
 import { Input } from '@/components/ui/input';
-import { CREDENTIALS } from '@/constants/credentials';
 import { Eye, EyeOff, UserRound, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import z from 'zod';
+import z  from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod"
+import {useSignInMutation} from "@/lib/features/auth/authApi"
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/lib/features/auth/authSlice';
+import { CREDENTIALS } from '@/constants/constant';
+
+
 
 function EyeIcon({ show }) {
     return show ? (
@@ -17,47 +22,57 @@ function EyeIcon({ show }) {
 }
 
 const signInSchema = z.object({
-    username: z.string().min(1, "Username is required"),
+    email: z.email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters")
 })
 
 export default function Auth() {
+    const [login, {isLoading, isError, error}] = useSignInMutation()
+    const dispatch = useDispatch();
     const {
         register,
         handleSubmit,
+        setValue,
         watch,
         formState: { errors }
     } = useForm({
         resolver: zodResolver(signInSchema),
-        defaultValues: { username: "", password: "" }
+        defaultValues: { email: "", password: "" }
     })
-
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const [role, setRole] = useState("");
 
-    console.log(watch("username"), watch("password"));
+    // console.log(watch("email"), watch("password"));
 
     const [showPw, setShowPw] = useState(false);
 
     const handleUse = (cred) => {
-        setUsername(cred.user);
-        setPassword(cred.pass);
+        setValue("email", cred.email);
+        setValue("password", cred.pass);
+        setRole(cred.role)
     };
 
-    // function handleFieldChange(e) {
-    //     const {name, value} = e.target;
-    //     setForm(prev => ({...prev, [name]: value}))
-    // }
+    async function onSubmit(data) {
+        try{
+            const userData = await login(data).unwrap();
+            // console.log("userData",userData);
+            dispatch(setUser(userData.data))
 
-    function onSubmit(data) {
-        console.log(data);
+            if(userData?.data?.role === 'super_admin'){
+                navigate('/admin', { replace: true })
+            }else{
+                navigate('/dc', { replace: true })
+            }
+        }catch(err){
+            console.error('Failed to login:', err);
+        }
+        // console.log(data);
 
     }
 
     function handleSignIn() {
-        console.log(username);
-        if (username === 'super_admin') {
+        // console.log(data);
+        if (role === 'super_admin') {
             navigate('/admin', { replace: true })
         } else {
             navigate('/dc', { replace: true })
@@ -125,23 +140,23 @@ export default function Auth() {
                         Enter your credentials to continue
                     </p>
 
-                    <form onSubmit={handleSubmit(onSubmit)}>
+                    <form onSubmit={handleSubmit(handleSignIn)}>
                         {/* Username */}
                         <div className="relative">
                             <UserRound className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
                             <Input
-                                type="text"
-                                name="username"
-                                placeholder="Username"
+                                type="email"
+                                name="email"
+                                placeholder="arjun.j@gmail.com"
                                 // value={form.username}
-                                {...register("username")}
+                                {...register("email")}
                                 // onChange={(e) => handleFieldChange(e)}
                                 className={`input-field w-full pl-10 pr-10 h-11 border ${errors.username ? 'border-red-500' : 'border-[#e8e8f0]'}  rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
 
                         </div>
-                        {errors.username && (
-                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.username.message}</span>
+                        {errors.email && (
+                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.email.message}</span>
                         )}
 
                         {/* Password */}
@@ -154,7 +169,7 @@ export default function Auth() {
                                 // value={form.password}
                                 {...register("password")}
                                 // onChange={(e) => handleFieldChange(e)}
-                                className={`input-field w-full pl-10 pr-10 h-11 border ${errors.username ? 'border-red-500' : 'border-[#e8e8f0]'} rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
+                                className={`input-field w-full pl-10 pr-10 h-11 border ${errors.email ? 'border-red-500' : 'border-[#e8e8f0]'} rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
                             <button
                                 type="button"
@@ -180,7 +195,7 @@ export default function Auth() {
                                 fontFamily: "'DM Sans', sans-serif",
                             }}
                         >
-                            Sign In
+                            {isLoading ? 'Please wait...' : 'Sign In'}
                         </button>
 
                     </form>
@@ -209,7 +224,7 @@ export default function Auth() {
                                     </span>
                                 </div>
                                 <span className="text-[12px] text-[#9090a0] font-mono">
-                                    {cred.user} / {cred.pass}
+                                    {cred.email} / {cred.pass}
                                 </span>
                             </div>
                             <button

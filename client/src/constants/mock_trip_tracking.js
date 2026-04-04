@@ -28,7 +28,7 @@ export const MOCK_TRIPS = {
     progressFraction: 0.42,
     alerts: ["Minor slowdown near expressway"],
     waypoints: [
-      [18.6298, 73.8008], // Pimpri-Chinchwad
+      [18.6298, 73.8008], // Pimpri-Chinchwad [lat,lng]
       [18.5204, 73.8567], // Pune
       [18.3635, 73.8664], // Khopoli
       [18.9667, 72.8333], // Navi Mumbai

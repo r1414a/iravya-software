@@ -1,4 +1,5 @@
 import { registerUser ,
+    getMe,
     loginUser,
     logoutUser,
     deleteUser,
@@ -27,7 +28,7 @@ import {
 
 const router = express.Router()
 
-
+router.get("/me", protect, getMe)
 
 //-------------Common Routs
 router.post(
@@ -41,10 +42,10 @@ router.post(
 
 router.post(
     "/signin",
-    
+    // protect,
     loginValidation,
     validate,
-    authorizeSihnin(true),
+    // authorizeSihnin(true),
     loginUser
 )
 

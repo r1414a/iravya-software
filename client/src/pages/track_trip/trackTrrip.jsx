@@ -133,6 +133,7 @@ export default function TrackTrip (){
                 CreateButton={<></>}
             />
             <TrackingForm 
+            MOCK_TRIPS={MOCK_TRIPS}
             />
             
         </section>

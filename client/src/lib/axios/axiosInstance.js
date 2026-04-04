@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.API_BACKEND_DEV,
+  baseURL: process.env.VITE_BACKEND_DEV,
   timeout: 10000,
 });
 

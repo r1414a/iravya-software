@@ -49,7 +49,7 @@ export default function Auth() {
     const handleUse = (cred) => {
         setValue("email", cred.email);
         setValue("password", cred.pass);
-        setRole(cred.role)
+        setRole(cred.badge)
     };
 
     async function onSubmit(data) {
@@ -71,7 +71,7 @@ export default function Auth() {
     }
 
     function handleSignIn() {
-        // console.log(data);
+        // console.log(role);
         if (role === 'super_admin') {
             navigate('/admin', { replace: true })
         } else {

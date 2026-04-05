@@ -57,5 +57,7 @@ router.put("/update_user/:id", protect, authorize('super_admin'), updateUserVali
 router.get("/all_users",protect, authorize('super_admin'), getAllUser)
 router.get("/user/:id",protect, authorize('super_admin'), getUserID)
 router.post("/users_by_search",protect, authorize('super_admin'), getUserbySearch)
+
+
 export default router
 

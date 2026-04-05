@@ -21,8 +21,6 @@ const getMe = asyncHandler(async (req,res) => {
     sendResponse(res, 200, req.user, "")
 })
 
-
-
 const registerUser = asyncHandler(async (req, res) => {
     console.log(req.body)
     const { email, password } = req.body

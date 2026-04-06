@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 
 import {
@@ -18,10 +18,25 @@ import {
 import { selectUser } from "@/lib/features/auth/authSlice";
 import { useSelector } from "react-redux";
 import { ROLES } from "@/constants/constant";
+import { useSignOutMutation } from "@/lib/features/auth/authApi";
 
 export default function Header() {
-  const { user, isAuthticated, loading } = useSelector(selectUser)
-  console.log("header", user, isAuthticated, loading);
+  const { user } = useSelector(selectUser);
+  const [signOut] = useSignOutMutation();
+  const navigate = useNavigate();
+  // console.log("header", user, isAuthticated, loading);
+
+  const handleLogout = async () => {
+    console.log('logout');
+
+    try {
+      await signOut().unwrap();
+      navigate('/')
+    } catch (err) {
+      console.error("Error while logging out: ", err);
+
+    }
+  }
 
   return (
     <div className="bg-zinc-100 sticky top-0 z-50">
@@ -88,7 +103,10 @@ export default function Header() {
 
             <DropdownMenuItem className="text-red-500 focus:text-red-600">
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              <Button onClick={handleLogout} variant="ghost" className="hover:bg-transparent w-full">
+
+                Logout
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

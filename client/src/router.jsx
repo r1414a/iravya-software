@@ -1,32 +1,43 @@
 import { createBrowserRouter } from "react-router-dom";
-import Auth from "./pages/auth/Auth";
-import AuthLayout from "./layouts/AuthLayout";
-import AdminLayout from "./layouts/AdminLayout";
-import SuperAdminHome from "./pages/super-admin/SuperAdminHome";
-import SuperAdminManageUser from "./pages/super-admin/manage-users/SuperAdminManageUser";
-import DCHome from "./pages/dc-operator/DCHome";
-import DCManageTrips from "./pages/dc-operator/manage-trips/DCManageTrips";
-import StoreManagerHome from "./pages/store-manager/StoreManagerHome"
-import ViewTrips from "./pages/store-manager/ViewTrips/ViewTrips."
-import DCManageDrivers from "./pages/dc-operator/manage-drivers/DCManageDrivers";
-import DCManageTrucks from "./pages/dc-operator/manage-trucks/DCManageTrucks";
-import DCManageStores from "./pages/dc-operator/manage-stores/DCManageStores"
-import DCManageDevices from "./pages/dc-operator/manage-gps-device/DCManageDevices";
-import SuperAdminManageTrips from "./pages/super-admin/manage-trips/SuperAdminManageTrips";
-import SuperAdminManageDrivers from "./pages/super-admin/manage-drivers/SuperAdminManageDrivers";
-import SuperAdminManageTrucks from "./pages/super-admin/manage-trucks/SuperAdminManageTrucks";
-import SuperAdminManageDCs from "./pages/super-admin/manage-dcs/SuperAdminManageDCS";
-import TrackTrip from "./pages/track_trip/trackTrrip";
-import SuperAdminManageStores from "./pages/super-admin/manage-stores/SuperAdminManageStores";
-import SuperAdminSettings from "./pages/super-admin/settings/SuperAdminSettings";
-import SuperAdminAlerts from "./pages/super-admin/alerts/SuperAdminAlerts";
-import SuperAdminManageDevices from "./pages/super-admin/manage-devices/SuperAdminManageDevices";
-
-import SuperAdminManageBrands from "./pages/super-admin/manage-brands/SuperAdminManageBrands"
-import TripTracking from "./pages/new/DriverDashboard";
+import {lazy} from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROLES } from "./constants/constant";
-import DriverDashboard from "./pages/new/DriverDashboard";
+
+const Auth = lazy(() => import("./pages/auth/Auth"))
+
+const AuthLayout = lazy(() => import("./layouts/AuthLayout"))
+const AdminLayout = lazy(() => import("./layouts/AdminLayout"))
+
+const SuperAdminHome = lazy(() => import("./pages/super-admin/SuperAdminHome"));
+const SuperAdminManageUser = lazy(() => import("./pages/super-admin/manage-users/SuperAdminManageUser"));
+
+
+const DCHome = lazy(() => import("./pages/dc-operator/DCHome"));
+const DCManageTrips = lazy(() => import("./pages/dc-operator/manage-trips/DCManageTrips"));
+const DCManageDrivers = lazy(() => import("./pages/dc-operator/manage-drivers/DCManageDrivers"));
+const DCManageTrucks = lazy(() => import("./pages/dc-operator/manage-trucks/DCManageTrucks"));
+const DCManageStores = lazy(() => import("./pages/dc-operator/manage-stores/DCManageStores"));
+const DCManageDevices = lazy(() => import("./pages/dc-operator/manage-gps-device/DCManageDevices"));
+
+
+const SuperAdminManageTrips = lazy(() => import("./pages/super-admin/manage-trips/SuperAdminManageTrips"));
+const SuperAdminManageDCs = lazy(() => import("./pages/super-admin/manage-dcs/SuperAdminManageDCS"));
+const SuperAdminManageDrivers = lazy(() => import("./pages/super-admin/manage-drivers/SuperAdminManageDrivers"));
+const SuperAdminManageTrucks = lazy(() => import("./pages/super-admin/manage-trucks/SuperAdminManageTrucks"));
+const SuperAdminManageStores = lazy(() => import("./pages/super-admin/manage-stores/SuperAdminManageStores"));
+const SuperAdminSettings = lazy(() => import("./pages/super-admin/settings/SuperAdminSettings"));
+const SuperAdminAlerts = lazy(() => import("./pages/super-admin/alerts/SuperAdminAlerts"));
+const SuperAdminManageDevices = lazy(() => import("./pages/super-admin/manage-devices/SuperAdminManageDevices"));
+const SuperAdminManageBrands = lazy(() => import("./pages/super-admin/manage-brands/SuperAdminManageBrands"));
+
+SuperAdminManageDCs
+const TrackTrip = lazy(() => import("./pages/track-trip/TrackTrip"))
+
+
+const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
+
+
+
 
 
 
@@ -45,9 +56,9 @@ const router = createBrowserRouter([
 
     //Admin Routes
     {
-        // element: <ProtectedRoute allowedRoles={[ROLES.super_admin.role]} />,
-        // children: [
-        //     {
+        element: <ProtectedRoute allowedRoles={[ROLES.super_admin.role]} />,
+        children: [
+            {
                 path: '/admin',
                 element: <AdminLayout />,
                 children: [
@@ -98,14 +109,15 @@ const router = createBrowserRouter([
 
 
                 ]
-        //     }
-        // ]
+            }
+        ]
 
     },
+    //DC Routes
     {
-        // element: <ProtectedRoute allowedRoles={[ROLES.dc_manager.role]} />,
-        // children: [
-        //     {
+        element: <ProtectedRoute allowedRoles={[ROLES.dc_manager.role]} />,
+        children: [
+            {
                 path: '/dc',
                 element: <AdminLayout />,
                 children: [
@@ -135,31 +147,18 @@ const router = createBrowserRouter([
                         element: <DCManageStores />
                     }
                 ]
-        //     }
-
-        // ]
-
-    },
-
-    {
-        path: '/stores',
-        element: <AdminLayout />,
-        children: [
-            {
-                index: true,
-                element: <StoreManagerHome />
-            },
-            {
-                path: 'view-trips',
-                element: <ViewTrips />
             }
-            //more pages
+
         ]
+
     },
+    //Driver Route
     {
         path: "/driver",
         element: <DriverDashboard/>
     },
+
+    //Tracking Public Route
     {
         path: '/track',
         element: <AdminLayout />,
@@ -168,7 +167,6 @@ const router = createBrowserRouter([
                 index: true,
                 element: <TrackTrip />
             },
-            //more pages
         ]
     }
 ])

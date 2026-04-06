@@ -14,8 +14,8 @@ export const baseQueryWithToast = async (args, api, extraOptions) => {
   //   console.log("result", result);
 
   if (result.error) {
-
-    if (!skipToast && result.error.status !== 401) {
+//&& result.error.status !== 401
+    if (!skipToast) {
       showErrorToast(result.error)
     }
 

@@ -34,7 +34,7 @@ const statusStyles = {
 function ActionsCell({ row }) {
     const driver = row.original
     const {pathname} = useLocation();
-    console.log(pathname);
+    // console.log(pathname);
     
     const [editOpen, setEditOpen] = useState(false)
     const [tripDetailsOpen, setTripDetailsOpen] = useState(false)

@@ -3,6 +3,7 @@ import { useEffect } from "react"
 import { selectUser, setUser } from "./lib/features/auth/authSlice"
 import { useGetMeQuery } from "./lib/features/auth/authApi"
 import { useNavigate } from "react-router-dom"
+import LoadingSpinner from "./components/LoadingSpinner"
 
 export default function AuthLoader({ children }) {
 
@@ -35,7 +36,7 @@ export default function AuthLoader({ children }) {
     }, [data, dispatch, navigate])
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <LoadingSpinner/>
     }
 
     return children

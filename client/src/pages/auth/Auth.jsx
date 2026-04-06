@@ -12,7 +12,6 @@ import { setUser } from '@/lib/features/auth/authSlice';
 import { CREDENTIALS } from '@/constants/constant';
 
 
-
 function EyeIcon({ show }) {
     return show ? (
         <Eye className="text-gray-400" size={20} />
@@ -140,7 +139,7 @@ export default function Auth() {
                         Enter your credentials to continue
                     </p>
 
-                    <form onSubmit={handleSubmit(handleSignIn)}>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         {/* Username */}
                         <div className="relative">
                             <UserRound className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
@@ -148,9 +147,7 @@ export default function Auth() {
                                 type="email"
                                 name="email"
                                 placeholder="arjun.j@gmail.com"
-                                // value={form.username}
                                 {...register("email")}
-                                // onChange={(e) => handleFieldChange(e)}
                                 className={`input-field w-full pl-10 pr-10 h-11 border ${errors.username ? 'border-red-500' : 'border-[#e8e8f0]'}  rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
 
@@ -166,9 +163,7 @@ export default function Auth() {
                                 type={showPw ? "text" : "password"}
                                 name="password"
                                 placeholder="Password"
-                                // value={form.password}
                                 {...register("password")}
-                                // onChange={(e) => handleFieldChange(e)}
                                 className={`input-field w-full pl-10 pr-10 h-11 border ${errors.email ? 'border-red-500' : 'border-[#e8e8f0]'} rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
                             <button
@@ -188,7 +183,7 @@ export default function Auth() {
                         <button
                             type="submit"
                             className="btn-signin w-full py-3.5 text-white text-[15px] font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
-                            // onClick={handleSignIn}
+                            
                             style={{
                                 background: "linear-gradient(135deg, #8b1a30, #6b1223)",
                                 boxShadow: "0 4px 18px rgba(139,26,48,0.32)",

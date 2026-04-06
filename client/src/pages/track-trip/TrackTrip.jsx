@@ -1,7 +1,3 @@
-
-import MapView from "../../components/map/mapViewTrip"
-import { useState } from "react";
-import { Truck } from 'lucide-react';
 import AdminSubHeader from "@/components/AdminSubHeader"
 import TrackingForm from "./TrackingForm"
 import { MOCK_TRIPS } from "@/constants/mock_trip_tracking";

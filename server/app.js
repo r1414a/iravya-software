@@ -6,6 +6,7 @@ import userRoutes from './routes/userRoutes.js'
 import { globalErrorHandler } from "./middleware/globalErrorHandler.js"
 import dcRoutes from './routes/dcRoutes.js'
 import driverRoutes from './routes/driverRoutes.js'
+import truckRoutes from './routes/truckRoutes.js'
 
 const app = express()
 

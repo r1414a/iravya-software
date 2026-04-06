@@ -12,20 +12,49 @@ const addDriverService = async (data) => {
         licence_expiry
     } = data;
 
+    const name= full_name.split(" ")
+    const [newUser] = await sql`
+        INSERT INTO "User"
+    (
+       
+        "first_name",
+        "last_name",
+        "role",
+        "status"
+    )
+    VALUES
+    (
+       
+        ${name[0]},
+        ${name[1]},
+        ${"driver"},
+        true
+    )
+    RETURNING
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "role",
+        "status"
+`;
+
     const driver = await sql`
         INSERT INTO "Drivers" (
         "full_name",
         "phone",
         "licence_no",
         "licence_class",
-        "licence_expiry"
+        "licence_expiry",
+        "user_id"
         )
         VALUES (
         ${full_name},
         ${phone},
         ${licence_no},
         ${licence_class},
-        ${licence_expiry}
+        ${licence_expiry},
+        ${newUser.id}
         )
         RETURNING *
     `;

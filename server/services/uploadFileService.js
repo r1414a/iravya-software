@@ -7,7 +7,7 @@ const uploadFile = async (file, folder) => {
 
     const { data, error } = await supabase
         .storage
-        .from('truck-documents')
+        .from('Documents')   // ✅ Correct bucket name
         .upload(fileName, file.buffer, {
             contentType: file.mimetype
         })
@@ -16,7 +16,7 @@ const uploadFile = async (file, folder) => {
 
     const { data: publicUrl } = supabase
         .storage
-        .from('truck-documents')
+        .from('Documents')   // ✅ same bucket
         .getPublicUrl(fileName)
 
     return publicUrl.publicUrl

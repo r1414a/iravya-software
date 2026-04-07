@@ -22,11 +22,10 @@ app.use(cookieParser())
 
 
 
-
-
 app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/dc',dcRoutes)
 app.use('/api/v1/driver',driverRoutes)
+app.use('/api/v1/truck',truckRoutes)
 
 app.use(globalErrorHandler);
 

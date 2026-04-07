@@ -7,6 +7,8 @@ import { globalErrorHandler } from "./middleware/globalErrorHandler.js"
 import dcRoutes from './routes/dcRoutes.js'
 import driverRoutes from './routes/driverRoutes.js'
 import truckRoutes from './routes/truckRoutes.js'
+import storeRoutes from "./routes/storeRoutes.js"
+import brandRoutes from "./routes/brandRoutes.js"
 
 const app = express()
 
@@ -26,6 +28,8 @@ app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/dc',dcRoutes)
 app.use('/api/v1/driver',driverRoutes)
 app.use('/api/v1/truck',truckRoutes)
+app.use('/api/v1/store',storeRoutes)
+app.use('/api/v1/brands',brandRoutes)
 
 app.use(globalErrorHandler);
 

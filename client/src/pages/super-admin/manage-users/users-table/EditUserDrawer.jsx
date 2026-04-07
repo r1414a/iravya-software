@@ -37,44 +37,52 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
+import { getNameInitials } from "@/lib/utils/getNameInitials"
+import { ROLES, STATUS } from "@/constants/constant"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-// ── Role colour map — same as your columns.jsx ────────────────────────────────
-const ROLE_COLOR = {
-    "DC operator": "bg-orange-100 border-orange-200 text-orange-700",
-    "Store manager": "bg-yellow-100 border-yellow-200 text-yellow-700",
-}
-
-const STATUS_COLOR = {
-    active: "bg-green-100 border-green-200 text-green-700",
-    inactive: "bg-red-100 border-red-200 text-red-700",
-}
 
 // ── Scope options per role ────────────────────────────────────────────────────
 const SCOPE_OPTIONS = {
-    "DC operator": ["Pune Warehouse DC", "Mumbai Warehouse DC", "Nashik DC", "Nagpur DC"],
-    "Store manager": ["Koregaon Park Store", "Hinjawadi Store", "FC Road Store", "Baner Store", "Kothrud Store"],
+    "dc_manager": ["Pune Warehouse DC", "Mumbai Warehouse DC", "Nashik DC", "Nagpur DC"],
+    "store_manager": ["Koregaon Park Store", "Hinjawadi Store", "FC Road Store", "Baner Store", "Kothrud Store"],
 }
 
 const ROLE_HINT = {
-    "DC operator": "Can dispatch trips and manage trucks from their assigned DC",
-    "Store manager": "Can track deliveries coming to their assigned store",
+    "dc_manager": "Can dispatch trips and manage trucks from their assigned DC",
+    "store_manager": "Can track deliveries coming to their assigned store",
 }
 
 export default function EditUserDrawer({ open, setOpen, selectedUser }) {
+    if (!selectedUser) return null
+
+    const {first_name, last_name, email, last_login, user_status} = selectedUser
     const [selectedRole, setSelectedRole] = useState(selectedUser?.role ?? "")
     const [showResetConfirm, setShowResetConfirm] = useState(false)
 
     // Keep local role in sync when a different row is clicked
     const role = selectedRole || selectedUser?.role || ""
 
-    if (!selectedUser) return null
 
-    const showScope = role === "DC operator" || role === "Store manager"
+    const showScope = role === "dc_manager" || role === "store_manager"
+
+    const {
+            register,
+            handleSubmit,
+            setValue,
+            watch,
+            formState: { errors }
+        } = useForm({
+            // resolver: zodResolver(createUserSchema),
+            defaultValues: { first_name, last_name, email, role, user_status}
+        })
+    
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetContent className="bg-white w-full max-w-full sm:max-w-md lg:max-w-lg flex flex-col p-0">
-
+            <SheetContent className="bg-white w-full max-w-full sm:max-w-md lg:max-w-lg flex flex-col h-full p-0">
+            <form className="h-full flex flex-col">
                 {/* ── Header — same border-b border-gray-200 style ── */}
                 <SheetHeader className="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-gray-200">
                     <SheetTitle className="text-base sm:text-lg">Edit user</SheetTitle>
@@ -82,30 +90,30 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                         {selectedUser.email}
                     </SheetDescription>
                 </SheetHeader>
-                <div className="overflow-y-auto">
+                <div className="flex-1 overflow-y-auto">
 
                     {/* ── User identity card — same bg-gray-100 rounded-md style as your draft ── */}
                     <div className="px-4 sm:px-6 pt-4">
                         <div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-gray-100 rounded-md sm:items-start">
 
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gold flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
-                                {selectedUser.initials}
+                            <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
+                                {getNameInitials(first_name, last_name)}
                             </div>
 
                             <div className="flex-1 min-w-0">
                                 <h2 className="text-sm sm:text-base font-semibold truncate">
-                                    {selectedUser.name}
+                                    {first_name}
                                 </h2>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                                    {selectedUser.email}
+                                    {email}
                                 </p>
 
                                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                    <span className={`${ROLE_COLOR[selectedUser.role]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
-                                        {selectedUser.role}
+                                    <span className={`${ROLES[role].color} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
+                                        {ROLES[role].text}
                                     </span>
-                                    <span className={`${STATUS_COLOR[selectedUser.status]} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
-                                        {selectedUser.status}
+                                    <span className={`${STATUS[user_status].color} inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border`}>
+                                        {user_status}
                                     </span>
                                 </div>
                             </div>
@@ -135,7 +143,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                         <Field>
                                             <FieldLabel>First name</FieldLabel>
                                             <Input
-                                                defaultValue={selectedUser.name.split(" ")[0]}
+                                                {...register("first_name")}
                                                 placeholder="First name"
                                                 className="placeholder:text-sm text-sm sm:text-md"
                                             />
@@ -143,7 +151,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                         <Field>
                                             <FieldLabel>Last name</FieldLabel>
                                             <Input
-                                                defaultValue={selectedUser.name.split(" ").slice(1).join(" ")}
+                                                {...register("last_name")}
                                                 placeholder="Last name"
                                                 className="placeholder:text-sm text-sm sm:text-md"
                                             />
@@ -155,7 +163,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                         <FieldLabel>Email address</FieldLabel>
                                         <Input
                                             type="email"
-                                            defaultValue={selectedUser.email}
+                                            {...register("email")}
                                             placeholder="user@brand.com"
                                             className="placeholder:text-sm text-sm sm:text-md"
                                         />
@@ -165,7 +173,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                     <Field>
                                         <FieldLabel>Role</FieldLabel>
                                         <Select
-                                            defaultValue={selectedUser.role}
+                                            defaultValue={role}
                                             onValueChange={(val) => setSelectedRole(val)}
                                         >
                                             <SelectTrigger className="w-full">
@@ -174,14 +182,14 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                             <SelectContent className="bg-white border shadow-md">
                                                 <SelectGroup>
                                                     <SelectLabel>Role</SelectLabel>
-                                                    <SelectItem value="DC operator">DC Operator</SelectItem>
-                                                    <SelectItem value="Store manager">Store Manager</SelectItem>
+                                                    <SelectItem value="dc_manager">DC Manager</SelectItem>
+                                                    <SelectItem value="store_manager">Store Manager</SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
 
                                         {role && (
-                                            <FieldDescription className="text-xs break-words">
+                                            <FieldDescription className="text-xs wrap-break-words">
                                                 {ROLE_HINT[role]}
                                             </FieldDescription>
                                         )}
@@ -191,17 +199,17 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                     {showScope && (
                                         <Field>
                                             <FieldLabel>
-                                                {role === "DC operator" ? "Assigned DC" : "Assigned store"}
+                                                {role === "dc_manager" ? "Assigned DC" : "Assigned store"}
                                             </FieldLabel>
 
                                             <Select defaultValue={selectedUser.scope}>
                                                 <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder={`Select ${role === "DC operator" ? "data center" : "store"}...`} />
+                                                    <SelectValue placeholder={`Select ${role === "dc_manager" ? "data center" : "store"}...`} />
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-white border shadow-md">
                                                     <SelectGroup>
                                                         <SelectLabel>
-                                                            {role === "DC operator" ? "Data Centers" : "Stores"}
+                                                            {role === "dc_manager" ? "Data Centers" : "Stores"}
                                                         </SelectLabel>
                                                         {(SCOPE_OPTIONS[role] ?? []).map((opt) => (
                                                             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
@@ -210,8 +218,8 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                                 </SelectContent>
                                             </Select>
 
-                                            <FieldDescription className="text-xs break-words">
-                                                {role === "DC operator"
+                                            <FieldDescription className="text-xs wrap-break-words">
+                                                {role === "dc_manager"
                                                     ? "User will only see trucks and trips from this DC"
                                                     : "User will only see deliveries coming to this store"}
                                             </FieldDescription>
@@ -222,7 +230,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                     {/* Status */}
                                     <Field>
                                         <FieldLabel>Status</FieldLabel>
-                                        <Select defaultValue={selectedUser.status}>
+                                        <Select defaultValue={user_status}>
                                             <SelectTrigger>
                                                 <SelectValue />
                                             </SelectTrigger>
@@ -251,7 +259,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                                 <KeyRound size={14} className="text-gray-500 mt-0.5 shrink-0" />
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-700">Reset password</p>
-                                                    <p className="text-xs text-gray-400 mt-0.5 break-words">
+                                                    <p className="text-xs text-gray-400 mt-0.5 wrap-break-words">
                                                         Send a password reset link to {selectedUser.email}
                                                     </p>
                                                 </div>
@@ -270,7 +278,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                         {/* Reset confirm */}
                                         {showResetConfirm && (
                                             <div className="mb-2 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                                <p className="text-xs text-blue-700 break-words">
+                                                <p className="text-xs text-blue-700 wrap-break-words">
                                                     Send reset link to <span className="font-medium">{selectedUser.email}</span>?
                                                 </p>
 
@@ -373,7 +381,7 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                     </SheetClose>
                 </SheetFooter>
 
-
+</form>
             </SheetContent>
         </Sheet>
     )

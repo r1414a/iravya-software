@@ -1,5 +1,8 @@
 import { DataTable } from "./users-table/data-table";
 import { columns } from "./users-table/columns";
+import { useGetAllUsersQuery } from "@/lib/features/users/userApi";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { useState } from "react";
 
 
 const users = [
@@ -14,11 +17,29 @@ const users = [
 ];
 
 export default function UsersTable() {
+    const [page, setPage] = useState(1);
+    const {data, isLoading, isFetching} = useGetAllUsersQuery({
+        page,
+        limit: 10
+    });
+    console.log("allusers", data,page)
+
+    if(isLoading){
+        return <LoadingSpinner/>
+    }
     return (
         
         <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
-                <DataTable columns={columns} data={users}/>
+                <DataTable 
+                    columns={columns} 
+                    data={data?.data?.users || []}
+                    page={data?.data?.page || 1}
+                    totalPages={data?.data?.totalPages || 1}
+                    onPrevious={() => setPage((prev) => Math.max(prev-1,1))}
+                    onNext={() => setPage((prev) => prev < (data?.data?.totalPages || 1) ? prev + 1 : prev)}
+                    isFetching={isFetching}
+                />
                 
             </div>
         </section>

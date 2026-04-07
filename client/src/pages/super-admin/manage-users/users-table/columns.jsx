@@ -13,9 +13,11 @@ import EditUserDrawer from "./EditUserDrawer"
 import { useState } from "react"
 import { Pencil } from "lucide-react"
 import DeleteModal from "@/components/DeleteModal"
+import { getNameInitials } from "@/lib/utils/getNameInitials"
+import { ROLES, STATUS } from "@/constants/constant"
+import {formatDistanceToNow, parseISO} from "date-fns"
 
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
-const ROLES = ["DC Operator", "Store Manager"]
 const STATUS_COLOR = {
   active: "bg-green-100  border-green-200 text-green-700",
   inactive: "bg-red-100  border-red-200 text-red-700",
@@ -53,12 +55,12 @@ export const columns = [
       return (
         <div className="flex gap-4 items-center">
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white">
-            {user.initials}
+            {getNameInitials(user.first_name, user.last_name)}
           </div>
           <div>
-            <p>{user.name}</p>
+            <p>{user.first_name} {user.last_name}</p>
             <p className="text-xs text-muted-foreground">
-              {user.email}
+              {user.role !== 'driver' ? user.email : user.phone_number}
             </p>
           </div>
         </div>
@@ -68,7 +70,7 @@ export const columns = [
   {
     accessorKey: "role",
     header: ({ column }) => {
-      const current = column.getFilterValue() || "all"
+      const current = column.getFilterValue() || "all";
       return (
         <div className="flex items-center gap-2">
           <span>Role</span>
@@ -79,7 +81,7 @@ export const columns = [
                 size="sm"
                 className="h-6 min-w-18 text-[10px]"
               >
-                {current === "all" ? "All" : current}
+                {current === "all" ? "All" : ROLES[current].text}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40 bg-white border shadow-md">
@@ -92,11 +94,12 @@ export const columns = [
                 <DropdownMenuRadioItem value="all" className="text-xs">
                   All roles
                 </DropdownMenuRadioItem>
-                {ROLES.map((r) => (
-                  <DropdownMenuRadioItem key={r} value={r} className="text-xs">
-                    {r}
+                {Object.entries(ROLES).map(([key, value]) => (
+                  <DropdownMenuRadioItem key={key} value={key} className="text-xs">
+                    {value.text}
                   </DropdownMenuRadioItem>
-                ))}
+                ))
+                }
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -105,15 +108,9 @@ export const columns = [
     },
     cell: ({ row }) => {
       const role = row.getValue("role")
-
-      const ROLE_COLOR = {
-        "dc operator": "bg-orange-100  border-orange-200 text-orange-700",
-        "store manager": "bg-yellow-100  border-yellow-200 text-yellow-700",
-      }
-
       return (
-        <span className={`${ROLE_COLOR[role.toLowerCase()]} inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border`}>
-          {role}
+        <span className={`${ROLES[role.toLowerCase()].color} inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border`}>
+          {ROLES[role].text}
         </span>
       )
     },
@@ -160,13 +157,28 @@ export const columns = [
     header: "SCOPE",
   },
   {
-    accessorKey: "lastLogin",
+    accessorKey: "last_login",
     header: "LAST LOGIN",
+    cell: ({row}) => {
+      const lastLogin = row.getValue("last_login");
+      // console.log(lastLogin);
+
+      if(!lastLogin) return <span className="text-gray-400">-</span>
+
+      const relativeTime = formatDistanceToNow(parseISO(lastLogin), {
+        addSuffix: true
+      })
+
+      return(
+        <p className="text-gray-600 capitalize">{relativeTime.replace('about', '')}</p>
+      )
+    }
   },
   {
-    accessorKey: "status",
+    accessorKey: "user_status",
     header: ({ column }) => {
-      const currentValue = column.getFilterValue() || "all"
+      const currentValue = column.getFilterValue() || "all";
+
       return (
         <div className="flex items-center gap-2">
           <span>Status</span>
@@ -207,14 +219,15 @@ export const columns = [
       )
     },
     cell: ({ row }) => {
-      const s = row.original.status
+      const s = row.original.user_status
       return (
-        <span className={`${STATUS_COLOR[s]} inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border`}>
-          {s}
+        <span className={`${STATUS[s].color} inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border`}>
+          {STATUS[s].text}
         </span>
       )
     },
     filterFn: (row, id, value) => {
+
       if (!value) return true
       return row.getValue(id) === value
     }

@@ -4,6 +4,14 @@ export const CREDENTIALS = [
 ];
 
 export const ROLES = {
-    super_admin: {role:"super_admin", text: "Super Admin"},
-    dc_manager: {role: "dc_manager", text: "DC Manager"}
+    store_manager: {role: "store_manager", text: "Store Manager", color: "bg-amber-100 border-amber-200 text-amber-800"},
+    super_admin: {role:"super_admin", text: "Super Admin", color: "bg-rose-100 border-rose-200 text-rose-700"},
+    dc_manager: {role: "dc_manager", text: "DC Manager", color: "bg-orange-100 border-orange-200 text-orange-700"},
+    driver: {role: "driver", text: "Driver", color: "bg-blue-100 border-blue-200 text-blue-700"}, 
+}
+
+
+export const STATUS = {
+    active: {text: "Active", color: "bg-green-100  border-green-200 text-green-700"},
+    inactive: {text: "In Active", color: "bg-red-100  border-red-200 text-red-700"}
 }

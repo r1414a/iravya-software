@@ -26,7 +26,7 @@ const addDriverValidation = [
     .trim()
     .notEmpty()
     .withMessage("Licence class is required")
-    .isIn(["LMV", "HMV", "MCWG", "HGV"])
+    .isIn(["LMV", "HMV", "HGMV", "HTV"])
     .withMessage("Invalid licence class"),
 
   body("licence_expiry")

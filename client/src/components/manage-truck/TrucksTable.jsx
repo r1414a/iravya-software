@@ -85,7 +85,8 @@ const trucks = [
     },
 ]
  
-export default function TrucksTable() {
+export default function TrucksTable({trucks, totalPages, setPage, page, onPrevious, onNext, isFetching,  columnFilters, 
+                setColumnFilters}) {
  
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -93,6 +94,14 @@ export default function TrucksTable() {
                 <DataTable
                     columns={columns}
                     data={trucks}
+                    setPage={setPage}
+                    columnFilters={columnFilters} 
+                setColumnFilters={setColumnFilters}
+                                        totalPages={totalPages}
+                                        page={page}
+                                        onPrevious={onPrevious}
+                                        onNext={onNext}
+                                        isFetching={isFetching}
                 />
             </div>
  

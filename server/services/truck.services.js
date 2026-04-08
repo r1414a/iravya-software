@@ -64,7 +64,7 @@ const addTruckservice = async(data)=>{
 
 }
 
-const truckExistByRegNoService = async({registration_no})=>{
+const truckExistByRegNoService = async(registration_no)=>{
    
     const [result] = await sql`
         SELECT EXISTS (
@@ -224,86 +224,136 @@ const getTripHistoryService = async(id)=>{
     return trips
 }
 
-const getAllTruckDataService = async({type, truck_status, search, page,
-    limit})=>{
+const getAllTruckDataService = async ({ type, truck_status, search, page, limit }) => {
     const offset = (page - 1) * limit
-    console.log(page, limit)
-    let query = sql`
+ 
+    // FIX 1: Build query conditionally — don't apply search filter when search is null
+    // FIX 2: pagination object was missing the opening brace — page/limit/total_pages were outside
+    const trucks = await sql`
         SELECT 
-            tr.id,
-            tr.registration_no,
-            tr.type,
-            tr.model,
-            tr.status,
+            tr.id, tr.registration_no, tr.type, tr.model, tr.status,
             COUNT(t.id) AS total_trips,
             MAX(t.departed_at) AS last_trip
-
         FROM "Trucks" tr
-        LEFT JOIN "Trips" t 
-            ON t.truck_id = tr.id
+        LEFT JOIN "Trips" t ON t.truck_id = tr.id
         WHERE 1=1
-    `
-
-    if (type) {
-        query = sql`${query} AND tr.type = ${type}`
-    }
-
-    if (truck_status) {
-        query = sql`${query} AND tr.status = ${truck_status}`
-    }
-
-    query = sql`
-        ${query}
-        AND (
-            tr.search_vector @@ plainto_tsquery('simple', ${search})
-            OR tr.registration_no ILIKE ${'%' + search + '%'}
-        )
-    `
-
-    query = sql`
-        ${query}
-        GROUP BY 
-            tr.id,
-            tr.registration_no,
-            tr.type,
-            tr.model,
-            tr.status
+            AND (${type}::text IS NULL OR tr.type = ${type})
+            AND (${truck_status}::text IS NULL OR tr.status = ${truck_status})
+            AND (
+                ${search}::text IS NULL
+                OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
+                OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
+            )
+        GROUP BY tr.id, tr.registration_no, tr.type, tr.model, tr.status
         ORDER BY last_trip DESC NULLS LAST
-        LIMIT ${limit}
-        OFFSET ${offset}
+        LIMIT ${limit} OFFSET ${offset}
     `
-
-    const trucks = await query
-
-    const totalCount = await sql`
-
-        SELECT COUNT(*) 
-
-        FROM "Trucks" tr
-
-        WHERE 
-            (${type}::text IS NULL OR tr.type = ${type})
-        AND
-            (${truck_status}::text IS NULL OR tr.status = ${truck_status})
-        AND
-            (${search}::text IS NULL 
-                OR tr.search_vector @@ plainto_tsquery('simple', ${search})
+ 
+    const [countRow] = await sql`
+        SELECT COUNT(*) FROM "Trucks" tr
+        WHERE 1=1
+            AND (${type}::text IS NULL OR tr.type = ${type})
+            AND (${truck_status}::text IS NULL OR tr.status = ${truck_status})
+            AND (
+                ${search}::text IS NULL
+                OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
+                OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
     `
-
-
-    const total = Number(totalCount[0].count)
-
+ 
+    const total = Number(countRow.count)
+ 
     return {
         data: trucks,
-        pagination: 
+        pagination: {       // FIX 2: was missing opening brace here
             total,
             page,
             limit,
-            total_pages: Math.ceil(total / limit)
-        }
-    
+            total_pages: Math.ceil(total / limit),
+        },
+    }
 }
+
+// const getAllTruckDataService = async({type, truck_status, search, page,
+//     limit})=>{
+//     const offset = (page - 1) * limit
+//     console.log(page, limit)
+//     let query = sql`
+//         SELECT 
+//             tr.id,
+//             tr.registration_no,
+//             tr.type,
+//             tr.model,
+//             tr.status,
+//             COUNT(t.id) AS total_trips,
+//             MAX(t.departed_at) AS last_trip
+
+//         FROM "Trucks" tr
+//         LEFT JOIN "Trips" t 
+//             ON t.truck_id = tr.id
+//         WHERE 1=1
+//     `
+
+//     if (type) {
+//         query = sql`${query} AND tr.type = ${type}`
+//     }
+
+//     if (truck_status) {
+//         query = sql`${query} AND tr.status = ${truck_status}`
+//     }
+
+//     query = sql`
+//         ${query}
+//         AND (
+//             tr.search_vector @@ plainto_tsquery('simple', ${search})
+//             OR tr.registration_no ILIKE ${'%' + search + '%'}
+//         )
+//     `
+
+//     query = sql`
+//         ${query}
+//         GROUP BY 
+//             tr.id,
+//             tr.registration_no,
+//             tr.type,
+//             tr.model,
+//             tr.status
+//         ORDER BY last_trip DESC NULLS LAST
+//         LIMIT ${limit}
+//         OFFSET ${offset}
+//     `
+
+//     const trucks = await query
+
+//     const totalCount = await sql`
+
+//         SELECT COUNT(*) 
+
+//         FROM "Trucks" tr
+
+//         WHERE 
+//             (${type}::text IS NULL OR tr.type = ${type})
+//         AND
+//             (${truck_status}::text IS NULL OR tr.status = ${truck_status})
+//         AND
+//             (${search}::text IS NULL 
+//                 OR tr.search_vector @@ plainto_tsquery('simple', ${search})
+//             )
+//     `
+
+
+//     const total = Number(totalCount[0].count)
+
+//     return {
+//         data: trucks,
+//         pagination: 
+//             total,
+//             page,
+//             limit,
+//             total_pages: Math.ceil(total / limit)
+//         }
+    
+// }
 
 export{
     addTruckservice,

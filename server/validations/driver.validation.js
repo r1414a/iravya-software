@@ -50,7 +50,7 @@ const updateDriverValidation = [
     .isLength({ min: 2, max: 100 })
     .withMessage("Full name must be between 2 and 100 characters"),
 
-  body("phone")
+  body("phone_number")
     .notEmpty()
     .withMessage("Phone number is required")
     .isMobilePhone()
@@ -68,7 +68,7 @@ const updateDriverValidation = [
     .trim()
     .notEmpty()
     .withMessage("Licence class is required")
-    .isIn(["LMV", "HMV", "MCWG", "HGV"])
+    .isIn(["LMV", "HMV", "HGMV", "HTV"])
     .withMessage("Invalid licence class"),
 
   body("licence_expiry")

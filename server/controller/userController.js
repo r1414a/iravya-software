@@ -100,7 +100,8 @@ const loginUser = asyncHandler(async (req, res) => {
             httpOnly: true,
             secure: true,
             sameSite: 'None',
-            maxAege: 24 *60*60*1000
+            path: "/",
+            maxAge: 24 *60*60*1000
         }
 
        res.cookie("token", token, options)
@@ -123,22 +124,16 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
-const logoutUser = asyncHandler(async(req, res) => {
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
-    return res
-    .status(200)
-    .clearCookie("token", options)
-    // .json({
-    //     success: true,
-    //     message: "User logged out successfully"
-    // })
-    .json(
-        new ApiResponse(200,{},"User logged out successfully")
-    )
-})
+const logoutUser = asyncHandler(async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    path: "/",
+  });
+
+  sendResponse(res, 200, {}, "User logged out successfully");
+});
 
 const deleteUser = asyncHandler(async(req, res)=>{
     const { id } = req.params

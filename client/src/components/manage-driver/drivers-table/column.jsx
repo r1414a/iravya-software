@@ -19,26 +19,41 @@ import { FieldLabel } from "@/components/ui/field"
 import TripDetailSheet from "../../manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
+import { getNameInitials } from "@/lib/utils/getNameInitials"
+import { format, parseISO } from "date-fns"
+import { useDeleteDriverMutation } from "@/lib/features/drivers/driverApi"
+
 
 // Colour map for avatar initials — same ua-* palette as users
 
 
 // Status badge styles
 const statusStyles = {
-    available: "bg-green-100 text-green-700",
-    on_trip: "bg-blue-100 text-blue-700",
-    inactive: "bg-gray-100 text-gray-500",
+    "Available": "bg-green-100 text-green-700",
+    "On trip": "bg-blue-100 text-blue-700",
+    "Inactive": "bg-gray-100 text-gray-500",
 }
 
 
 function ActionsCell({ row }) {
     const driver = row.original
-    const {pathname} = useLocation();
-    // console.log(pathname);
-    
+    const { pathname } = useLocation();
+
     const [editOpen, setEditOpen] = useState(false)
     const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
     const [historyOpen, setHistoryOpen] = useState(false)
+
+      const [deleteDriver, { isLoading: isDeleting }] = useDeleteDriverMutation();
+
+    const handleDelete = async () => {
+        try {
+            await deleteDriver(driver.id).unwrap();
+            toast.success("Driver deleted successfully");
+        } catch (err) {
+            toast.error(err?.data?.message || "Failed to delete driver");
+        }
+    };
+
 
     return (
         <>
@@ -69,7 +84,7 @@ function ActionsCell({ row }) {
                 open={tripDetailsOpen}
                 onClose={setTripDetailsOpen}
             />
-           
+
             <TripHistorySheet
                 driver={driver}
                 open={historyOpen}
@@ -79,16 +94,18 @@ function ActionsCell({ row }) {
             <div className="flex items-center gap-2 justify-end">
 
                 {
-                    pathname.startsWith('/admin') &&  (
+                    pathname.startsWith('/admin') && (
                         <>
-                    <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                            <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
-                    <DeleteModal
-                                           who={driver.name}
-                                           m1active="Driver will not be assignable to any trip"
-                                         />
-                    {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
-                    </>
+                            <DeleteModal
+                                who={driver.name}
+                                m1active="Driver will not be assignable to any trip"
+                                onConfirm={handleDelete}
+                                isLoading={isDeleting}
+                            />
+                            {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
+                        </>
                     )
                 }
 
@@ -140,15 +157,15 @@ export const columns = [
         accessorKey: "name",
         header: "Driver",
         cell: ({ row }) => {
-            const { initials, color, name, phone, email } = row.original
+            const { first_name, last_name, phone_number, full_name } = row.original
             return (
                 <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white`}>
-                        {initials}
+                        {getNameInitials(first_name, last_name)}
                     </div>
                     <div className="-space-y-0.5">
-                        <p className="font-medium text-sm">{name}</p>
-                        <p className="text-xs text-gray-400">{phone}</p>
+                        <p className="font-medium text-sm">{full_name}</p>
+                        <p className="text-xs text-gray-400">{phone_number}</p>
                     </div>
                 </div>
             )
@@ -156,7 +173,7 @@ export const columns = [
     },
     // Licence number + class
     {
-        accessorKey: "licenceClass",
+        accessorKey: "licence_class",
         header: ({ column }) => {
             const currentValue = column.getFilterValue() || "all"
             return (
@@ -204,8 +221,8 @@ export const columns = [
         },
         cell: ({ row }) => (
             <div className="-space-y-0.5">
-                <p className="text-sm font-mono">{row.original.licenceNo}</p>
-                <p className="text-xs text-gray-400">{row.original.licenceClass} · Exp {row.original.licenceExpiry}</p>
+                <p className="text-sm font-mono">{row.original.licence_no}</p>
+                <p className="text-xs text-gray-400">{row.original.licence_class} · Exp {format(parseISO(row.original.licence_expiry), 'MMM yyyy')}</p>
             </div>
         ),
         filterFn: (row, id, value) => {
@@ -215,7 +232,7 @@ export const columns = [
     },
     // Current Trip(or "—")
     {
-        accessorKey: "currentTrip",
+        accessorKey: "current_trip",
         header: ({ column }) => {
             const currentValue = column.getFilterValue() || "all"
             const isChecked = currentValue === "idle"
@@ -267,21 +284,22 @@ export const columns = [
         header: "Trips",
         cell: ({ row }) => (
             <div className="-space-y-0.5">
-                <p className="text-sm font-medium">{row.original.totalTrips} total</p>
-                <p className="text-xs text-gray-400">{row.original.tripsThisMonth} this month</p>
+                <p className="text-sm font-medium">{row.original.total_trips} total</p>
+                <p className="text-xs text-gray-400">{row.original.trips_this_month} this month</p>
             </div>
         ),
     },
     {
         accessorKey: "since",
         header: "Since",
-        cell: ({ row }) => <span className="text-sm text-gray-500">{row.original.since}</span>,
+        cell: ({ row }) => <span className="text-sm text-gray-500">{format(parseISO(row.original.licence_expiry), 'MMM yyyy')}</span>,
     },
     // Status
     {
-        accessorKey: "status",
+        accessorKey: "driver_status",
         header: ({ column }) => {
             const currentValue = column.getFilterValue() || "all"
+
             return (
                 <div className="flex items-center gap-2">
                     <span>Status</span>
@@ -289,11 +307,12 @@ export const columns = [
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                                {currentValue === "all"
+                                {currentValue}
+                                {/* {currentValue === "all"
                                     ? "All"
                                     : currentValue === "on_trip"
                                         ? "On trip"
-                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
+                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)} */}
                             </Button>
                             {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
                         </DropdownMenuTrigger>
@@ -309,15 +328,12 @@ export const columns = [
                                 <DropdownMenuRadioItem value="all" className="text-xs">
                                     All
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="available" className="text-xs">
+                                <DropdownMenuRadioItem value="Available" className="text-xs">
                                     Available
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="on_trip" className="text-xs">
+                                <DropdownMenuRadioItem value="On trip" className="text-xs">
                                     On trip
                                 </DropdownMenuRadioItem>
-                                {/* <DropdownMenuRadioItem value="inactive" className="text-xs">
-                                    Inactive
-                                </DropdownMenuRadioItem> */}
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -325,11 +341,13 @@ export const columns = [
             )
         },
         cell: ({ row }) => {
-            const s = row.original.status
-            const label = s === "on_trip" ? "On trip" : s.charAt(0).toUpperCase() + s.slice(1)
+            const s = row.original.driver_status;
+
+            // const label = s === "on_trip" ? "On trip" : s.charAt(0).toUpperCase() + s.slice(1)
+            // const label = s
             return (
                 <Badge className={`${statusStyles[s]} border-0 text-xs font-medium`}>
-                    {label}
+                    {s}
                 </Badge>
             )
         },

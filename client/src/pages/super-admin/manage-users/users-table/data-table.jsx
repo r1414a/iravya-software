@@ -95,7 +95,7 @@ export function DataTable({
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                No users found
+                                No drivers found
                             </TableCell>
                         </TableRow>
                     )}

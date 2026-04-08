@@ -90,11 +90,19 @@ const drivers = [
     },
 ]
  
-export default function DriversTable() {
+export default function DriversTable({drivers, totalPages, page, onPrevious, onNext, isFetching}) {
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
-                <DataTable columns={columns} data={drivers} />
+                <DataTable 
+                    columns={columns} 
+                    data={drivers} 
+                    totalPages={totalPages}
+                    page={page}
+                    onPrevious={onPrevious}
+                    onNext={onNext}
+                    isFetching={isFetching}
+                />
             </div>
         </section>
     )

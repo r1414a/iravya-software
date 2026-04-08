@@ -5,7 +5,8 @@ import validate from "../middleware/validate.js";
 import { addDc, 
     getDc,
     updateDc ,
-    deleteDc
+    deleteDc,
+    getAllDc
 } from "../controller/dcController.js";
 
 import { updatedcValidation, adddcValidation } from "../validations/dc.validation.js";
@@ -16,5 +17,5 @@ router.post('/addDc',protect, authorize('super_admin', 'dc_manager'),updatedcVal
 router.get('/getDc/:id',protect, authorize('super_admin', 'dc_manager'), getDc)
 router.put('/updatDc/:id', protect, authorize('super_admin', 'dc_manager'),updatedcValidation, validate, updateDc)
 router.delete('/deleteDc/:id', protect, authorize('super_admin', 'dc_manager'), deleteDc)
-
+router.get('/dc',protect, authorize('super_admin', 'dc_manager'),getAllDc)
 export default router

@@ -4,6 +4,6 @@ import { baseQueryWithToast } from "./baseQuery"
 export const api = createApi({
     reducerPath: "api",
     baseQuery: baseQueryWithToast,
-    tagTypes: ['Auth'],
+    tagTypes: ['Auth', 'Drivers', 'DriverTrip', 'DriverHistory'],
     endpoints: () => ({})
 })

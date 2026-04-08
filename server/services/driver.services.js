@@ -5,29 +5,33 @@ import ApiError from "../utils/ApiError.js"
 
 const addDriverService = async (data) => {
     const {
-        full_name,
-        phone,
-        licence_no,
-        licence_class,
-        licence_expiry
+       full_name = "",
+        phone = null,
+        licence_no = null,
+        licence_class = null,
+        licence_expiry = null
     } = data;
 
-    const name= full_name.split(" ")
+    const nameParts = full_name.trim().split(/\s+/);
+    const first_name = nameParts[0] || "Unknown";
+    const last_name = nameParts.slice(1).join(" ") || ""; 
     const [newUser] = await sql`
         INSERT INTO "User"
     (
        
         "first_name",
         "last_name",
+        "email",
         "role",
         "status"
     )
     VALUES
     (
        
-        ${name[0]},
-        ${name[1]},
-        ${"driver"},
+        ${first_name},
+        ${last_name},
+        NULL,
+        'driver',
         true
     )
     RETURNING
@@ -41,16 +45,12 @@ const addDriverService = async (data) => {
 
     const driver = await sql`
         INSERT INTO "Drivers" (
-        "full_name",
-        "phone",
         "licence_no",
         "licence_class",
         "licence_expiry",
         "user_id"
         )
         VALUES (
-        ${full_name},
-        ${phone},
         ${licence_no},
         ${licence_class},
         ${licence_expiry},

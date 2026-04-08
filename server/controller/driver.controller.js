@@ -18,86 +18,69 @@ const addDriver = asyncHandler(async (req, res) => {
     const exist_driver = await driverExistBylicenceno(licence_no)
 
     if(exist_driver.length){
-        sendResponse(res, 200 ,exist_driver, "Driver already added")
+        return sendResponse(res, 200 ,exist_driver, "Driver already added")
     }
     const driver = await addDriverService(req.body)
     if(driver.length){
-        sendResponse(res, 200, driver, "Driver data is added successfully")
+        return sendResponse(res, 200, driver, "Driver data is added successfully")
     }
+
+    throw new ApiError(500, "Failed to add driver");
 })
 
 const getDriver = asyncHandler(async(req, res)=>{
     const {id} = req.params
     const driver = await getDriverbyidService(id)
 
-    if(driver.length){
-        sendResponse(res, 201, driver, "Found driver data")
+    if (driver.length) {
+        return sendResponse(res, 200, driver, "Driver found");
     }
-    else{
-        sendResponse(res, 201, driver, "could not find driver data")
-    }
+    throw new ApiError(404, "Driver not found");
 })
 
 const updateDriver = asyncHandler(async (req,res) => {
     const {id} = req.params
     const driver = await updateDriverService(id, req.body)
 
-    if(driver.length){
-        sendResponse(res, 200, driver, "Driver data updated successfully")
+    if (driver.length) {
+        return sendResponse(res, 200, driver, "Driver updated successfully");
     }
-    else{
-        throw new ApiError(200, "could not find driver")
-    }
+    throw new ApiError(404, "Driver not found");
 })
 
 const deleteDriver = asyncHandler(async (req, res) => {
     const {id} = req.params
     const driver = await deleteDriverService(id)
-    if(driver.length){
-        sendResponse(res, 200, driver, "Driver is deleted successfully")
+    if (driver.length) {
+        return sendResponse(res, 200, driver, "Driver deleted successfully");
     }
-    else{
-        throw new ApiError(200, "could not find driver")
-    }
+    throw new ApiError(404, "Driver not found");
 })
 
 const viewCurrentTripdetails = asyncHandler(async (req, res) => {
     const {id} = req.params
     const trip = await getDriverCurrentTrip(id)
     console.log(trip)
-    if(trip.length){
-        sendResponse(res, 201, trip, "Todays current trip")
+        if (trip.length) {
+        return sendResponse(res, 200, trip, "Current trip found");
     }
-    else{
-        throw new ApiError(200, "No data found")
-    }
+    return sendResponse(res, 200, [], "No active trip");
 })
 
 const getDriverTripHistory = asyncHandler(async (req, res) => {
     const {id} = req.params
     const trips = await getDriverTripHistoryService(id)
-    if(trips.length){
-        sendResponse(res, 201, trips, "Data Found")
+    if (trips.length) {
+        return sendResponse(res, 200, trips, "Trip history found");
     }
-    else{
-        throw new ApiError(200, "No data found")
-    }
+    return sendResponse(res, 200, [], "No trip history")
 })
 
 const getAllDriverList = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
-    const drivers = await getDriversListService(
-        Number(page),
-        Number(limit)
-    );
-
-    sendResponse(
-        res,
-        200,
-        drivers,
-        "Drivers fetched successfully"
-    );
+    const drivers = await getDriversListService(Number(page), Number(limit));
+    return sendResponse(res, 200, drivers, "Drivers fetched successfully");
 });
 
 const getAllDriverListBySearch = asyncHandler(async (req, res) => {
@@ -110,7 +93,7 @@ const getAllDriverListBySearch = asyncHandler(async (req, res) => {
     search
   );
 
-  sendResponse(res, 200, drivers, "Drivers fetched successfully");
+  return sendResponse(res, 200, drivers, "Drivers fetched successfully");
 });
 
 

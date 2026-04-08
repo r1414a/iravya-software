@@ -60,6 +60,47 @@ const createStoreValidator = [
     .withMessage("Invalid email")
 ];
 
+const updateStoreValidation = [
+  body("brand_id")
+    .isUUID()
+    .withMessage("Invalid Brand ID"),
+
+  body("name")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Store name must be 2-100 characters"),
+
+
+  body("latitude")
+    .isFloat({ min: -90, max: 90 })
+    .withMessage("Invalid latitude"),
+
+  body("longitude")
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Invalid longitude"),
+
+  body("manager_name")
+    .isLength({ min: 2 })
+    .withMessage("Manager name too short"),
+
+  body("manager_phone")
+    .isMobilePhone()
+    .withMessage("Invalid phone number"),
+
+  body("manager_email")
+    .isEmail()
+    .withMessage("Invalid email"),
+
+  body("status")
+    .optional()
+    .isIn(["active", "inactive"])
+    .withMessage("Status must be active or inactive")
+
+
+]
+
 export{
-    createStoreValidator
+    createStoreValidator,
+    updateStoreValidation
 }
+
+

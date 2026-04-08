@@ -262,8 +262,9 @@ const getAllUser = asyncHandler(async(req, res)=>{
 const getUserbySearch = asyncHandler(async (req,res) => {
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
+    const {role= null, status = null} = req.query
     const {slug} = req.body
-    const users = await getUserbySearchService(page, limit, slug)
+    const users = await getUserbySearchService(page, limit, slug, role, status)
     res.status(201)
     .json(new ApiResponse(
         201,

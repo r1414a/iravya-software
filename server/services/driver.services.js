@@ -90,7 +90,6 @@ const updateDriverService = async (id, data) => {
     const driver = await sql`
         UPDATE "Drivers"
         SET 
-           "full_name" = ${full_name},
             "phone" = ${phone},
             "licence_no" = ${licence_no},
             "licence_class" = ${licence_class},
@@ -98,6 +97,20 @@ const updateDriverService = async (id, data) => {
         WHERE "id" = ${id}
         RETURNING *
     `
+    const name_ = full_name.split(" ")
+    await sql`
+      UPDATE "User"
+      SET
+        "first_name" = COALESCE(${name_[0]}, "first_name"),
+        "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+        "email" = COALESCE(${manager_email}, "email"),
+        "phone_number" = COALESCE(${manager_phone}, "phone_number")
+      WHERE "id" = (
+        SELECT "user_id"
+        FROM "Drivers"
+        WHERE "id" = ${id}
+      )
+    `;
     return driver
 }
 

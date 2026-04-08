@@ -78,6 +78,7 @@ const userExistbyidService = async (id) =>{
     console.log(id)
     const userExists = await sql`
         SELECT * FROM "User" WHERE "id" = ${id}
+        RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `
     return userExists
 }
@@ -98,6 +99,7 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             "role",
             "status",
             "last_login"
+            RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
     await sendEmail({
         to: user.email,
@@ -133,6 +135,7 @@ const setUserStatusService = async(id, status)=>{
             "role",
             "status",
             "last_login"
+            RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
 
     return user
@@ -145,6 +148,7 @@ const getAllUserService = async(page = 1, limit = 10)=>{
         ORDER BY "created_at" DESC
         LIMIT ${limit}
         OFFSET ${offset}
+        RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
         `
     const [{ count }] = await sql`
         SELECT COUNT(*) FROM "User"
@@ -159,7 +163,7 @@ const getAllUserService = async(page = 1, limit = 10)=>{
     }
 }
 
-const getUserbySearchService = async(page = 1, limit = 10, search) =>{
+const getUserbySearchService = async(page = 1, limit = 10, search, role, status) =>{
     const offset = (page - 1) * limit
 
     const users = await sql`
@@ -172,6 +176,7 @@ const getUserbySearchService = async(page = 1, limit = 10, search) =>{
     ORDER BY created_at DESC
     LIMIT ${limit}
     OFFSET ${offset}
+    RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
     `
     const [{ count }] = await sql`
         SELECT COUNT(*) FROM "User"
@@ -196,7 +201,7 @@ const updateUserService = async(id, data)=>{
                 "role" = ${data.role},
                 "status" = ${data.status}
             WHERE id = ${id}
-            RETURNING *
+            RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
                 
         `)[0]
 

@@ -72,7 +72,7 @@ const addStoreService = async(data)=>{
         ${country},
         ${latitude},
         ${longitude},
-        ${newUser.id},
+        ${newUser.id}
         ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
         )
         RETURNING *;
@@ -81,9 +81,225 @@ const addStoreService = async(data)=>{
     return newStore
 }
 
+const getStoreDataService = async(id)=>{
+
+    const store = await sql`
+        SELECT * FROM "Stores" 
+        WHERE "id" = ${id}   
+    `
+    return store
+}
+
+const updateStoreService = async (id, data) => {
+  const {
+    brand_id,
+    name,
+    address,
+    city,
+    state,
+    country,
+    latitude,
+    longitude,
+    store_code,
+    status
+  } = data;
+
+  const updateFields = {};
+  
+  if (brand_id) updateFields.brand_id = brand_id;
+  if (store_code) updateFields.store_code = store_code;
+  if (name) updateFields.name = name;
+  if (address) updateFields.address = address;
+  if (city) updateFields.city = city;
+  if (state) updateFields.state = state;
+  if (country) updateFields.country = country;
+  if (latitude) updateFields.latitude = latitude;
+  if (longitude) updateFields.longitude = longitude;
+  if (status) updateFields.status = status;
+
+  // Location update
+  if (latitude && longitude) {
+    updateFields.location = sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`
+  }
+
+  updateFields.updated_at = sql`NOW()`;
+
+  const [updatedStore] = await sql`
+    UPDATE "Stores"
+    SET ${sql(updateFields)}
+    WHERE "id" = ${id}
+    RETURNING *
+  `;
+
+  // Manager Update
+  const { manager_name, manager_phone, manager_email } = data;
+
+  if (manager_name || manager_phone || manager_email) {
+    const name_ = manager_name?.split(" ") || [];
+
+    await sql`
+      UPDATE "User"
+      SET
+        "first_name" = COALESCE(${name_[0]}, "first_name"),
+        "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+        "email" = COALESCE(${manager_email}, "email"),
+        "phone_number" = COALESCE(${manager_phone}, "phone_number")
+      WHERE "id" = (
+        SELECT "store_manager"
+        FROM "Stores"
+        WHERE "id" = ${id}
+      )
+    `;
+  }
+  return updatedStore;
+};
+
+const deleteStoreService = async(id)=>{
+    const store = await sql`
+        DELETE FROM "Stores"
+        WHERE "id" = ${id}
+    `
+    return store
+  }
+
+const deleveryDetailService = async (id) => {
+    const trips = await sql`
+    SELECT 
+        t.id AS trip_id,
+        t.tracking_code,
+        t.status AS trip_status,
+        t.departed_at,
+        
+        dc.name AS dc_name,
+        
+        tr.registration_no AS truck_number,
+        
+        CONCAT(u.first_name, ' ', u.last_name) AS driver_name
+
+    FROM "Trips" t
+
+    JOIN "Trip_stops" ts 
+        ON ts.trip_id = t.id
+
+    JOIN "Distribution_center" dc 
+        ON dc.id = t.source_dc_id
+
+    LEFT JOIN "Trucks" tr 
+        ON tr.id = t.truck_id
+
+    LEFT JOIN "Drivers" d 
+        ON d.id = t.driver_id
+
+    LEFT JOIN "User" u
+        ON u.id = d.user_id
+
+    WHERE ts.store_id = ${id}
+
+    ORDER BY t.departed_at DESC
+
+    LIMIT 10
+    `;
+    return trips
+}
+
+const getAllStoreService = async (filters) => {
+    const {
+        brand_id,
+        status,
+        city,
+        search,
+        page = 1,
+        limit = 10
+    } = filters;
+
+    const offset = (page - 1) * limit;
+
+    const stores = await sql`
+        SELECT 
+        s.id,
+        s.name AS store_name,
+        s.address,
+        s.city,
+        s.status,
+        s.store_code,
+
+        b.name AS brand_name,
+
+        CONCAT(u.first_name, ' ', u.last_name) AS manager_name,
+        u.phone_number AS manager_phone,
+        u.email AS manager_email,
+
+        COUNT(t.id) FILTER (
+            WHERE DATE(t.departed_at) = CURRENT_DATE
+        ) AS today_deliveries,
+
+        COUNT(*) OVER() AS total_count
+
+    FROM "Stores" s
+
+    LEFT JOIN "Brand" b
+        ON b.id = s.brand_id
+
+    LEFT JOIN "User" u
+        ON u.id = s.store_manager
+
+    LEFT JOIN "Trip_stops" ts
+        ON ts.store_id = s.id
+
+    LEFT JOIN "Trips" t
+        ON t.id = ts.trip_id
+
+    WHERE 1=1
+
+    ${brand_id ? sql`
+    AND s.brand_id = ${brand_id}
+    ` : sql``}
+
+    ${status ? sql`
+    AND s.status = ${status}
+    ` : sql``}
+
+    ${city ? sql`
+    AND s.city = ${city}
+    ` : sql``}
+
+    ${search ? sql`
+    AND s.search_vector @@ plainto_tsquery('english', ${search})
+    ` : sql``}
+
+    GROUP BY 
+        s.id,
+        b.name,
+        u.first_name,
+        u.last_name,
+        u.phone_number,
+        u.email
+
+    ORDER BY s.created_at DESC
+
+    LIMIT ${limit}
+    OFFSET ${offset}
+    `;
+
+    return {
+        data: stores,
+        total: stores[0]?.total_count || 0,
+        page,
+        limit,
+        total_pages: Math.ceil((stores[0]?.total_count || 0) / limit)
+    };
+};
+    
+
+
 
 
 export{
     addStoreService,
-    storeExistByStoreCode
+    storeExistByStoreCode,
+    getStoreDataService,
+    updateStoreService,
+    deleteStoreService,
+    deleveryDetailService,
+    getAllStoreService
 }

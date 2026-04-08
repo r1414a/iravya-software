@@ -167,17 +167,37 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
     const offset = (page - 1) * limit
 
     const users = await sql`
-    SELECT *
-    FROM "User"
-    WHERE 
-        "first_name" ILIKE ${'%' + search + '%'}
-        OR "last_name" ILIKE ${'%' + search + '%'}
-        OR "email" ILIKE ${'%' + search + '%'}
-    ORDER BY created_at DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
-    RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
-    `
+        SELECT 
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "role",
+            "status",
+            "last_login",
+            "created_at",
+            "updated_at",
+            COUNT(*) OVER() AS total_count
+        FROM "User"
+        WHERE 1=1
+
+        ${search ? sql`
+        AND (
+            "first_name" ILIKE ${'%' + search + '%'}
+            OR "last_name" ILIKE ${'%' + search + '%'}
+            OR "email" ILIKE ${'%' + search + '%'}
+        )
+        ` : sql``}
+
+        ${role ? sql`AND "role" = ${role}` : sql``}
+
+        ${status ? sql`AND "status" = ${status}` : sql``}
+
+        ORDER BY "created_at" DESC
+        LIMIT ${limit}
+        OFFSET ${offset};
+    `;
+
     const [{ count }] = await sql`
         SELECT COUNT(*) FROM "User"
     `

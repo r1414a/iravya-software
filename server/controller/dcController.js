@@ -8,7 +8,8 @@ import { addDcService,
     dcByNameExist,
     getDcByIdService,
     updateDcService,
-    deleteDcService
+    deleteDcService,
+    getAllDcService
  } from "../services/dcService.js";
 
 
@@ -68,9 +69,34 @@ const deleteDc = asyncHandler(async (req, res) => {
     }
 })
 
+const getAllDc = asyncHandler(async (req, res) => {
+    let {
+      page,
+      limit,
+      search,
+      dc_status,
+    } = req.query;
+
+    // Defaults
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+
+    search = search?.trim() || null;
+    dc_status = dc_status || null;
+
+    const dc = await getAllDcService(page,
+      limit,
+      search,
+      dc_status)
+
+    sendResponse(res, 201, dc, "Data found")
+
+})
+
 export{
     addDc,
     getDc,
     updateDc,
-    deleteDc
+    deleteDc,
+    getAllDc
 }

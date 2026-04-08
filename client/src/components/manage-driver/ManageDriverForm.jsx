@@ -29,9 +29,8 @@ import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 import { useAddDriverMutation } from "@/lib/features/drivers/driverApi"
 import { useForm } from "react-hook-form"
 import { useEffect } from "react"
+import { LICENCE_CLASSES } from "@/constants/constant"
 
-
-const LICENCE_CLASSES = ["LMV", "HMV", "HGMV", "HTV"]
 
 export default function ManageDriverForm() {
     const [addDriver, { isLoading }] = useAddDriverMutation()
@@ -63,6 +62,8 @@ export default function ManageDriverForm() {
 
     const onSubmit = async (data) => {
         try {
+            console.log(data);
+            
             await addDriver(data).unwrap()
         } catch (err) {
             console.error(err)
@@ -111,7 +112,7 @@ export default function ManageDriverForm() {
                                                     <SelectLabel>Class</SelectLabel>
                                                     {/* <SelectItem value="all_licences">All classes</SelectItem> */}
                                                      {LICENCE_CLASSES.map(c => (
-                                                         <SelectItem key={c} value={c}>{c}</SelectItem>
+                                                         <SelectItem key={c.type} value={c.type}>{c.full}</SelectItem>
                                                          ))}
                                                    {/*  <SelectItem value="lmv">LMV - light motor vehicles/cars</SelectItem>
                                                     <SelectItem value="hmv">HMV - heavy motor vehicles</SelectItem>

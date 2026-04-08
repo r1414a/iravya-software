@@ -23,15 +23,17 @@ export const authApi = api.injectEndpoints({
                 url: "/api/v1/users/signout",
                 method: "POST"
             }),
+            invalidatesTags: ['Auth'],
             async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
                     dispatch(clearUser());
-                    dispatch(api.util.resetApiState());
+                    // dispatch(api.util.resetApiState());
                 } catch (error) {
                     console.error("Logout failed:", error);
                 }
             },
+            
         }),
 
         //login,getMe,logout

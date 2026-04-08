@@ -15,3 +15,22 @@ export const STATUS = {
     active: {text: "Active", color: "bg-green-100  border-green-200 text-green-700"},
     inactive: {text: "In Active", color: "bg-red-100  border-red-200 text-red-700"}
 }
+
+export const LICENCE_CLASSES = [
+    {
+        type: "LMV",
+        full: "LMV - light motor vehicles/cars"
+    },
+    {
+        type: "HMV",
+        full: "HMV - heavy motor vehicles"
+    },
+    {
+        type: "HGMV",
+        full: "HGMV - heavy goods motor vehicles"
+    },
+    {
+        type: "HTV",
+        full: "HTV - heavy transport vehicles"
+    },
+]

@@ -31,9 +31,10 @@ import {
     ShieldCheck, AlertTriangle, ExternalLink,
     Wind,
 } from "lucide-react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
-
+import { useAddTruckMutation } from "@/lib/features/trucks/truckApi"
+import { useForm } from "react-hook-form"
 
 // ── Mock documents (simulate uploaded files) ──────────────────────────────────
 // In a real app these would come from the truck object / API
@@ -73,7 +74,6 @@ function DocRow({ docKey, doc, onChange }) {
     const displayName = replaced?.name ?? doc?.name
     const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
 
-
     return (
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border ${cfg.bg} transition-colors`}>
             {/* Icon */}
@@ -87,8 +87,8 @@ function DocRow({ docKey, doc, onChange }) {
                     <p className="text-xs sm:text-sm font-medium text-gray-800">{docLabels[docKey]}</p>
                     {doc?.expiry && (
                         <span className={`text-[8px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${doc.status === "expiring" ? "bg-amber-100 text-amber-700"
-                                : doc.status === "expired" ? "bg-red-100 text-red-600"
-                                    : "bg-green-100 text-green-700"
+                            : doc.status === "expired" ? "bg-red-100 text-red-600"
+                                : "bg-green-100 text-green-700"
                             }`}>
                             {doc.status === "expiring" ? "⚠ " : ""} Exp {doc.expiry}
                         </span>
@@ -169,8 +169,8 @@ function DocumentUpload({ label, accept = ".pdf,.jpg,.jpeg,.png", onChange }) {
                 {label}
                 {/* {required
                     ?  */}
-                    <span className="text-red-500 ml-0.5">*</span>
-                    {/* : <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                <span className="text-red-500 ml-0.5">*</span>
+                {/* : <span className="text-gray-400 font-normal ml-1">(optional)</span>
                 } */}
             </FieldLabel>
 
@@ -225,23 +225,90 @@ function DocumentUpload({ label, accept = ".pdf,.jpg,.jpeg,.png", onChange }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AddTruckModal({ truck = null, open, onClose }) {
-
-    const [form, setForm] = useState({
-        regNo: truck?.regNo || "",
-        make: truck?.make || "",
-        type: truck?.type || "",
-        capacity: truck?.capacity || "",
-    })
+    // const [form, setForm] = useState({
+    //     regNo: truck?.regNo || "",
+    //     make: truck?.make || "",
+    //     type: truck?.type || "",
+    //     capacity: truck?.capacity || "",
+    // })
 
     // In real app, docs would come from truck object. Using mock here.
     const dummy_docs = truck?.docs ?? mockDocs
-    const [docs, setDocs] = useState(
-        dummy_docs || {
-            rc: null,
-            insurance: null,
-            puc: null,
-        }
+     const [docs, setDocs] = useState(
+        truck
+            ? dummy_docs
+            : {
+                registration_cert: null,
+                insurance_doc: null,
+                PUC_cert: null,
+            }
     )
+    const [addTruck, { isLoading }] = useAddTruckMutation()
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        watch,
+        setValue,
+        formState: {
+            isSubmitSuccessful
+        }
+    } = useForm({
+        defaultValues: {
+            registration_no: truck?.registration_no || "",
+            model: truck?.model || "",
+            type: truck?.type || "",
+            capacity: truck?.capacity || "",
+            // licence_expiry: "",
+        }
+    })
+
+    useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset();
+            setDocs({
+                registration_cert: null,
+                insurance_doc: null,
+                PUC_cert: null,
+            })
+            onClose?.(false)
+        }
+    }, [isSubmitSuccessful, reset]);
+
+
+    const selectedType = watch('type')
+
+
+    const onSubmit = async (data) => {
+        try {
+            console.log(data);
+const formData = new FormData()
+
+            formData.append("registration_no", data.registration_no.toUpperCase().trim())
+            formData.append("model", data.model)
+            formData.append("type", data.type)
+            formData.append("capacity", data.capacity)
+
+            if (docs.registration_cert) {
+                formData.append("registration_cert", docs.registration_cert)
+            }
+
+            if (docs.insurance_doc) {
+                formData.append("insurance_doc", docs.insurance_doc)
+            }
+
+            if (docs.PUC_cert) {
+                formData.append("PUC_cert", docs.PUC_cert)
+            }
+
+            await addTruck(formData).unwrap()
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+
 
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
@@ -250,152 +317,149 @@ export default function AddTruckModal({ truck = null, open, onClose }) {
                     null
                     :
                     <CreateFormSheetTrigger text='Add Truck' />
-                //     <SheetTrigger className="flex items-center bg-maroon hover:bg-maroon-dark text-white rounded-md text-sm h-8 px-2">
-                //     <Plus className="w-4 h-4 mr-2" />
-                //     Add Truck
-                // </SheetTrigger>
             }
 
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
-                <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle>{truck ? "Edit truck" : "Add a truck"}</SheetTitle>
-                    <SheetDescription>
-                        Register a new truck, link a GPS device, and optionally assign a driver
-                    </SheetDescription>
-                </SheetHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                    <SheetHeader className="border-b border-gray-200">
+                        <SheetTitle>{truck ? "Edit truck" : "Add a truck"}</SheetTitle>
+                        <SheetDescription>
+                            Register a new truck, link a GPS device, and optionally assign a driver
+                        </SheetDescription>
+                    </SheetHeader>
 
-                {/* Scrollable body */}
-                <div className="flex-1 overflow-y-auto pb-4 px-4">
-                    <FieldGroup>
-                        <FieldSet>
-                            <FieldGroup>
+                    {/* Scrollable body */}
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                        <FieldGroup>
+                            <FieldSet>
+                                <FieldGroup>
 
-                                {/* ── Truck details ── */}
-                                <div className="flex gap-2">
-                                    <Field>
-                                        <FieldLabel>Registration no.</FieldLabel>
-                                        <Input value={form.regNo}
-                                            onChange={(e) => setForm({ ...form, regNo: e.target.value })} placeholder="MH12AB1234" className="font-mono uppercase text-sm sm:text-md placeholder:text-sm" required />
+                                    {/* ── Truck details ── */}
+                                    <div className="flex gap-2">
+                                        <Field>
+                                            <FieldLabel>Registration no.</FieldLabel>
+                                            <Input
+                                                {...register('registration_no')}
+                                                placeholder="MH12AB1234"
+                                                className="font-mono uppercase text-sm sm:text-md placeholder:text-sm" required />
 
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel>Make &amp; model</FieldLabel>
-                                        <Input value={form.make}
-                                        className="placeholder:text-sm text-sm sm:text-md"
-                                            onChange={(e) => setForm({ ...form, make: e.target.value })} placeholder="Tata 407" />
-                                    </Field>
-                                </div>
+                                        </Field>
+                                        <Field>
+                                            <FieldLabel>Make &amp; model</FieldLabel>
+                                            <Input
+                                                {...register('model')}
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                                placeholder="Tata 407" />
+                                        </Field>
+                                    </div>
 
-                                <div className="flex gap-2">
-                                    <Field>
-                                        <FieldLabel>Truck type</FieldLabel>
-                                        <Select onValueChange={(value) => setForm({ ...form, type: value })} value={form.type}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select type" className="placeholder:text-sm text-sm sm:text-md"/>
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Type</SelectLabel>
-                                                    <SelectItem value="mini_truck">Mini truck</SelectItem>
-                                                    <SelectItem value="medium">Medium</SelectItem>
-                                                    <SelectItem value="heavy">Heavy</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel>Capacity</FieldLabel>
-                                        <Input value={form.capacity}
-                                        className="placeholder:text-sm text-sm sm:text-md"
-                                            onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="e.g. 4T" />
-                                    </Field>
-                                </div>
+                                    <div className="flex gap-2">
+                                        <Field>
+                                            <FieldLabel>Truck type</FieldLabel>
+                                            <Select
+                                                value={selectedType}
+                                            onValueChange={(val) => setValue("type", val)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select type" className="placeholder:text-sm text-sm sm:text-md" />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border shadow-md">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Type</SelectLabel>
+                                                        <SelectItem value="mini_truck">Mini truck</SelectItem>
+                                                        <SelectItem value="medium">Medium</SelectItem>
+                                                        <SelectItem value="heavy">Heavy</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </Field>
+                                        <Field>
+                                            <FieldLabel>Capacity (in tons)</FieldLabel>
+                                            <Input
+                                                {...register('capacity')}
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                                placeholder="e.g. 4" />
+                                        </Field>
+                                    </div>
 
 
-                                {/* ── Documents section ── */}
-                                {
-                                    truck
-                                        ?
-                                        <>
-                                            {/* ── Documents ── */}
-                                            <div className="py-4 border-b">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documents</p>
+                                    {/* ── Documents section ── */}
+                                    {
+                                        truck
+                                            ?
+                                            <>
+                                                {/* ── Documents ── */}
+                                                <div className="py-4 border-b">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documents</p>
 
-                                                    {/* Warn if any doc is expiring / expired / missing */}
-                                                    {Object.values(docs).some((d) => !d || ["expiring", "expired", "missing"].includes(d?.status)) && (
-                                                        <span className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
-                                                            <AlertTriangle size={11} />
-                                                            Action needed
-                                                        </span>
-                                                    )}
+                                                        {/* Warn if any doc is expiring / expired / missing */}
+                                                        {Object.values(docs).some((d) => !d || ["expiring", "expired", "missing"].includes(d?.status)) && (
+                                                            <span className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                                                                <AlertTriangle size={11} />
+                                                                Action needed
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2">
+                                                        {["rc", "insurance", "puc"].map((key) => (
+                                                            <DocRow
+                                                                key={key}
+                                                                docKey={key}
+                                                                doc={docs[key] ?? null}
+                                                                onChange={(file) =>
+                                                                    setDocs((prev) => ({ ...prev, [key]: file }))
+                                                                }
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                            :
+                                            <div className="pt-2">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <FileText size={14} className="text-gray-400" />
+                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                        Vehicle documents
+                                                    </p>
                                                 </div>
 
-                                                <div className="flex flex-col gap-2">
-                                                    {["rc", "insurance", "puc"].map((key) => (
-                                                        <DocRow
-                                                            key={key}
-                                                            docKey={key}
-                                                            doc={docs[key] ?? null}
-                                                            onChange={(file) =>
-                                                                setDocs((prev) => ({ ...prev, [key]: file }))
-                                                            }
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </>
-                                        :
-                                        <div className="pt-2">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <FileText size={14} className="text-gray-400" />
-                                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                    Vehicle documents
-                                                </p>
-                                            </div>
-
-                                            <div className="flex flex-col gap-3">
-                                                <DocumentUpload
+                                                <div className="flex flex-col gap-3">
+                                                                                                    <DocumentUpload
                                                     label="RC (Registration Certificate)"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, rc: f }))}
+                                                    onChange={(f) => setDocs((d) => ({ ...d, registration_cert: f }))}
                                                 />
                                                 <DocumentUpload
                                                     label="Insurance"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, insurance: f }))}
+                                                    onChange={(f) => setDocs((d) => ({ ...d, insurance_doc: f }))}
                                                 />
                                                 <DocumentUpload
                                                     label="PUC Certificate"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, puc: f }))}
+                                                    onChange={(f) => setDocs((d) => ({ ...d, PUC_cert: f }))}
                                                 />
+
+                                                </div>
                                             </div>
-                                        </div>
-                                }
+                                    }
 
 
 
 
-                            </FieldGroup>
-                        </FieldSet>
-                    </FieldGroup>
-                </div>
+                                </FieldGroup>
+                            </FieldSet>
+                        </FieldGroup>
+                    </div>
 
 
-                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>{truck ? "Save changes" : "Add Truck"} <Truck /></Button>
-                    <SheetClose className='basis-1/2' asChild>
-                        <Button className="w-full" variant="outline">Cancel</Button>
-                    </SheetClose>
-                </SheetFooter>
-
-                {/* <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                    <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
-                        {truck ? "Save changes" : "Add Truck"}  <Truck />
-                    </Button>
-                    <SheetClose className="basis-1/2" asChild>
-                        <Button className="w-full" variant="outline">Cancel</Button>
-                    </SheetClose>
-                </SheetFooter> */}
+                    <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>{isLoading ? "Saving..." : truck ? "Save changes" : "Add Truck"} <Truck /></Button>
+                        <SheetClose className='basis-1/2' asChild>
+                            <Button className="w-full" variant="outline">Cancel</Button>
+                        </SheetClose>
+                    </SheetFooter>
+                </form>
             </SheetContent>
         </Sheet>
     )

@@ -176,7 +176,7 @@ export const columns = [
     // Truck reg no. + type badge
     {
         accessorKey: "type",
-        header: ({ column }) => {
+        header: ({ column, table }) => {
             const currentValue = column.getFilterValue() || "all"
             return (
                 <div className="flex items-center gap-2">
@@ -198,6 +198,8 @@ export const columns = [
                                     column.setFilterValue(
                                         value === "all" ? undefined : value
                                     )
+
+                                    table.options.meta?.updatePage(1)
                                 }}
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">
@@ -328,7 +330,7 @@ export const columns = [
     // Status badge
     {
         accessorKey: "status",
-        header: ({ column }) => {
+        header: ({ column, table }) => {
             const currentValue = column.getFilterValue() || "all"
             return (
                 <div className="flex items-center gap-2">
@@ -352,6 +354,7 @@ export const columns = [
                                     column.setFilterValue(
                                         value === "all" ? undefined : value
                                     )
+                                     table.options.meta?.updatePage(1)
                                 }}
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">

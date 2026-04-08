@@ -27,7 +27,7 @@ app.use(cookieParser())
 app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/dc',dcRoutes)
 app.use('/api/v1/drivers',driverRoutes)
-app.use('/api/v1/truck',truckRoutes)
+app.use('/api/v1/trucks',truckRoutes)
 app.use('/api/v1/store',storeRoutes)
 app.use('/api/v1/brands',brandRoutes)
 

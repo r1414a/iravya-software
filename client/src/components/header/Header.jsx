@@ -101,12 +101,10 @@ export default function Header() {
             <DropdownMenuSeparator />
             */}
 
-            <DropdownMenuItem className="text-red-500 focus:text-red-600">
+            <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-600">
               <LogOut className="mr-2 h-4 w-4" />
-              <Button onClick={handleLogout} variant="ghost" className="hover:bg-transparent w-full">
-
-                Logout
-              </Button>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Logout</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

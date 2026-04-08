@@ -7,11 +7,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Ban, Trash2 } from "lucide-react"
-import {Button} from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 
-export default function DeleteModal({ m1active, who}) {
+export default function DeleteModal({ m1active, who, onConfirm, isLoading }) {
     // const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false)
     return (
         <Dialog>
@@ -24,35 +24,36 @@ export default function DeleteModal({ m1active, who}) {
                     <DialogDescription>
                         This action cannot be undone. This will permanently remove your data from our servers.
                     </DialogDescription>
-                        <div className="pt-2">
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                                        Danger zone
+                    <div className="pt-2">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                            Danger zone
+                        </p>
+
+                        <div className={`flex items-start justify-between gap-4 p-3 rounded-lg border border-red-200 bg-red-50`}>
+                            <div className="flex items-start gap-2">
+                                <Ban size={14} className={`mt-0.5 shrink-0 text-red-500`} />
+                                <div>
+                                    <p className={`text-sm font-medium text-red-700`}>
+                                        Delete {who}
                                     </p>
- 
-                                    <div className={`flex items-start justify-between gap-4 p-3 rounded-lg border border-red-200 bg-red-50`}>
-                                        <div className="flex items-start gap-2">
-                                            <Ban size={14} className={`mt-0.5 shrink-0 text-red-500`} />
-                                            <div>
-                                                <p className={`text-sm font-medium text-red-700`}>
-                                                    Delete {who}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-0.5">
-                                                    {m1active}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            // onClick={() => setShowDeactivateConfirm(!showDeactivateConfirm)}
-                                            className={`shrink-0 text-xs text-red-600 border-red-300 hover:bg-red-100`}
-                                        >
-                                           Delete
-                                        </Button>
-                                    </div>
- 
-                                    {/* Inline confirm — same pattern as EditUserDrawer */}
-                                    {/* {showDeactivateConfirm && (
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {m1active}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className={`shrink-0 text-xs text-red-600 border-red-300 hover:bg-red-100`}
+                                onClick={onConfirm}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Deleting..." : "Delete"}
+                            </Button>
+                        </div>
+
+                        {/* Inline confirm — same pattern as EditUserDrawer */}
+                        {/* {showDeactivateConfirm && (
                                         <div className={`mt-2 px-3 py-2.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                                             isActive ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"
                                         }`}>
@@ -84,7 +85,7 @@ export default function DeleteModal({ m1active, who}) {
                                             </div>
                                         </div>
                                     )} */}
-                                </div>
+                    </div>
                 </DialogHeader>
             </DialogContent>
         </Dialog>

@@ -22,6 +22,7 @@ const addDriverService = async (data) => {
         "first_name",
         "last_name",
         "email",
+        "phone_number",
         "role",
         "status"
     )
@@ -31,6 +32,7 @@ const addDriverService = async (data) => {
         ${first_name},
         ${last_name},
         NULL,
+        ${phone},
         'driver',
         true
     )
@@ -81,19 +83,20 @@ const getDriverbyidService = async (id) => {
 const updateDriverService = async (id, data) => {
     const {
         full_name,
-        phone,
+        phone_number,
         licence_no,
         licence_class,
-        licence_expiry
+        licence_expiry,
+        status
     } = data;
 
     const driver = await sql`
         UPDATE "Drivers"
         SET 
-            "phone" = ${phone},
             "licence_no" = ${licence_no},
             "licence_class" = ${licence_class},
-            "licence_expiry" = ${licence_expiry}
+            "licence_expiry" = ${licence_expiry},
+            "status" = ${status}
         WHERE "id" = ${id}
         RETURNING *
     `
@@ -103,8 +106,7 @@ const updateDriverService = async (id, data) => {
       SET
         "first_name" = COALESCE(${name_[0]}, "first_name"),
         "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
-        "email" = COALESCE(${manager_email}, "email"),
-        "phone_number" = COALESCE(${manager_phone}, "phone_number")
+        "phone_number" = COALESCE(${phone_number}, "phone_number")
       WHERE "id" = (
         SELECT "user_id"
         FROM "Drivers"
@@ -222,30 +224,39 @@ const getDriversListService = async (page = 1, limit = 10) => {
   const drivers = await sql`
     SELECT 
         d.id,
-        d.full_name,
-        d.phone,
+        CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.phone_number,
         d.licence_no,
         d.licence_class,
         d.licence_expiry,
+        d.status,
+        d.total_trips,
         d.created_at AS since,
 
         t.id AS current_trip,
         t.status AS trip_status,
 
-        COUNT(tr.id) AS total_trips,
+        COUNT(DISTINCT tr.id) AS total_trips,
 
-        COUNT(tr.id) FILTER (
-            WHERE DATE_TRUNC('month', tr.scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
-        ) AS trips_this_month,
+        COUNT(DISTINCT tr.id) FILTER (
+    WHERE DATE_TRUNC('month', tr.scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
+) AS trips_this_month,
 
         CASE 
-            WHEN t.status = 'in_transit' THEN 'On trip'
+            WHEN d.status = 'on_trip' THEN 'On trip'
+            WHEN d.status = 'inactive' THEN 'Inactive'
             ELSE 'Available'
         END AS driver_status,
 
         COUNT(*) OVER() AS total_count
 
     FROM "Drivers" d
+
+    INNER JOIN "User" u
+        ON d.user_id = u.id
 
     LEFT JOIN "Trips" t 
         ON t.driver_id = d.id 
@@ -256,6 +267,7 @@ const getDriversListService = async (page = 1, limit = 10) => {
 
     GROUP BY 
         d.id,
+        u.id,
         t.id,
         t.status
 
@@ -268,72 +280,71 @@ const getDriversListService = async (page = 1, limit = 10) => {
 
   return {
     data: drivers,
-    
-      total: drivers[0]?.total_count || 0,
-      page,
-      limit,
-      totalPages: Math.ceil((drivers[0]?.total_count || 0) / limit)
-    
+    total: Number(drivers[0]?.total_count || 0),
+    page,
+    limit,
+    totalPages: Math.ceil((drivers[0]?.total_count || 0) / limit)
   };
 };
 
 const getDriversListeBySearchService = async (page = 1, limit = 10, search = "") => {
   const offset = (page - 1) * limit;
+  const searchPattern = `%${search}%`;
 
   const drivers = await sql`
     SELECT 
         d.id,
-        d.full_name,
-        d.phone,
+        -- Concatenate names from the Users table
+        u.first_name,
+        u.last_name,
+        CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+        u.phone_number,
         d.licence_no,
         d.licence_class,
         d.licence_expiry,
         d.created_at AS since,
 
-        t.id AS current_trip,
+        t.id AS current_trip_id,
         t.status AS trip_status,
 
-        COUNT(tr.id) AS total_trips,
-
-        COUNT(tr.id) FILTER (
-            WHERE DATE_TRUNC('month', tr.scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
+        -- Using subqueries for counts is cleaner than multiple JOINs in complex setups
+        (SELECT COUNT(*) FROM "Trips" WHERE driver_id = d.id) AS total_trips,
+        (SELECT COUNT(*) FROM "Trips" 
+         WHERE driver_id = d.id 
+         AND DATE_TRUNC('month', scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
         ) AS trips_this_month,
 
+        -- Determine UI status based on trip presence
         CASE 
-            WHEN t.status = 'in_transit' THEN 'On trip'
+            WHEN d.status = 'on_trip' THEN 'On trip'
+            WHEN d.status = 'inactive' THEN 'Inactive'
             ELSE 'Available'
         END AS driver_status,
 
         COUNT(*) OVER() AS total_count
 
     FROM "Drivers" d
-
-    LEFT JOIN "Trips" t 
-        ON t.driver_id = d.id 
-        AND t.status = 'in_transit'
-
-    LEFT JOIN "Trips" tr 
-        ON tr.driver_id = d.id
+    -- Join Users to get Name and Phone
+    INNER JOIN "User" u ON d.user_id = u.id
+    -- Left Join Trips to find if they are currently on a trip
+    LEFT JOIN "Trips" t ON t.driver_id = d.id AND t.status = 'in_transit'
 
     WHERE 
-        (
-            ${search} = '' 
-            OR d.full_name ILIKE ${'%' + search + '%'}
-            OR d.phone ILIKE ${'%' + search + '%'}
-        )
+        ${search} = '' 
+        OR u.first_name ILIKE ${searchPattern}
+        OR u.last_name ILIKE ${searchPattern}
+        OR u.phone_number ILIKE ${searchPattern}
+        OR d.licence_no ILIKE ${searchPattern}
 
     GROUP BY 
-        d.id,
-        t.id,
-        t.status
+        d.id, u.first_name, u.last_name, u.phone_number, t.id, t.status
 
     ORDER BY d.created_at DESC
-
     LIMIT ${limit}
     OFFSET ${offset}
   `;
 
-  const total = drivers[0]?.total_count || 0;
+  const total = parseInt(drivers[0]?.total_count || 0);
 
   return {
     data: drivers,

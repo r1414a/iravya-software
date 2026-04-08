@@ -42,8 +42,8 @@ const updateDriver = asyncHandler(async (req,res) => {
     const {id} = req.params
     const driver = await updateDriverService(id, req.body)
 
-    if (driver.length) {
-        return sendResponse(res, 200, driver, "Driver updated successfully");
+    if (driver && driver.length > 0) {
+        return sendResponse(res, 200, driver[0], "Driver updated successfully");
     }
     throw new ApiError(404, "Driver not found");
 })

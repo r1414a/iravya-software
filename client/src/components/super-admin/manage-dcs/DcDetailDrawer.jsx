@@ -47,7 +47,7 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                 <SheetHeader className="p-4 border-b">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div className="min-w-0">
-                            <SheetTitle className="text-base sm:text-lg lg:text-xl font-bold truncate">{dc.name}</SheetTitle>
+                            <SheetTitle className="text-base sm:text-lg lg:text-xl font-bold truncate">{dc.dc_name}</SheetTitle>
                             <p className="text-xs sm:text-sm text-gray-500 mt-0.5 flex items-center gap-1 flex-wrap">
                                 <MapPin size={12} /> {dc.city} · {dc.brand}
                             </p>
@@ -66,12 +66,12 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3">
                             {[
-                                { icon: Truck, label: "Trucks", value: `${dc.activeTrucks} active / ${dc.totalTrucks} total` },
-                                { icon: Users, label: "Drivers", value: `${dc.totalDrivers} registered` },
-                                { icon: LocateFixed, label: "GPS devices", value: `${dc.devicesAvailable} available / ${dc.totalDevices} total` },
-                                { icon: Road, label: "Active trips", value: dc.activeTrips },
-                                { icon: CheckCircle2, label: "Total trips", value: dc.totalTrips },
-                                { icon: Clock, label: "Operating since", value: dc.createdAt },
+                                { icon: Truck, label: "Trucks", value: `${dc.active_trucks} active / ${dc.total_trucks} total` },
+                                { icon: Users, label: "Drivers", value: `${dc.total_drivers} registered` },
+                                // { icon: LocateFixed, label: "GPS devices", value: `${dc.devicesAvailable} available / ${dc.total_devices} total` },
+                                { icon: Road, label: "Active trips", value: dc.activ_trips },
+                                { icon: CheckCircle2, label: "Total trips", value: dc.total_trips },
+                                { icon: Clock, label: "Operating since", value: dc.created_at },
                             ].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="bg-gray-50 border border-gray-100 rounded-lg p-2 sm:p-3">
                                     <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 mb-1">

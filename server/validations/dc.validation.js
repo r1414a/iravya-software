@@ -66,10 +66,10 @@ export const updatedcValidation = [
         .notEmpty()
         .withMessage("State is required"),
 
-    body("country")
-        .notEmpty()
-        .default("India")
-        .withMessage("Country is required"),
+    // body("country")
+    //     .notEmpty()
+    //     .default("India")
+    //     .withMessage("Country is required"),
 
     body("contact_name")
         .notEmpty()
@@ -87,9 +87,9 @@ export const updatedcValidation = [
         .isEmail()
         .withMessage("Invalid email"),
 
-    body("status")
-        .optional()
-        .isBoolean()
-        .withMessage("status can either be active or inactive")
+    // body("status")
+    //     .optional()
+    //     .isBoolean()
+    //     .withMessage("status can either be active or inactive")
 
 ];

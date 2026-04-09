@@ -218,9 +218,13 @@ const getDriverTripHistoryService = async (driverId) => {
   return trips;
 };
 
-const getDriversListService = async (page = 1, limit = 10) => {
+const getDriversListService = async (page = 1, limit = 10, user_id) => {
   const offset = (page - 1) * limit;
 
+  const [dc] = await sql`
+        SELECT "brand_id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+    `
+    const brandId = dc?.brand_id || null
   const drivers = await sql`
     SELECT 
         d.id,
@@ -250,6 +254,8 @@ const getDriversListService = async (page = 1, limit = 10) => {
             WHEN d.status = 'inactive' THEN 'Inactive'
             ELSE 'Available'
         END AS driver_status,
+
+        d.brand_id = ${brandId}
 
         COUNT(*) OVER() AS total_count
 
@@ -287,74 +293,80 @@ const getDriversListService = async (page = 1, limit = 10) => {
   };
 };
 
-const getDriversListeBySearchService = async (page = 1, limit = 10, search = "") => {
-  const offset = (page - 1) * limit;
-  const searchPattern = `%${search}%`;
+const getDriversListeBySearchService = async (page = 1, limit = 10, search = "", user_id) => {
+    const offset = (page - 1) * limit;
+    const searchPattern = `%${search}%`;
 
-  const drivers = await sql`
-    SELECT 
-        d.id,
-        -- Concatenate names from the Users table
-        u.first_name,
-        u.last_name,
-        CONCAT(u.first_name, ' ', u.last_name) AS full_name,
-        u.phone_number,
-        d.licence_no,
-        d.licence_class,
-        d.licence_expiry,
-        d.created_at AS since,
+    const [dc] = await sql`
+            SELECT "brand_id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+        `
+    const brandId = dc?.brand_id || null
+    const drivers = await sql`
+        SELECT 
+            d.id,
+            -- Concatenate names from the Users table
+            u.first_name,
+            u.last_name,
+            CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+            u.phone_number,
+            d.licence_no,
+            d.licence_class,
+            d.licence_expiry,
+            d.created_at AS since,
 
-        t.id AS current_trip_id,
-        t.status AS trip_status,
+            t.id AS current_trip_id,
+            t.status AS trip_status,
 
-        -- Using subqueries for counts is cleaner than multiple JOINs in complex setups
-        (SELECT COUNT(*) FROM "Trips" WHERE driver_id = d.id) AS total_trips,
-        (SELECT COUNT(*) FROM "Trips" 
-         WHERE driver_id = d.id 
-         AND DATE_TRUNC('month', scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
-        ) AS trips_this_month,
+            -- Using subqueries for counts is cleaner than multiple JOINs in complex setups
+            (SELECT COUNT(*) FROM "Trips" WHERE driver_id = d.id) AS total_trips,
+            (SELECT COUNT(*) FROM "Trips" 
+            WHERE driver_id = d.id 
+            AND d.brand_id=${brandId}
+            AND DATE_TRUNC('month', scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
+            ) AS trips_this_month,
 
-        -- Determine UI status based on trip presence
-        CASE 
-            WHEN d.status = 'on_trip' THEN 'On trip'
-            WHEN d.status = 'inactive' THEN 'Inactive'
-            ELSE 'Available'
-        END AS driver_status,
+            -- Determine UI status based on trip presence
+            CASE 
+                WHEN d.status = 'on_trip' THEN 'On trip'
+                WHEN d.status = 'inactive' THEN 'Inactive'
+                ELSE 'Available'
+            END AS driver_status,
 
-        COUNT(*) OVER() AS total_count
+            COUNT(*) OVER() AS total_count
 
-    FROM "Drivers" d
-    -- Join Users to get Name and Phone
-    INNER JOIN "User" u ON d.user_id = u.id
-    -- Left Join Trips to find if they are currently on a trip
-    LEFT JOIN "Trips" t ON t.driver_id = d.id AND t.status = 'in_transit'
+        FROM "Drivers" d
+        -- Join Users to get Name and Phone
+        INNER JOIN "User" u ON d.user_id = u.id
+        -- Left Join Trips to find if they are currently on a trip
+        LEFT JOIN "Trips" t ON t.driver_id = d.id AND t.status = 'in_transit'
 
-    WHERE 
-        ${search} = '' 
-        OR u.first_name ILIKE ${searchPattern}
-        OR u.last_name ILIKE ${searchPattern}
-        OR u.phone_number ILIKE ${searchPattern}
-        OR d.licence_no ILIKE ${searchPattern}
+        WHERE 
+            ${search} = '' 
+            OR u.first_name ILIKE ${searchPattern}
+            OR u.last_name ILIKE ${searchPattern}
+            OR u.phone_number ILIKE ${searchPattern}
+            OR d.licence_no ILIKE ${searchPattern}
+            
 
-    GROUP BY 
-        d.id, u.first_name, u.last_name, u.phone_number, t.id, t.status
+        GROUP BY 
+            d.id, u.first_name, u.last_name, u.phone_number, t.id, t.status
 
-    ORDER BY d.created_at DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `;
+        ORDER BY d.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+    `;
 
-  const total = parseInt(drivers[0]?.total_count || 0);
+    const total = parseInt(drivers[0]?.total_count || 0);
 
-  return {
-    data: drivers,
-    pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
-    }
-  };
+    return {
+        data: drivers,
+        pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+        }
+    };
 };
 
 export{

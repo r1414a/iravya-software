@@ -40,7 +40,7 @@ router.put("/updatetruck/:id", protect, authorize('super_admin',"dc_manager"), u
   ]), updateTruckData, validate, updateTruckData)
 
 router.delete("/truck/delete/:id", protect, authorize('super_admin',"dc_manager"),deleteTruck)
-router.get("/trip-data", protect, authorize('super_admin',"dc_manager"), getRecentTripDetails)
+router.get("/trip-data/:id", protect, authorize('super_admin',"dc_manager"), getRecentTripDetails)
 router.get('/trip-history/:id', protect, authorize('super_admin',"dc_manager"),getTripHistory)
 router.get("/truck", protect, authorize('super_admin',"dc_manager"), getAllTruckData)
 export default router

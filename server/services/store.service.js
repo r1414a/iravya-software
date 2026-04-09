@@ -209,10 +209,15 @@ const getAllStoreService = async (filters) => {
         city,
         search,
         page = 1,
-        limit = 10
+        limit = 10,
+        user_id
     } = filters;
 
     const offset = (page - 1) * limit;
+    const [dc] = await sql`
+            SELECT "id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+        `
+    const dcID = dc?.id || null
 
     const stores = await sql`
         SELECT 
@@ -250,6 +255,7 @@ const getAllStoreService = async (filters) => {
         ON t.id = ts.trip_id
 
     WHERE 1=1
+    AND s.dc_id = ${dcID}
 
     ${brand_id ? sql`
     AND s.brand_id = ${brand_id}

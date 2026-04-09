@@ -125,7 +125,8 @@ const deleteTruck = asyncHandler(async (req, res) => {
 })
 
 const getRecentTripDetails = async(req, res)=>{
-    const{trip_id} = req.body
+    const{trip_id} = req.params
+ 
     const data = await getRecentTripDetailsService(trip_id)
     if(data){
         sendResponse(res, 201, data, "Found Data")
@@ -151,12 +152,16 @@ const getAllTruckData = asyncHandler(async (req, res) => {
     const { type, status, search, page = 1, 
         limit = 10  } = req.query
 
+    const user_id = req.user.id
+    console.log(user_id)
+
     const trucks = await getAllTruckDataService({
         type: type || null,
         truck_status : status || null,
         search : search || null,
         page: Number(page),
-        limit: Number(limit)
+        limit: Number(limit),
+        user_id: user_id
     })
 
     return sendResponse(

@@ -224,11 +224,15 @@ const getTripHistoryService = async (id) => {
     return trips
 }
 
-const getAllTruckDataService = async ({ type, truck_status, search, page, limit }) => {
+const getAllTruckDataService = async ({ type, truck_status, search, page, limit, user_id}) => {
     const offset = (page - 1) * limit
 
-    // FIX 1: Build query conditionally — don't apply search filter when search is null
-    // FIX 2: pagination object was missing the opening brace — page/limit/total_pages were outside
+    console.log(user_id)
+    const [dc] = await sql`
+        SELECT "id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+    `
+    const dcId = dc?.id || null
+    console.log("dcId:", dcId)
     const trucks = await sql`
         SELECT 
             tr.id, tr.registration_no, tr.type, tr.capacity, tr.model, tr.status, tr."registration_cert", tr."insurance_doc", tr."PUC_cert",
@@ -236,6 +240,7 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
             MAX(t.departed_at) AS last_trip
         FROM "Trucks" tr
         LEFT JOIN "Trips" t ON t.truck_id = tr.id
+        
         WHERE 1=1
             AND (${type}::text IS NULL OR tr.type = ${type})
             AND (${truck_status}::text IS NULL OR tr.status = ${truck_status})
@@ -244,6 +249,10 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
                 OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
+            
+            AND tr.dc_id = ${dcId}
+            
+          
         GROUP BY tr.id, tr.registration_no, tr.type, tr.model, tr.status
         ORDER BY last_trip DESC NULLS LAST
         LIMIT ${limit} OFFSET ${offset}
@@ -259,6 +268,7 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
                 OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
+            AND tr.dc_id = ${dcId}
     `
 
     const total = Number(countRow.count)

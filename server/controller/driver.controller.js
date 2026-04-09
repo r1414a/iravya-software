@@ -78,8 +78,9 @@ const getDriverTripHistory = asyncHandler(async (req, res) => {
 
 const getAllDriverList = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
-
-    const drivers = await getDriversListService(Number(page), Number(limit));
+    const user_id = req.user.id
+    console.log(user_id)
+    const drivers = await getDriversListService(Number(page), Number(limit), user_id);
     return sendResponse(res, 200, drivers, "Drivers fetched successfully");
 });
 
@@ -87,10 +88,14 @@ const getAllDriverListBySearch = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10  } = req.params;
   const {search = "" } = req.body
 
+  const user_id = req.user.id
+    console.log(user_id)
+
   const drivers = await getDriversListeBySearchService(
     Number(page),
     Number(limit),
-    search
+    search,
+    user_id
   );
 
   return sendResponse(res, 200, drivers, "Drivers fetched successfully");

@@ -27,6 +27,7 @@ import EditDCDrawer from "../EditDCDrawer"
 import DeleteModal from "@/components/DeleteModal"
 import { useDeleteDcMutation } from "@/lib/features/dcs/dcApi"
 import { format, parseISO } from "date-fns"
+import AddDCForm from "../AddDcForm"
 
 const statusStyles = {
     active: "bg-green-100 text-green-700",
@@ -40,18 +41,13 @@ function ActionsCell({ row }) {
     const [viewDetails, setViewDetails] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
 
-    const [deleteTruck, { isLoading: isDeleting }] = useDeleteDcMutation();
+    const [deleteDC, { isLoading: isDeleting }] = useDeleteDcMutation();
 
     const handleDelete = async () => {
         try {
-            await deleteTruck(dc.id).unwrap();
-            // showSuccessToast("Driver deleted successfully")
-            // toast.success("Driver deleted successfully");
+            await deleteDC(dc.id).unwrap();
         } catch (err) {
             console.error("Failed to delete truck", err);
-
-            // showErrorToast(err)
-            // toast.error(err?.data?.message || "Failed to delete driver");
         }
     };
     return (
@@ -62,7 +58,7 @@ function ActionsCell({ row }) {
                 onClose={() => setViewDetails(false)}
             />
 
-            <EditDCDrawer
+            <AddDCForm
                 dc={dc}
                 open={editOpen}
                 onClose={() => setEditOpen(false)}

@@ -6,7 +6,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 
 
 const addDcService = async(data) =>{
-    const {name, address, city, state, country, contact_name, contact_phone, contact_email, status="active"} = data
+    const {name, address, city, state, contact_name, contact_phone, contact_email} = data
     
     const name_= contact_name.split(" ")
     const [newUser] = await sql`
@@ -17,7 +17,7 @@ const addDcService = async(data) =>{
             "role",
             "email",
             "phone_number",
-            "user_status",
+            "user_status"
 
         )
         VALUES
@@ -28,7 +28,7 @@ const addDcService = async(data) =>{
             ${"dc_manager"},
             ${contact_email},
             ${contact_phone},
-            active
+            ${"active"}
         )
         RETURNING
             "id",
@@ -48,8 +48,6 @@ const addDcService = async(data) =>{
             "address",
             "city",
             "state",
-            "country",
-            "status",
             "dc_manager"
             )
             VALUES
@@ -58,8 +56,6 @@ const addDcService = async(data) =>{
             ${address},
             ${city},
             ${state},
-            ${country},
-            ${status},
             ${newUser.id}
             )
             RETURNING *
@@ -88,16 +84,14 @@ const getDcByIdService = async(id)=>{
 }
 
 const updateDcService = async(id, data) =>{
-    const {name, address, city, state, country, contact_name, contact_phone, contact_email, is_active} = data
+    const {name, address, city, contact_name, contact_phone, contact_email, status} = data
     const dc = (await sql`
             UPDATE "Distribution_center"
             SET 
                 "name" = ${name},
                 "address" = ${address},
                 "city" = ${city},
-                "state" = ${state},
-                "country" = ${country},
-                "is_active" = ${is_active}
+                "status" = ${status}
             WHERE "id" = ${id}
             RETURNING *
         `)
@@ -138,6 +132,7 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
             dc.id,
             dc.name AS dc_name,
             dc.city,
+            dc.address,
             dc.status,
             dc.created_at,
 

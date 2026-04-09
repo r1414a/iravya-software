@@ -28,13 +28,16 @@ import {
 } from "@/components/ui/select"
 import { Plus, Warehouse } from "lucide-react"
 import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
-import { useAddDcMutation } from "@/lib/features/dcs/dcApi"
+import { useAddDcMutation, useUpdateDcMutation } from "@/lib/features/dcs/dcApi"
 import { Controller, useForm } from "react-hook-form"
 import { useEffect } from "react"
 
-export default function AddDCForm() {
+export default function AddDCForm({ dc = null, open, onClose }) {
+
+    // console.log(dc);
 
     const [addDc, { isLoading }] = useAddDcMutation()
+    const [updateDc, { isLoading: isUpdating }] = useUpdateDcMutation();
 
     const {
         register,
@@ -46,14 +49,14 @@ export default function AddDCForm() {
         formState: { errors, isSubmitSuccessful },
     } = useForm({
         defaultValues: {
-            name: "",
-            city: "",
+            name: dc?.dc_name || "",
+            city: dc?.city || "",
             state: "Maharashtra",
-            address: "",
-            contact_name: "",
-            contact_phone: "",
-            contact_email: "",
-            status: "active",
+            address: dc?.address || "",
+            contact_name: dc?.dc_manager_name || "",
+            contact_phone: dc?.dc_manager_phone || "",
+            contact_email: dc?.dc_manager_email || "",
+            status: dc?.status || "active",
         },
     })
 
@@ -65,11 +68,29 @@ export default function AddDCForm() {
         }
     }, [isSubmitSuccessful, reset]);
 
+    const selectedCity = watch('city')
+    const selectedStatus = watch('status')
+
     const onSubmit = async (data) => {
+        console.log(data);
+
         try {
-            console.log(data);
-            
-            await addDc(data).unwrap();
+            // const payload = {
+            //     name: data.name,
+            //     city: data.city,
+            //     address: data.address,
+            //     dc_manager_name: data.contact_name,
+            //     dc_manager_phone: data.contact_phone,
+            //     dc_manager_email: data.contact_email,
+            //     status: data.status,
+            // };
+
+            if (dc) {
+                await updateDc({ id: dc.id, ...data }).unwrap();
+            } else {
+                await addDc(data).unwrap();
+            }
+
         } catch (err) {
             console.error(err);
 
@@ -77,8 +98,13 @@ export default function AddDCForm() {
     }
 
     return (
-        <Sheet direction="right">
-            <CreateFormSheetTrigger text='Add a DC' />
+        <Sheet direction="right" open={open} onOpenChange={onClose}>
+            {
+                dc ?
+                    null
+                    :
+                    <CreateFormSheetTrigger text='Add a DC' />
+            }
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
@@ -120,7 +146,7 @@ export default function AddDCForm() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
                                             <FieldLabel>DC name <span className="text-red-500">*</span></FieldLabel>
-                                           <Input
+                                            <Input
                                                 {...register("name", {
                                                     required: "DC name is required",
                                                 })}
@@ -134,36 +160,33 @@ export default function AddDCForm() {
                                             )}
                                         </Field>
 
-                                         <Field>
+                                        <Field>
                                             <FieldLabel>
                                                 City <span className="text-red-500">*</span>
                                             </FieldLabel>
 
                                             <Controller
-                                                name="city"
-                                                control={control}
-                                                rules={{ required: "City is required" }}
-                                                render={({ field }) => (
-                                                    <Select
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
-                                                    >
-                                                        <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Select city..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent className="bg-white border shadow-md">
-                                                            <SelectGroup>
-                                                                <SelectLabel>Cities</SelectLabel>
-                                                                <SelectItem value="Pune">Pune</SelectItem>
-                                                                <SelectItem value="Mumbai">Mumbai</SelectItem>
-                                                                <SelectItem value="Nashik">Nashik</SelectItem>
-                                                                <SelectItem value="Nagpur">Nagpur</SelectItem>
-                                                                <SelectItem value="Kolhapur">Kolhapur</SelectItem>
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                )}
-                                            />
+    name="city"
+    control={control}
+    rules={{ required: "City is required" }}
+    render={({ field }) => (
+        <Select value={field.value} onValueChange={field.onChange}>
+            <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select city..." />
+            </SelectTrigger>
+            <SelectContent className="bg-white border shadow-md">
+                <SelectGroup>
+                    <SelectLabel>Cities</SelectLabel>
+                    <SelectItem value="Pune">Pune</SelectItem>
+                    <SelectItem value="Mumbai">Mumbai</SelectItem>
+                    <SelectItem value="Nashik">Nashik</SelectItem>
+                    <SelectItem value="Nagpur">Nagpur</SelectItem>
+                    <SelectItem value="Kolhapur">Kolhapur</SelectItem>
+                </SelectGroup>
+            </SelectContent>
+        </Select>
+    )}
+/>
 
                                             {errors.city && (
                                                 <p className="text-red-500 text-xs mt-1">
@@ -175,6 +198,7 @@ export default function AddDCForm() {
                                         {/* <Field>
                                             <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
                                             <Select
+                                                value={selectedCity}
                                                 onValueChange={(val) => setValue("city", val)}
                                             >
                                                 <SelectTrigger className="w-full">
@@ -183,11 +207,11 @@ export default function AddDCForm() {
                                                 <SelectContent className="bg-white border shadow-md">
                                                     <SelectGroup>
                                                         <SelectLabel>Cities</SelectLabel>
-                                                        <SelectItem value="pune">Pune</SelectItem>
-                                                        <SelectItem value="mumbai">Mumbai</SelectItem>
-                                                        <SelectItem value="nashik">Nashik</SelectItem>
-                                                        <SelectItem value="nagpur">Nagpur</SelectItem>
-                                                        <SelectItem value="kolhapur">Kolhapur</SelectItem>
+                                                        <SelectItem value="Pune">Pune</SelectItem>
+                                                        <SelectItem value="Mumbai">Mumbai</SelectItem>
+                                                        <SelectItem value="Nashik">Nashik</SelectItem>
+                                                        <SelectItem value="Nagpur">Nagpur</SelectItem>
+                                                        <SelectItem value="Kolhapur">Kolhapur</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -255,7 +279,7 @@ export default function AddDCForm() {
 
                                     <Field>
                                         <FieldLabel>Operator email</FieldLabel>
-                                         <Input
+                                        <Input
                                             {...register("contact_email", {
                                                 pattern: {
                                                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -276,6 +300,33 @@ export default function AddDCForm() {
                                         )}
                                     </Field>
 
+                                    {
+                                        dc &&
+                                        <Field>
+                                            <FieldLabel>Status</FieldLabel>
+                                            <Select
+                                                value={selectedStatus}
+                                                onValueChange={(val) => setValue("status", val)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border shadow-md">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Status</SelectLabel>
+                                                        {/* <SelectItem value="Available" className="text-sm">Available</SelectItem> */}
+                                                        <SelectItem value="active" className="text-sm">Active</SelectItem>
+                                                        <SelectItem value="inactive" className="text-sm">Inactive</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                            <FieldDescription className="text-xs">
+                                                Setting to inactive hides this dc from dispatch forms
+                                            </FieldDescription>
+                                        </Field>
+                                    }
+
+
                                 </FieldGroup>
                             </FieldSet>
                         </FieldGroup>
@@ -283,7 +334,13 @@ export default function AddDCForm() {
 
 
                     <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>{isLoading ? "Adding..." : "Add Warehouse"} <Warehouse /></Button>
+                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>
+                        {
+                       dc 
+  ? (isUpdating ? "Updating..." : "Update Warehouse")
+  : (isLoading ? "Adding..." : "Add Warehouse")
+                        } 
+                        <Warehouse /></Button>
                         <SheetClose className='basis-1/2' asChild>
                             <Button className="w-full" variant="outline">Cancel</Button>
                         </SheetClose>

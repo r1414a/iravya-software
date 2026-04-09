@@ -64,7 +64,7 @@ export default function ManageDriverForm() {
         try {
             console.log(data);
             
-            await addDriver(data).unwrap()
+            // await addDriver(data).unwrap()
         } catch (err) {
             console.error(err)
         }

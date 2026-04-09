@@ -95,7 +95,8 @@ const dcs = [
     },
 ]
 
-export default function DCsTable() {
+export default function DCsTable({ dcs, setPage, columnFilters,
+    setColumnFilters, totalPages, page, onPrevious, onNext, isFetching }) {
 
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -103,6 +104,14 @@ export default function DCsTable() {
                 <DataTable
                     columns={columns}
                     data={dcs}
+                    setPage={setPage}
+                    columnFilters={columnFilters}
+                    setColumnFilters={setColumnFilters}
+                    totalPages={totalPages}
+                    page={page}
+                    onPrevious={onPrevious}
+                    onNext={onNext}
+                    isFetching={isFetching}
                 />
             </div>
         </section>

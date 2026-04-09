@@ -6,9 +6,9 @@ import asyncHandler from "../utils/asyncHandler.js"
 
 
 const addDcService = async(data) =>{
-    const {name, address, city, state, country, contact_name, contact_phone, contact_email, is_active} = data
+    const {name, address, city, state, country, contact_name, contact_phone, contact_email, status="active"} = data
     
-    const name_= name.split(" ")
+    const name_= contact_name.split(" ")
     const [newUser] = await sql`
         INSERT INTO "User"
         (
@@ -17,7 +17,7 @@ const addDcService = async(data) =>{
             "role",
             "email",
             "phone_number",
-            "status",
+            "user_status",
 
         )
         VALUES
@@ -25,10 +25,10 @@ const addDcService = async(data) =>{
         
             ${name_[0]},
             ${name_[1]},
-            ${"store_manager"},
+            ${"dc_manager"},
             ${contact_email},
             ${contact_phone},
-            true
+            active
         )
         RETURNING
             "id",
@@ -37,7 +37,7 @@ const addDcService = async(data) =>{
             "email",
             "phone_number"
             "role",
-            "status"
+            "user_status"
             
     `;
     
@@ -49,17 +49,17 @@ const addDcService = async(data) =>{
             "city",
             "state",
             "country",
-            "is_active",
+            "status",
             "dc_manager"
             )
             VALUES
             (
-            ${data.name},
-            ${data.address},
-            ${data.city},
-            ${data.state},
-            ${data.country},
-            ${data.is_active},
+            ${name},
+            ${address},
+            ${city},
+            ${state},
+            ${country},
+            ${status},
             ${newUser.id}
             )
             RETURNING *

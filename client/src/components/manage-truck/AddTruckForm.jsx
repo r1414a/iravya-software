@@ -35,6 +35,7 @@ import { useState, useRef, useEffect } from "react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 import { useAddTruckMutation } from "@/lib/features/trucks/truckApi"
 import { useForm } from "react-hook-form"
+import { Checkbox } from "@/components/ui/checkbox"
 
 // ── Mock documents (simulate uploaded files) ──────────────────────────────────
 // In a real app these would come from the truck object / API
@@ -105,15 +106,15 @@ function DocRow({ docKey, doc, onChange }) {
             <div className="flex items-center sm:gap-1 shrink-0">
                 {/* View / open */}
                 {doc && !replaced && (
-    <a
-        href={doc}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
-    >
-        <ExternalLink size={13} />
-    </a>
-)}
+                    <a
+                        href={doc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
+                    >
+                        <ExternalLink size={13} />
+                    </a>
+                )}
 
                 {/* Replace / upload */}
                 <input
@@ -208,7 +209,7 @@ function DocumentUpload({ label, accept = ".pdf,.jpg,.jpeg,.png", onChange }) {
                     onDragLeave={() => setDragOver(false)}
                     onDrop={handleDrop}
                     className={`
-                        flex flex-col items-center justify-center gap-1 px-3 py-2 sm:py-4 rounded-md border-2 border-dashed cursor-pointer transition-colors
+                        flex flex-col items-center justify-center gap-1 px-3 py-2  rounded-md border-2 border-dashed cursor-pointer transition-colors
                         ${dragOver
                             ? "border-maroon bg-red-50"
                             : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
@@ -216,10 +217,10 @@ function DocumentUpload({ label, accept = ".pdf,.jpg,.jpeg,.png", onChange }) {
                     `}
                 >
                     <Upload size={16} className="text-gray-400" />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[10px] text-gray-500">
                         <span className="font-medium text-gray-700">Click to upload</span> or drag &amp; drop
                     </p>
-                    <p className="text-[11px] text-gray-400">PDF, JPG, PNG</p>
+                    <p className="text-[10px] text-gray-400">PDF, JPG, PNG</p>
                 </div>
             )}
         </Field>
@@ -237,10 +238,10 @@ export default function AddTruckModal({ truck = null, open, onClose }) {
 
     // In real app, docs would come from truck object. Using mock here.
     const [docs, setDocs] = useState({
-    registration_cert: truck?.registration_cert || null,
-    insurance_doc: truck?.insurance_doc || null,
-    PUC_cert: truck?.PUC_cert || null,
-})
+        registration_cert: truck?.registration_cert || null,
+        insurance_doc: truck?.insurance_doc || null,
+        PUC_cert: truck?.PUC_cert || null,
+    })
     const [addTruck, { isLoading }] = useAddTruckMutation()
 
     const {
@@ -289,16 +290,16 @@ export default function AddTruckModal({ truck = null, open, onClose }) {
             formData.append("capacity", data.capacity)
 
             if (docs.registration_cert instanceof File) {
-    formData.append("registration_cert", docs.registration_cert)
-}
+                formData.append("registration_cert", docs.registration_cert)
+            }
 
-if (docs.insurance_doc instanceof File) {
-    formData.append("insurance_doc", docs.insurance_doc)
-}
+            if (docs.insurance_doc instanceof File) {
+                formData.append("insurance_doc", docs.insurance_doc)
+            }
 
-if (docs.PUC_cert instanceof File) {
-    formData.append("PUC_cert", docs.PUC_cert)
-}
+            if (docs.PUC_cert instanceof File) {
+                formData.append("PUC_cert", docs.PUC_cert)
+            }
 
             await addTruck(formData).unwrap()
         } catch (err) {
@@ -381,6 +382,22 @@ if (docs.PUC_cert instanceof File) {
                                         </Field>
                                     </div>
 
+                                    {
+                                        truck &&
+                                        <FieldGroup className="">
+                                        <Field orientation="horizontal">
+                                            <Checkbox
+                                                id="terms-checkbox-basic"
+                                                name="terms-checkbox-basic"
+                                            />
+                                            <FieldLabel htmlFor="terms-checkbox-basic">
+                                                Mark as maintenance
+                                            </FieldLabel>
+                                        </Field>
+                                    </FieldGroup>
+                                    }
+
+                                    
 
                                     {/* ── Documents section ── */}
                                     {
@@ -388,7 +405,7 @@ if (docs.PUC_cert instanceof File) {
                                             ?
                                             <>
                                                 {/* ── Documents ── */}
-                                                <div className="py-4 border-b">
+                                                <div className=" border-b">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documents</p>
 
@@ -429,18 +446,33 @@ if (docs.PUC_cert instanceof File) {
                                                         label="RC (Registration Certificate)"
                                                         onChange={(f) => setDocs((d) => ({ ...d, registration_cert: f }))}
                                                     />
+
+                                                    <Field>
+                                                        <FieldLabel>Registration expiry</FieldLabel>
+                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
+                                                    </Field>
                                                     <DocumentUpload
                                                         label="Insurance"
                                                         onChange={(f) => setDocs((d) => ({ ...d, insurance_doc: f }))}
                                                     />
+                                                    <Field>
+                                                        <FieldLabel>Insurance expiry</FieldLabel>
+                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
+                                                    </Field>
                                                     <DocumentUpload
                                                         label="PUC Certificate"
                                                         onChange={(f) => setDocs((d) => ({ ...d, PUC_cert: f }))}
                                                     />
+                                                    <Field>
+                                                        <FieldLabel>PUC expiry</FieldLabel>
+                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
+                                                    </Field>
 
                                                 </div>
                                             </div>
                                     }
+
+
 
 
 

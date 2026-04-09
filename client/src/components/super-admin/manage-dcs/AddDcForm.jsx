@@ -28,27 +28,74 @@ import {
 } from "@/components/ui/select"
 import { Plus, Warehouse } from "lucide-react"
 import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
+import { useAddDcMutation } from "@/lib/features/dcs/dcApi"
+import { Controller, useForm } from "react-hook-form"
+import { useEffect } from "react"
 
 export default function AddDCForm() {
+
+    const [addDc, { isLoading }] = useAddDcMutation()
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        setValue,
+        watch,
+        formState: { errors, isSubmitSuccessful },
+    } = useForm({
+        defaultValues: {
+            name: "",
+            city: "",
+            state: "Maharashtra",
+            address: "",
+            contact_name: "",
+            contact_phone: "",
+            contact_email: "",
+            status: "active",
+        },
+    })
+
+
+    useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset();
+            // onClose?.(false)
+        }
+    }, [isSubmitSuccessful, reset]);
+
+    const onSubmit = async (data) => {
+        try {
+            console.log(data);
+            
+            await addDc(data).unwrap();
+        } catch (err) {
+            console.error(err);
+
+        }
+    }
+
     return (
         <Sheet direction="right">
-            <CreateFormSheetTrigger text='Add a DC'/>
-            
+            <CreateFormSheetTrigger text='Add a DC' />
+
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
-                <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle>Add new warehouse</SheetTitle>
-                    <SheetDescription>
-                        Register a new data center and assign it to a brand
-                    </SheetDescription>
-                </SheetHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                    <SheetHeader className="border-b border-gray-200">
+                        <SheetTitle>Add new warehouse</SheetTitle>
+                        <SheetDescription>
+                            Register a new data center and assign it to a brand
+                        </SheetDescription>
+                    </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-3 pb-3 sm:p-4">
-                    <FieldGroup>
-                        <FieldSet>
-                            <FieldGroup>
+                    <div className="flex-1 overflow-y-auto px-3 pb-3 sm:p-4">
+                        <FieldGroup>
+                            <FieldSet>
+                                <FieldGroup>
 
-                                {/* Brand */}
-                                {/* <Field>
+                                    {/* Brand */}
+                                    {/* <Field>
                                     <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
                                     <Select>
                                         <SelectTrigger className="w-full">
@@ -69,42 +116,106 @@ export default function AddDCForm() {
                                     </FieldDescription>
                                 </Field> */}
 
-                                {/* DC name + city */}
-                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <Field>
-                                        <FieldLabel>DC name <span className="text-red-500">*</span></FieldLabel>
-                                        <Input placeholder="e.g. Pune Warehouse DC" className="placeholder:text-sm text-sm sm:text-md"/>
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
-                                        <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select city..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Cities</SelectLabel>
-                                                <SelectItem value="pune">Pune</SelectItem>
-                                                <SelectItem value="mumbai">Mumbai</SelectItem>
-                                                <SelectItem value="nashik">Nashik</SelectItem>
-                                                <SelectItem value="nagpur">Nagpur</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    </Field>
-                                </div>
+                                    {/* DC name + city */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <Field>
+                                            <FieldLabel>DC name <span className="text-red-500">*</span></FieldLabel>
+                                           <Input
+                                                {...register("name", {
+                                                    required: "DC name is required",
+                                                })}
+                                                placeholder="Pune DC"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                            {errors.name && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.name.message}
+                                                </p>
+                                            )}
+                                        </Field>
 
-                                {/* Full address */}
-                                <Field>
-                                    <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input placeholder="Plot no., area, pincode" className="placeholder:text-sm text-sm sm:text-md"/>
-                                    <FieldDescription className="text-xs">
-                                        Used to geocode the DC location on the map
-                                    </FieldDescription>
-                                </Field>
+                                         <Field>
+                                            <FieldLabel>
+                                                City <span className="text-red-500">*</span>
+                                            </FieldLabel>
 
-                                {/* Geofence radius */}
-                                {/* <Field>
+                                            <Controller
+                                                name="city"
+                                                control={control}
+                                                rules={{ required: "City is required" }}
+                                                render={({ field }) => (
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select city..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-white border shadow-md">
+                                                            <SelectGroup>
+                                                                <SelectLabel>Cities</SelectLabel>
+                                                                <SelectItem value="Pune">Pune</SelectItem>
+                                                                <SelectItem value="Mumbai">Mumbai</SelectItem>
+                                                                <SelectItem value="Nashik">Nashik</SelectItem>
+                                                                <SelectItem value="Nagpur">Nagpur</SelectItem>
+                                                                <SelectItem value="Kolhapur">Kolhapur</SelectItem>
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+
+                                            {errors.city && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.city.message}
+                                                </p>
+                                            )}
+                                        </Field>
+
+                                        {/* <Field>
+                                            <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
+                                            <Select
+                                                onValueChange={(val) => setValue("city", val)}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select city..." />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-white border shadow-md">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Cities</SelectLabel>
+                                                        <SelectItem value="pune">Pune</SelectItem>
+                                                        <SelectItem value="mumbai">Mumbai</SelectItem>
+                                                        <SelectItem value="nashik">Nashik</SelectItem>
+                                                        <SelectItem value="nagpur">Nagpur</SelectItem>
+                                                        <SelectItem value="kolhapur">Kolhapur</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </Field> */}
+                                    </div>
+
+                                    {/* Full address */}
+                                    <Field>
+                                        <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
+                                        <Input
+                                            {...register("address", {
+                                                required: "Address is required",
+                                            })}
+                                            placeholder="Plot no., area, pincode"
+                                            className="placeholder:text-sm text-sm sm:text-md"
+                                        />
+                                        <FieldDescription className="text-xs">
+                                            Used to geocode the DC location on the map
+                                        </FieldDescription>
+                                        {errors.address && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.address.message}
+                                            </p>
+                                        )}
+                                    </Field>
+
+                                    {/* Geofence radius */}
+                                    {/* <Field>
                                     <FieldLabel>Geofence radius (metres)</FieldLabel>
                                     <Input type="number" placeholder="e.g. 300" defaultValue={300} />
                                     <FieldDescription className="text-xs">
@@ -112,38 +223,72 @@ export default function AddDCForm() {
                                     </FieldDescription>
                                 </Field> */}
 
-                                {/* Contact person */}
-                                <div  className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {/* Contact person */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <Field>
+                                            <FieldLabel>Operator name</FieldLabel>
+                                            <Input
+                                                {...register("contact_name")}
+                                                placeholder="e.g. Suresh Pawar"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                        </Field>
+                                        <Field>
+                                            <FieldLabel>Operator phone</FieldLabel>
+                                            <Input
+                                                {...register("contact_phone", {
+                                                    pattern: {
+                                                        value: /^[0-9+\-\s()]{10,15}$/,
+                                                        message: "Enter a valid phone number",
+                                                    },
+                                                })}
+                                                placeholder="+91 98XXX XXXXX"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                            {errors.contact_phone && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.contact_phone.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                    </div>
+
                                     <Field>
-                                        <FieldLabel>Operator name</FieldLabel>
-                                        <Input placeholder="e.g. Suresh Pawar" className="placeholder:text-sm text-sm sm:text-md"/>
+                                        <FieldLabel>Operator email</FieldLabel>
+                                         <Input
+                                            {...register("contact_email", {
+                                                pattern: {
+                                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                    message: "Enter a valid email",
+                                                },
+                                            })}
+                                            type="email"
+                                            placeholder="operator@brand.com"
+                                            className="placeholder:text-sm text-sm sm:text-md"
+                                        />
+                                        <FieldDescription className="text-xs">
+                                            A user account with DC operator role will be created for this email
+                                        </FieldDescription>
+                                        {errors.contact_email && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.contact_email.message}
+                                            </p>
+                                        )}
                                     </Field>
-                                    <Field>
-                                        <FieldLabel>Operator phone</FieldLabel>
-                                        <Input placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
-                                    </Field>
-                                </div>
 
-                                <Field>
-                                    <FieldLabel>Operator email</FieldLabel>
-                                    <Input type="email" placeholder="operator@brand.com" className="placeholder:text-sm text-sm sm:text-md"/>
-                                    <FieldDescription className="text-xs">
-                                        A user account with DC operator role will be created for this email
-                                    </FieldDescription>
-                                </Field>
-
-                            </FieldGroup>
-                        </FieldSet>
-                    </FieldGroup>
-                </div>
+                                </FieldGroup>
+                            </FieldSet>
+                        </FieldGroup>
+                    </div>
 
 
-                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Add Warehouse <Warehouse /></Button>
-                    <SheetClose className='basis-1/2' asChild>
-                        <Button className="w-full" variant="outline">Cancel</Button>
-                    </SheetClose>
-                </SheetFooter>
+                    <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
+                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>{isLoading ? "Adding..." : "Add Warehouse"} <Warehouse /></Button>
+                        <SheetClose className='basis-1/2' asChild>
+                            <Button className="w-full" variant="outline">Cancel</Button>
+                        </SheetClose>
+                    </SheetFooter>
+                </form>
             </SheetContent>
         </Sheet>
     )

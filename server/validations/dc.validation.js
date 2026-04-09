@@ -21,6 +21,7 @@ export const adddcValidation = [
 
     body("country")
         .notEmpty()
+        .default("India")
         .withMessage("Country is required"),
 
     body("contact_name")
@@ -39,10 +40,10 @@ export const adddcValidation = [
         .isEmail()
         .withMessage("Invalid email"),
 
-    body("is_active")
+    body("status")
         .optional()
         .isBoolean()
-        .withMessage("is_active must be boolean")
+        .withMessage("status can either be active or inactive")
 
 ];
 
@@ -67,6 +68,7 @@ export const updatedcValidation = [
 
     body("country")
         .notEmpty()
+        .default("India")
         .withMessage("Country is required"),
 
     body("contact_name")
@@ -85,9 +87,9 @@ export const updatedcValidation = [
         .isEmail()
         .withMessage("Invalid email"),
 
-    body("is_active")
+    body("status")
         .optional()
         .isBoolean()
-        .withMessage("is_active must be boolean")
+        .withMessage("status can either be active or inactive")
 
 ];

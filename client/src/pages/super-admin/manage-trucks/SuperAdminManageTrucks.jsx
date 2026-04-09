@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 const limit = 10;
 
 export default function SuperAdminManageTrucks() {
-     const [page, setPage] = useState(1);
-        const [searchInput, setSearchInput]   = useState("")
+    const [page, setPage] = useState(1);
+    const [searchInput, setSearchInput] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("");
 
     const [columnFilters, setColumnFilters] = useState([]);
@@ -18,31 +18,31 @@ export default function SuperAdminManageTrucks() {
     const typeFilter = columnFilters.find(f => f.id === "type")?.value || "";
     const statusFilter = columnFilters.find(f => f.id === "status")?.value || "";
 
-    
-        // Handle debouncing manually
-        useEffect(() => {
-            const handler = setTimeout(() => {
-                setDebouncedSearch(searchInput);
-                setPage(1); // Reset to page 1 whenever the search term actually changes
-            }, 500);
-    
-            return () => clearTimeout(handler); // Cleanup on every keystroke
-        }, [searchInput]);
-    
-        const { data, isLoading, isFetching } = useGetAllTrucksQuery(
-            { type: typeFilter,status: statusFilter,page, limit, search: debouncedSearch}
-        )
-    
-    
-         const trucks = data?.data?.data || [];
-        const totalPages = data?.data?.pagination?.totalPages || 1;
-        const currentPage = data?.data?.pagination?.page || 1;
-    
-        const handleClear = () => {
-            setSearchInput("");
-            setDebouncedSearch("");
-            setPage(1);
-        };
+
+    // Handle debouncing manually
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+            setPage(1); // Reset to page 1 whenever the search term actually changes
+        }, 500);
+
+        return () => clearTimeout(handler); // Cleanup on every keystroke
+    }, [searchInput]);
+
+    const { data, isLoading, isFetching } = useGetAllTrucksQuery(
+        { type: typeFilter, status: statusFilter, page, limit, search: debouncedSearch }
+    )
+
+
+    const trucks = data?.data?.data || [];
+    const totalPages = data?.data?.pagination?.totalPages || 1;
+    const currentPage = data?.data?.pagination?.page || 1;
+
+    const handleClear = () => {
+        setSearchInput("");
+        setDebouncedSearch("");
+        setPage(1);
+    };
     return (
         <section className="mb-10">
             <AdminSubHeader
@@ -52,23 +52,23 @@ export default function SuperAdminManageTrucks() {
             />
 
 
-            <TrucksFilter 
+            <TrucksFilter
                 CreateButton={<AddTruckForm />}
-                searchInput={searchInput} 
+                searchInput={searchInput}
                 setSearchInput={(val) => {
                     setSearchInput(val);
                     setPage(1); // Reset page when typing
-                }} 
+                }}
                 handleClear={handleClear}
             />
-            <TrucksTable 
-                trucks={trucks} 
+            <TrucksTable
+                trucks={trucks}
                 setPage={setPage}
-                columnFilters={columnFilters} 
+                columnFilters={columnFilters}
                 setColumnFilters={setColumnFilters}
                 totalPages={totalPages}
                 page={currentPage}
-                onPrevious={() => setPage((prev) => Math.max(prev-1,1))}
+                onPrevious={() => setPage((prev) => Math.max(prev - 1, 1))}
                 onNext={() => setPage((prev) => prev < (totalPages || 1) ? prev + 1 : prev)}
                 isFetching={isFetching || isLoading}
             />

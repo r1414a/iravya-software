@@ -22,7 +22,9 @@ import DeleteModal from "@/components/DeleteModal"
 import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { format, parseISO } from "date-fns"
 import { useDeleteDriverMutation } from "@/lib/features/drivers/driverApi"
-
+import { toast } from "sonner"
+import { showErrorToast } from "@/lib/utils/showErrorToast"
+import { showSuccessToast } from "@/lib/utils/showSuccessToast"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -48,9 +50,13 @@ function ActionsCell({ row }) {
     const handleDelete = async () => {
         try {
             await deleteDriver(driver.id).unwrap();
-            toast.success("Driver deleted successfully");
+            // showSuccessToast("Driver deleted successfully")
+            // toast.success("Driver deleted successfully");
         } catch (err) {
-            toast.error(err?.data?.message || "Failed to delete driver");
+            console.error("Failed to delete driver", err);
+            
+            // showErrorToast(err)
+            // toast.error(err?.data?.message || "Failed to delete driver");
         }
     };
 
@@ -99,7 +105,7 @@ function ActionsCell({ row }) {
                             <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
                             <DeleteModal
-                                who={driver.name}
+                                who={driver.full_name}
                                 m1active="Driver will not be assignable to any trip"
                                 onConfirm={handleDelete}
                                 isLoading={isDeleting}

@@ -32,7 +32,10 @@ import AddTruckModal from "../AddTruckForm"
 import TripDetailSheet from "@/components/manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
-
+import { useDeleteTruckMutation } from "@/lib/features/trucks/truckApi"
+import { toast } from "sonner"
+import { showSuccessToast } from "@/lib/utils/showSuccessToast"
+import { showErrorToast } from "@/lib/utils/showErrorToast"
 
 // Truck type icon colours — a small coloured square instead of avatar initials
 // const typeColors = {
@@ -68,6 +71,21 @@ function ActionsCell({ row }) {
     const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
     const location = useLocation();
     // console.log(location.pathname);
+
+    const [deleteTruck, { isLoading: isDeleting }] = useDeleteTruckMutation();
+
+    const handleDelete = async () => {
+        try {
+            await deleteTruck(truck.id).unwrap();
+            // showSuccessToast("Driver deleted successfully")
+            // toast.success("Driver deleted successfully");
+        } catch (err) {
+            console.error("Failed to delete truck", err);
+            
+            // showErrorToast(err)
+            // toast.error(err?.data?.message || "Failed to delete driver");
+        }
+    };
 
 
     return (
@@ -130,20 +148,22 @@ function ActionsCell({ row }) {
                     </Button>
                 )}
 
-                 {
-                    location.pathname.startsWith('/admin') &&  (
+                {
+                    location.pathname.startsWith('/admin') && (
                         <>
                             <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
                             <DeleteModal
-                                                                       who={truck.regNo}
-                                                                       m1active="Truck will not be assignable to any trip"
-                                                                     />
-                {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
+                                who={truck.registration_no}
+                                m1active="Truck will not be assignable to any trip"
+                                onConfirm={handleDelete}
+                                isLoading={isDeleting}
+                            />
+                            {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
                         </>
                     )
-}
+                }
 
-                
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -221,15 +241,15 @@ export const columns = [
             )
         },
         cell: ({ row }) => {
-            const { regNo, type } = row.original
+            const { registration_no, type } = row.original
             return (
                 <div className="flex items-center gap-3">
                     <div className={`rounded-lg flex items-center justify-center text-xs font-bold p-1 bg-gold text-maroon`}>
                         {typeLabels[type]}
                     </div>
                     <div className="-space-y-0.5">
-                        <p className="font-semibold text-sm font-mono">{regNo}</p>
-                        <p className="text-xs text-gray-400">{row.original.make} · {row.original.capacity}</p>
+                        <p className="font-semibold text-sm font-mono">{registration_no}</p>
+                        <p className="text-xs text-gray-400">{row.original.model} · {row.original.capacity}T</p>
                     </div>
                 </div>
             )
@@ -311,7 +331,7 @@ export const columns = [
         header: "Trips",
         cell: ({ row }) => (
             <div className="-space-y-0.5">
-                <p className="text-sm font-medium">{row.original.totalTrips} total</p>
+                <p className="text-sm font-medium">{row.original.total_trips} total</p>
                 <p className="text-xs text-gray-400">{row.original.tripsThisMonth} this month</p>
             </div>
         ),
@@ -354,7 +374,7 @@ export const columns = [
                                     column.setFilterValue(
                                         value === "all" ? undefined : value
                                     )
-                                     table.options.meta?.updatePage(1)
+                                    table.options.meta?.updatePage(1)
                                 }}
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">

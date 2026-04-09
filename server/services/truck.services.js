@@ -4,28 +4,28 @@ import supabase from "../config/supabase.js"
 
 const uploadFile = async (file, folder) => {
 
-  const fileName =
-    `${folder}/${Date.now()}-${file.originalname}`
+    const fileName =
+        `${folder}/${Date.now()}-${file.originalname}`
 
-  const { error } = await supabase
-    .storage
-    .from("Documents")
-    .upload(fileName, file.buffer, {
-      contentType: file.mimetype
-    })
+    const { error } = await supabase
+        .storage
+        .from("Documents")
+        .upload(fileName, file.buffer, {
+            contentType: file.mimetype
+        })
 
-  if (error) throw error
+    if (error) throw error
 
-  const { data } = supabase
-    .storage
-    .from("Documents")
-    .getPublicUrl(fileName)
+    const { data } = supabase
+        .storage
+        .from("Documents")
+        .getPublicUrl(fileName)
 
-  return data.publicUrl
+    return data.publicUrl
 }
 
 
-const addTruckservice = async(data)=>{
+const addTruckservice = async (data) => {
     const {
         registration_no,
         model,
@@ -64,8 +64,8 @@ const addTruckservice = async(data)=>{
 
 }
 
-const truckExistByRegNoService = async(registration_no)=>{
-   
+const truckExistByRegNoService = async (registration_no) => {
+
     const [result] = await sql`
         SELECT EXISTS (
             SELECT 1 
@@ -77,7 +77,7 @@ const truckExistByRegNoService = async(registration_no)=>{
     return result.isExist
 }
 
-const truckExistByIDService = async(id)=>{
+const truckExistByIDService = async (id) => {
     console.log(id)
     const [result] = await sql`
         SELECT EXISTS (
@@ -90,7 +90,7 @@ const truckExistByIDService = async(id)=>{
     return result.isExist
 }
 
-const getTruckDataService =async(id)=>{
+const getTruckDataService = async (id) => {
     const [truck] = await sql`
         SELECT * FROM "Trucks"
         WHERE "id" = ${id}
@@ -132,7 +132,7 @@ const updateTruckDataService = async (id, data) => {
     return truck
 }
 
-const deleteTruckService = async(id)=>{
+const deleteTruckService = async (id) => {
     const [truck] = await sql`
         DELETE FROM "Trucks"
         WHERE "id" = ${id}
@@ -181,7 +181,7 @@ const getRecentTripDetailsService = async (trip_id) => {
     return trip
 }
 
-const getTripHistoryService = async(id)=>{
+const getTripHistoryService = async (id) => {
     const trips = await sql`
         SELECT 
             t.id,
@@ -226,12 +226,12 @@ const getTripHistoryService = async(id)=>{
 
 const getAllTruckDataService = async ({ type, truck_status, search, page, limit }) => {
     const offset = (page - 1) * limit
- 
+
     // FIX 1: Build query conditionally — don't apply search filter when search is null
     // FIX 2: pagination object was missing the opening brace — page/limit/total_pages were outside
     const trucks = await sql`
         SELECT 
-            tr.id, tr.registration_no, tr.type, tr.model, tr.status,
+            tr.id, tr.registration_no, tr.type, tr.capacity, tr.model, tr.status, tr."registration_cert", tr."insurance_doc", tr."PUC_cert",
             COUNT(t.id) AS total_trips,
             MAX(t.departed_at) AS last_trip
         FROM "Trucks" tr
@@ -248,7 +248,7 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
         ORDER BY last_trip DESC NULLS LAST
         LIMIT ${limit} OFFSET ${offset}
     `
- 
+
     const [countRow] = await sql`
         SELECT COUNT(*) FROM "Trucks" tr
         WHERE 1=1
@@ -260,16 +260,16 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
     `
- 
+
     const total = Number(countRow.count)
- 
+
     return {
         data: trucks,
         pagination: {       // FIX 2: was missing opening brace here
             total,
             page,
             limit,
-            total_pages: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limit),
         },
     }
 }
@@ -352,10 +352,10 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit 
 //             limit,
 //             total_pages: Math.ceil(total / limit)
 //         }
-    
+
 // }
 
-export{
+export {
     addTruckservice,
     uploadFile,
     truckExistByRegNoService,

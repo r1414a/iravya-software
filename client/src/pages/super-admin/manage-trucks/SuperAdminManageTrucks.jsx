@@ -63,9 +63,9 @@ export default function SuperAdminManageTrucks() {
             />
             <TrucksTable 
                 trucks={trucks} 
-                 columnFilters={columnFilters} 
-                setColumnFilters={setColumnFilters}
                 setPage={setPage}
+                columnFilters={columnFilters} 
+                setColumnFilters={setColumnFilters}
                 totalPages={totalPages}
                 page={currentPage}
                 onPrevious={() => setPage((prev) => Math.max(prev-1,1))}

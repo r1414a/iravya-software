@@ -54,15 +54,14 @@ const docStatusConfig = {
 
 // ── Document icons ────────────────────────────────────────────────────────────
 const docIcons = {
-    rc: <FileText size={15} />,
-    insurance: <ShieldCheck size={15} />,
-    puc: <Wind size={15} />,
+    registration_cert: <FileText size={15} />,
+    insurance_doc: <ShieldCheck size={15} />,
+    PUC_cert: <Wind size={15} />,
 }
-
 const docLabels = {
-    rc: "RC",
-    insurance: "Insurance",
-    puc: "PUC",
+    registration_cert: "RC",
+    insurance_doc: "Insurance",
+    PUC_cert: "PUC",
 }
 
 // ── Single document row ───────────────────────────────────────────────────────
@@ -71,8 +70,10 @@ function DocRow({ docKey, doc, onChange }) {
     const [replaced, setReplaced] = useState(null) // locally replaced file (not persisted)
 
     const cfg = docStatusConfig[doc?.status ?? "missing"]
-    const displayName = replaced?.name ?? doc?.name
-    const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
+    // const displayName = replaced?.name ?? doc?.name
+    const displayName = replaced?.name ?? (typeof doc === "string" ? doc.split("/").pop() : null)
+    // const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
+    const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : ""
 
     return (
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border ${cfg.bg} transition-colors`}>
@@ -103,14 +104,16 @@ function DocRow({ docKey, doc, onChange }) {
             {/* Actions */}
             <div className="flex items-center sm:gap-1 shrink-0">
                 {/* View / open */}
-                {displayName && (
-                    <button
-                        className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
-                        title="View document"
-                    >
-                        <ExternalLink size={13} />
-                    </button>
-                )}
+                {doc && !replaced && (
+    <a
+        href={doc}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
+    >
+        <ExternalLink size={13} />
+    </a>
+)}
 
                 {/* Replace / upload */}
                 <input
@@ -233,16 +236,11 @@ export default function AddTruckModal({ truck = null, open, onClose }) {
     // })
 
     // In real app, docs would come from truck object. Using mock here.
-    const dummy_docs = truck?.docs ?? mockDocs
-     const [docs, setDocs] = useState(
-        truck
-            ? dummy_docs
-            : {
-                registration_cert: null,
-                insurance_doc: null,
-                PUC_cert: null,
-            }
-    )
+    const [docs, setDocs] = useState({
+    registration_cert: truck?.registration_cert || null,
+    insurance_doc: truck?.insurance_doc || null,
+    PUC_cert: truck?.PUC_cert || null,
+})
     const [addTruck, { isLoading }] = useAddTruckMutation()
 
     const {
@@ -283,24 +281,24 @@ export default function AddTruckModal({ truck = null, open, onClose }) {
     const onSubmit = async (data) => {
         try {
             console.log(data);
-const formData = new FormData()
+            const formData = new FormData()
 
             formData.append("registration_no", data.registration_no.toUpperCase().trim())
             formData.append("model", data.model)
             formData.append("type", data.type)
             formData.append("capacity", data.capacity)
 
-            if (docs.registration_cert) {
-                formData.append("registration_cert", docs.registration_cert)
-            }
+            if (docs.registration_cert instanceof File) {
+    formData.append("registration_cert", docs.registration_cert)
+}
 
-            if (docs.insurance_doc) {
-                formData.append("insurance_doc", docs.insurance_doc)
-            }
+if (docs.insurance_doc instanceof File) {
+    formData.append("insurance_doc", docs.insurance_doc)
+}
 
-            if (docs.PUC_cert) {
-                formData.append("PUC_cert", docs.PUC_cert)
-            }
+if (docs.PUC_cert instanceof File) {
+    formData.append("PUC_cert", docs.PUC_cert)
+}
 
             await addTruck(formData).unwrap()
         } catch (err) {
@@ -359,7 +357,7 @@ const formData = new FormData()
                                             <FieldLabel>Truck type</FieldLabel>
                                             <Select
                                                 value={selectedType}
-                                            onValueChange={(val) => setValue("type", val)}
+                                                onValueChange={(val) => setValue("type", val)}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select type" className="placeholder:text-sm text-sm sm:text-md" />
@@ -404,7 +402,7 @@ const formData = new FormData()
                                                     </div>
 
                                                     <div className="flex flex-col gap-2">
-                                                        {["rc", "insurance", "puc"].map((key) => (
+                                                        {["registration_cert", "insurance_doc", "PUC_cert"].map((key) => (
                                                             <DocRow
                                                                 key={key}
                                                                 docKey={key}
@@ -427,18 +425,18 @@ const formData = new FormData()
                                                 </div>
 
                                                 <div className="flex flex-col gap-3">
-                                                                                                    <DocumentUpload
-                                                    label="RC (Registration Certificate)"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, registration_cert: f }))}
-                                                />
-                                                <DocumentUpload
-                                                    label="Insurance"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, insurance_doc: f }))}
-                                                />
-                                                <DocumentUpload
-                                                    label="PUC Certificate"
-                                                    onChange={(f) => setDocs((d) => ({ ...d, PUC_cert: f }))}
-                                                />
+                                                    <DocumentUpload
+                                                        label="RC (Registration Certificate)"
+                                                        onChange={(f) => setDocs((d) => ({ ...d, registration_cert: f }))}
+                                                    />
+                                                    <DocumentUpload
+                                                        label="Insurance"
+                                                        onChange={(f) => setDocs((d) => ({ ...d, insurance_doc: f }))}
+                                                    />
+                                                    <DocumentUpload
+                                                        label="PUC Certificate"
+                                                        onChange={(f) => setDocs((d) => ({ ...d, PUC_cert: f }))}
+                                                    />
 
                                                 </div>
                                             </div>

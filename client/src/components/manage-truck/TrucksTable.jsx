@@ -84,10 +84,10 @@ const trucks = [
         status: "idle",
     },
 ]
- 
-export default function TrucksTable({trucks, totalPages, setPage, page, onPrevious, onNext, isFetching,  columnFilters, 
-                setColumnFilters}) {
- 
+
+export default function TrucksTable({ trucks, setPage, columnFilters,
+    setColumnFilters,totalPages, page, onPrevious, onNext, isFetching  }) {
+
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
@@ -95,16 +95,16 @@ export default function TrucksTable({trucks, totalPages, setPage, page, onPrevio
                     columns={columns}
                     data={trucks}
                     setPage={setPage}
-                    columnFilters={columnFilters} 
-                setColumnFilters={setColumnFilters}
-                                        totalPages={totalPages}
-                                        page={page}
-                                        onPrevious={onPrevious}
-                                        onNext={onNext}
-                                        isFetching={isFetching}
+                    columnFilters={columnFilters}
+                    setColumnFilters={setColumnFilters}
+                    totalPages={totalPages}
+                    page={page}
+                    onPrevious={onPrevious}
+                    onNext={onNext}
+                    isFetching={isFetching}
                 />
             </div>
- 
+
         </section>
     )
 }

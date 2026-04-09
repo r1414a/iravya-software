@@ -18,12 +18,13 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 // import EditUserDrawer from "./EditUserDrawer"
 
-export function DataTable({ columns,setPage, data,page = 1,
+export function DataTable({ data,columns,setPage, columnFilters, 
+    setColumnFilters ,
     totalPages = 1,
+    page = 1,
     onPrevious,
     onNext,
-    isFetching = false,columnFilters, 
-                setColumnFilters  }) {
+    isFetching = false }) {
 //     const [open, setOpen] = useState(false)
 // const [columnFilters, setColumnFilters] = useState([])
     const table = useReactTable({
@@ -72,7 +73,7 @@ export function DataTable({ columns,setPage, data,page = 1,
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                Loading users...
+                                Loading trucks...
                             </TableCell>
                         </TableRow>
                     ) : table.getRowModel().rows.length ? (
@@ -101,7 +102,7 @@ export function DataTable({ columns,setPage, data,page = 1,
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                No users found
+                                No trucks found
                             </TableCell>
                         </TableRow>
                     )}

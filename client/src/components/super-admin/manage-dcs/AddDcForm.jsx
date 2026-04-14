@@ -31,6 +31,22 @@ import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
 import { useAddDcMutation, useUpdateDcMutation } from "@/lib/features/dcs/dcApi"
 import { Controller, useForm } from "react-hook-form"
 import { useEffect } from "react"
+import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
+import { zodResolver } from "@hookform/resolvers/zod"
+import z from "zod"
+
+
+const dcSchema = z.object({
+    name: z.string().min(2, "DC name must be at least 2 characters").max(100, "DC name is too long"),
+    city: cityV,
+    address: addressV,
+    contact_name: fullNameV,
+    contact_email: emailV,
+    contact_phone: phoneV,
+    status: z
+        .enum(["active", "inactive"])
+        .default("active").optional(),
+})
 
 export default function AddDCForm({ dc = null, open, onClose }) {
 
@@ -48,6 +64,7 @@ export default function AddDCForm({ dc = null, open, onClose }) {
         watch,
         formState: { errors, isSubmitSuccessful },
     } = useForm({
+        resolver: zodResolver(dcSchema),
         defaultValues: {
             name: dc?.dc_name || "",
             city: dc?.city || "",
@@ -75,16 +92,6 @@ export default function AddDCForm({ dc = null, open, onClose }) {
         console.log(data);
 
         try {
-            // const payload = {
-            //     name: data.name,
-            //     city: data.city,
-            //     address: data.address,
-            //     dc_manager_name: data.contact_name,
-            //     dc_manager_phone: data.contact_phone,
-            //     dc_manager_email: data.contact_email,
-            //     status: data.status,
-            // };
-
             if (dc) {
                 await updateDc({ id: dc.id, ...data }).unwrap();
             } else {
@@ -109,9 +116,15 @@ export default function AddDCForm({ dc = null, open, onClose }) {
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                     <SheetHeader className="border-b border-gray-200">
-                        <SheetTitle>Add new warehouse</SheetTitle>
+                        <SheetTitle>{dc ? "Edit warehouse" : 'Add new warehouse'}</SheetTitle>
                         <SheetDescription>
-                            Register a new data center and assign it to a brand
+                            {
+                                dc ?
+                                "Update warehouse details"
+                                :
+                                "Register a new data center and assign it to a brand"
+                            }
+                            
                         </SheetDescription>
                     </SheetHeader>
 
@@ -119,28 +132,6 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                         <FieldGroup>
                             <FieldSet>
                                 <FieldGroup>
-
-                                    {/* Brand */}
-                                    {/* <Field>
-                                    <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
-                                    <Select>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select brand..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Brands</SelectLabel>
-                                                <SelectItem value="tata_westside">Tata Westside</SelectItem>
-                                                <SelectItem value="zudio">Zudio</SelectItem>
-                                                <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
-                                                <SelectItem value="tanishq">Tanishq</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FieldDescription className="text-xs">
-                                        This DC will only manage trucks and trips for this brand
-                                    </FieldDescription>
-                                </Field> */}
 
                                     {/* DC name + city */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -154,7 +145,7 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                                 className="placeholder:text-sm text-sm sm:text-md"
                                             />
                                             {errors.name && (
-                                                <p className="text-red-500 text-xs mt-1">
+                                                <p className="text-red-500 text-xs">
                                                     {errors.name.message}
                                                 </p>
                                             )}
@@ -166,30 +157,31 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                             </FieldLabel>
 
                                             <Controller
-    name="city"
-    control={control}
-    rules={{ required: "City is required" }}
-    render={({ field }) => (
-        <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select city..." />
-            </SelectTrigger>
-            <SelectContent className="bg-white border shadow-md">
-                <SelectGroup>
-                    <SelectLabel>Cities</SelectLabel>
-                    <SelectItem value="Pune">Pune</SelectItem>
-                    <SelectItem value="Mumbai">Mumbai</SelectItem>
-                    <SelectItem value="Nashik">Nashik</SelectItem>
-                    <SelectItem value="Nagpur">Nagpur</SelectItem>
-                    <SelectItem value="Kolhapur">Kolhapur</SelectItem>
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    )}
-/>
+                                                name="city"
+                                                control={control}
+                                                rules={{ required: "City is required" }}
+                                                render={({ field }) => (
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select city..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-white border shadow-md">
+                                                            <SelectGroup>
+                                                                <SelectLabel>Cities</SelectLabel>
+                                                                <SelectItem value="Pune">Pune</SelectItem>
+                                                                <SelectItem value="Mumbai">Mumbai</SelectItem>
+                                                                <SelectItem value="Nashik">Nashik</SelectItem>
+                                                                <SelectItem value="Nagpur">Nagpur</SelectItem>
+                                                                <SelectItem value="Kolhapur">Kolhapur</SelectItem>
+                                                                <SelectItem value="Amravati">Amravati</SelectItem>
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
 
                                             {errors.city && (
-                                                <p className="text-red-500 text-xs mt-1">
+                                                <p className="text-red-500 text-xs">
                                                     {errors.city.message}
                                                 </p>
                                             )}
@@ -232,7 +224,7 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                             Used to geocode the DC location on the map
                                         </FieldDescription>
                                         {errors.address && (
-                                            <p className="text-red-500 text-xs mt-1">
+                                            <p className="text-red-500 text-xs">
                                                 {errors.address.message}
                                             </p>
                                         )}
@@ -250,15 +242,20 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                     {/* Contact person */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
-                                            <FieldLabel>Operator name</FieldLabel>
+                                            <FieldLabel>Operator name <span className="text-red-500">*</span></FieldLabel>
                                             <Input
                                                 {...register("contact_name")}
                                                 placeholder="e.g. Suresh Pawar"
                                                 className="placeholder:text-sm text-sm sm:text-md"
                                             />
+                                            {errors.contact_name && (
+                                                <p className="text-red-500 text-xs">
+                                                    {errors.contact_name.message}
+                                                </p>
+                                            )}
                                         </Field>
                                         <Field>
-                                            <FieldLabel>Operator phone</FieldLabel>
+                                            <FieldLabel>Operator phone <span className="text-red-500">*</span></FieldLabel>
                                             <Input
                                                 {...register("contact_phone", {
                                                     pattern: {
@@ -278,7 +275,7 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                     </div>
 
                                     <Field>
-                                        <FieldLabel>Operator email</FieldLabel>
+                                        <FieldLabel>Operator email <span className="text-red-500">*</span></FieldLabel>
                                         <Input
                                             {...register("contact_email", {
                                                 pattern: {
@@ -335,12 +332,12 @@ export default function AddDCForm({ dc = null, open, onClose }) {
 
                     <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
                         <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>
-                        {
-                       dc 
-  ? (isUpdating ? "Updating..." : "Update Warehouse")
-  : (isLoading ? "Adding..." : "Add Warehouse")
-                        } 
-                        <Warehouse /></Button>
+                            {
+                                dc
+                                    ? (isUpdating ? "Updating..." : "Update Warehouse")
+                                    : (isLoading ? "Adding..." : "Add Warehouse")
+                            }
+                            <Warehouse /></Button>
                         <SheetClose className='basis-1/2' asChild>
                             <Button className="w-full" variant="outline">Cancel</Button>
                         </SheetClose>

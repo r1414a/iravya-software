@@ -9,9 +9,12 @@ const limit = 10;
 
 export default function SuperAdminManageDrivers() {
     const [page, setPage] = useState(1);
-    // const [search, setSearch] = useState("");
-    const [searchInput, setSearchInput]   = useState("")
-const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [searchInput, setSearchInput] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [columnFilters, setColumnFilters] = useState([]);
+
+     const statusFilter = columnFilters.find(f => f.id === "status")?.value || "";
+     const licenceFilter = columnFilters.find(f => f.id === "licence_class")?.value || "";
 
     // Handle debouncing manually
     useEffect(() => {
@@ -23,18 +26,12 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
         return () => clearTimeout(handler); // Cleanup on every keystroke
     }, [searchInput]);
 
-    // const isSearching = search.trim().length > 0;
-
-    //  const { data: listData, isLoading: listLoading, isFetching: getFetching, isError, refetch } = useGetAllDriversQuery(
-    //     { page, limit }
-    // )
-
     const { data, isLoading, isFetching } = useSearchDriversQuery(
         { page, limit, search: debouncedSearch }
     )
 
 
-     const drivers = data?.data?.data || [];
+    const drivers = data?.data?.data || [];
     const totalPages = data?.data?.pagination?.totalPages || 1;
     const currentPage = data?.data?.pagination?.page || 1;
 
@@ -44,18 +41,6 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
         setPage(1);
     };
 
-    // const activeData = isSearching ? searchData : listData;
-    // const drivers       = activeData?.data?.data   || []
-    // const pagination    = activeData?.data?.pagination || activeData?.data
-    // const totalPages    = activeData?.data?.data?.totalPages   || 1
-    // const isLoading     = isSearching ? searchLoading : listLoading
-    
-
-    // console.log(drivers,totalPages, activeData?.data?.page);
-    
-    // const handleSearch  = () => { setSearch(searchInput); setPage(1) }
-    // const handleClear   = () => { setDebouncedSearch(""); setSearchInput(""); setPage(1) }
-
     return (
         <section className="mb-10">
             <AdminSubHeader
@@ -63,20 +48,20 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
                 heading="Manage Drivers"
                 subh="Manage drivers — view, edit, trip status, details, history, and deactivate"
             />
-            <DriversFilter 
-                CreateButton={<ManageDriverForm />} 
-                searchInput={searchInput} 
+            <DriversFilter
+                CreateButton={<ManageDriverForm />}
+                searchInput={searchInput}
                 setSearchInput={(val) => {
                     setSearchInput(val);
                     setPage(1); // Reset page when typing
-                }} 
+                }}
                 handleClear={handleClear}
             />
-            <DriversTable 
-                drivers={drivers} 
+            <DriversTable
+                drivers={drivers}
                 totalPages={totalPages}
                 page={currentPage}
-                onPrevious={() => setPage((prev) => Math.max(prev-1,1))}
+                onPrevious={() => setPage((prev) => Math.max(prev - 1, 1))}
                 onNext={() => setPage((prev) => prev < (totalPages || 1) ? prev + 1 : prev)}
                 isFetching={isFetching || isLoading}
             />

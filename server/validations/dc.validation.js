@@ -15,15 +15,6 @@ export const adddcValidation = [
         .notEmpty()
         .withMessage("City is required"),
 
-    body("state")
-        .notEmpty()
-        .withMessage("State is required"),
-
-    body("country")
-        .notEmpty()
-        .default("India")
-        .withMessage("Country is required"),
-
     body("contact_name")
         .notEmpty()
         .withMessage("Contact name is required"),
@@ -61,15 +52,6 @@ export const updatedcValidation = [
     body("city")
         .notEmpty()
         .withMessage("City is required"),
-
-    body("state")
-        .notEmpty()
-        .withMessage("State is required"),
-
-    // body("country")
-    //     .notEmpty()
-    //     .default("India")
-    //     .withMessage("Country is required"),
 
     body("contact_name")
         .notEmpty()

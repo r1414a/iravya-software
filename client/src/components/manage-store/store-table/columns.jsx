@@ -26,9 +26,10 @@ import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import StoreForm from "../StoreForm"
 import DeleteModal from "@/components/DeleteModal"
+import { useDeleteStoreMutation } from "@/lib/features/stores/storeApi"
 
 const statusStyles = {
-    active:   "bg-green-100 text-green-700",
+    active: "bg-green-100 text-green-700",
     inactive: "bg-gray-100 text-gray-500",
 }
 
@@ -36,93 +37,65 @@ const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
 const CITIES = ["Pune", "Mumbai", "Nashik", "Nagpur"]
 
 
-function ActionsCell({ row }) {
-      const store = row.original
-      const {pathname} = useLocation();
+function ActionsCell({ row, table }) {
+    const store = row.original;
+    console.log(store);
+
+    const brands = table.options.meta?.brands || []
+    const { pathname } = useLocation();
     const [viewDetails, setViewDetails] = useState(false)
-    const [editOpen,    setEditOpen]    = useState(false)
+    const [editOpen, setEditOpen] = useState(false)
+
+    const [deleteStore, { isLoading: isDeleting }] = useDeleteStoreMutation();
+
+    const handleDelete = async () => {
+        try {
+            await deleteStore(dc.id).unwrap();
+        } catch (err) {
+            console.error("Failed to delete store", err);
+        }
+    };
     return (
         <>
             <StoreDetailDrawer
-                store={store} 
-                open={viewDetails} 
-                onClose={() => setViewDetails(false)} 
+                store={store}
+                open={viewDetails}
+                onClose={() => setViewDetails(false)}
             />
-
-            
-    
-        
-        <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16}/></Button>
             {
                 pathname.startsWith('/admin') && (
-                    <>
-                    <StoreForm mode={'edit'} store={store} />
-                    <DeleteModal
-                                                                                           who={store.name}
-                                                                                           m1active="Store will no longer be available for trip scheduling or fleet tracking."
-                                                                                         />
-                    {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
-                    
-                    </>
-                )
-            }
 
-            
-        </div>
+                    <StoreForm
+                        store={store}
+                        brands={brands}
+                        open={editOpen}
+                        onClose={() => setEditOpen(false)}
+                    />
+                )}
+
+
+            <div className="flex items-center gap-2 justify-end">
+                <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16} /></Button>
+                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                {
+                    pathname.startsWith('/admin') && (
+
+
+                        <DeleteModal
+                            who={store.name}
+                            m1active="Store will no longer be available for trip scheduling or fleet tracking."
+                            onConfirm={handleDelete}
+                            isLoading={isDeleting}
+                        />
+
+                    )
+                }
+
+
+            </div>
         </>
     )
 }
-
-// function ActionsCell({ row }) {
-//     const store = row.original
-//     // const [editOpen, setEditOpen] = useState(false)
-//     // const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
-//     // const [historyOpen, setHistoryOpen] = useState(false)
-
-//     return (
-//         <div className="flex items-center gap-2 justify-end">
-
-//                     <DropdownMenu>
-//                         <DropdownMenuTrigger asChild>
-//                             <Button
-//                                 variant="ghost"
-//                                 size="icon"
-//                                 className="h-8 w-8"
-//                                 onClick={(e) => e.stopPropagation()}
-//                             >
-//                                 <MoreHorizontal size={16} />
-//                             </Button>
-//                         </DropdownMenuTrigger>
-//                         <DropdownMenuContent
-//                             align="end"
-//                             className="bg-white border shadow-md w-48"
-//                             onClick={(e) => e.stopPropagation()}
-//                         >
-//                             <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
-//                                 <Pencil size={14} /> Edit store details
-//                             </DropdownMenuItem>
-//                             <DropdownMenuItem
-//                                 className="gap-2 text-sm cursor-pointer"
-//                                 onClick={() => window.open(`/track/${store.publicTrackingSlug}`, "_blank")}
-//                             >
-//                                 <ExternalLink size={14} /> Open public tracking URL
-//                             </DropdownMenuItem>
-//                             <DropdownMenuSeparator />
-//                             <DropdownMenuItem
-//                                 className={`gap-2 text-sm cursor-pointer ${store.status === "active" ? "text-red-500" : "text-green-600"}`}
-//                             >
-//                                 <Ban size={14} />
-//                                 {store.status === "active" ? "Deactivate store" : "Reactivate store"}
-//                             </DropdownMenuItem>
-//                         </DropdownMenuContent>
-//                     </DropdownMenu>
-//                     {/* <ChevronRight size={16} className="text-gray-300" /> */}
-//                 </div>
-//     )
-// }
-
-
 
 export const columns = [
     // Store name + address
@@ -134,7 +107,7 @@ export const columns = [
             return (
                 <div className="-space-y-0.5">
                     <p className="font-semibold text-sm">{name}</p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-56 truncate">
+                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-56 text-wrap">
                         <MapPin size={10} className="shrink-0" />
                         {address}
                     </p>
@@ -145,28 +118,33 @@ export const columns = [
 
     // Brand — radio filter in header
     {
-        accessorKey: "brand",
-        header: ({ column }) => {
+        accessorKey: "brand_name",
+        header: ({ column, table }) => {
             const current = column.getFilterValue() || "all"
+            const brands = table.options.meta?.brands || []
+            console.log("brands", brands);
+
             return (
                 <div className="flex items-center gap-2">
                     <span>Brand</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-                                {current === "all" ? "All" : current.split(" ")[1] ?? current}
+                                {current === "all" ? "All" : brands.find(b => String(b.id) === current)?.name || "Select"}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40 bg-white border shadow-md">
                             <DropdownMenuRadioGroup
                                 value={current}
-                                onValueChange={(val) =>
+                                onValueChange={(val) => {
                                     column.setFilterValue(val === "all" ? undefined : val)
+                                    table.options.meta?.updatePage?.(1)
+                                }
                                 }
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-                                {BRANDS.map((b) => (
-                                    <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
+                                {brands.map((b) => (
+                                    <DropdownMenuRadioItem key={b.id} value={String(b.id)} className="text-xs">{b.name}</DropdownMenuRadioItem>
                                 ))}
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
@@ -175,9 +153,12 @@ export const columns = [
             )
         },
         cell: ({ row }) => (
-            <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
+            <span className="text-sm text-gray-700">{row.getValue("brand_name")}</span>
         ),
-        filterFn: (row, id, value) => !value || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value) return true
+            return row.getValue(id) === value
+        },
     },
 
     // City — radio filter in header
@@ -222,11 +203,11 @@ export const columns = [
         accessorKey: "managerName",
         header: "Store manager",
         cell: ({ row }) => {
-            const { managerName, managerPhone } = row.original
+            const { manager_name, manager_phone } = row.original
             return (
                 <div className="-space-y-0.5">
-                    <p className="text-sm font-medium">{managerName}</p>
-                    <p className="text-xs text-gray-400">{managerPhone}</p>
+                    <p className="text-sm font-medium">{manager_name}</p>
+                    <p className="text-xs text-gray-400">+91 {manager_phone}</p>
                 </div>
             )
         },
@@ -237,16 +218,16 @@ export const columns = [
         accessorKey: "deliveriesToday",
         header: "Deliveries",
         cell: ({ row }) => {
-            const { deliveriesToday, totalDeliveries, lastDelivery } = row.original
+            const { today_deliveries = 0, total_deliveries = 0 } = row.original
             return (
                 <div className="-space-y-0.5">
                     <p className="text-sm font-medium">
-                        {deliveriesToday > 0
-                            ? <span className="text-blue-600">{deliveriesToday} today</span>
+                        {today_deliveries > 0
+                            ? <span className="text-blue-600">{today_deliveries} today</span>
                             : <span className="text-gray-400">None today</span>
                         }
                     </p>
-                    <p className="text-xs text-gray-400">{totalDeliveries} total</p>
+                    <p className="text-xs text-gray-400">{total_deliveries} total</p>
                 </div>
             )
         },
@@ -275,31 +256,31 @@ export const columns = [
     // },
 
     // Public tracking slug
-    {
-        accessorKey: "publicTrackingSlug",
-        header: "Public URL",
-        cell: ({ row }) => {
-            const slug = row.original.publicTrackingSlug
-            return (
-                <div
-                    className="flex items-center gap-1.5 text-xs font-mono text-blue-600 hover:underline cursor-pointer"
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        navigator.clipboard.writeText(`/track/${slug}`)
-                    }}
-                    title="Click to copy"
-                >
-                    <Copy size={10} />
-                    /track/{slug}
-                </div>
-            )
-        },
-    },
+    // {
+    //     accessorKey: "publicTrackingSlug",
+    //     header: "Public URL",
+    //     cell: ({ row }) => {
+    //         const slug = row.original.publicTrackingSlug
+    //         return (
+    //             <div
+    //                 className="flex items-center gap-1.5 text-xs font-mono text-blue-600 hover:underline cursor-pointer"
+    //                 onClick={(e) => {
+    //                     e.stopPropagation()
+    //                     navigator.clipboard.writeText(`/track/${slug}`)
+    //                 }}
+    //                 title="Click to copy"
+    //             >
+    //                 <Copy size={10} />
+    //                 /track/{slug}
+    //             </div>
+    //         )
+    //     },
+    // },
 
     // Status — radio filter in header
     {
         accessorKey: "status",
-        header: ({ column }) => {
+        header: ({ column, table }) => {
             const current = column.getFilterValue() || "all"
             return (
                 <div className="flex items-center gap-2">
@@ -313,12 +294,15 @@ export const columns = [
                         <DropdownMenuContent className="w-32 bg-white border shadow-md">
                             <DropdownMenuRadioGroup
                                 value={current}
-                                onValueChange={(val) =>
+                                onValueChange={(val) => {
                                     column.setFilterValue(val === "all" ? undefined : val)
+                                    table.options.meta?.updatePage(1)
+                                }
+
                                 }
                             >
-                                <DropdownMenuRadioItem value="all"      className="text-xs">All</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="active"   className="text-xs">Active</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="all" className="text-xs">All</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="active" className="text-xs">Active</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="inactive" className="text-xs">Inactive</DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
@@ -334,14 +318,17 @@ export const columns = [
                 </Badge>
             )
         },
-        filterFn: (row, id, value) => !value || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value) return true
+            return row.getValue(id) === value
+        },
     },
 
     // Actions
 
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
     },
     // {
     //     id: "actions",

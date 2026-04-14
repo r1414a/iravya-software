@@ -8,7 +8,7 @@ import { allBrand } from "../controller/brandController.js";
 
 const router = express.Router()
 
-router.get("/brands", protect, authorize('super_admin',"dc_manager"), allBrand)
+router.get("/", protect, authorize('super_admin',"dc_manager"), allBrand)
 
 
 export default router

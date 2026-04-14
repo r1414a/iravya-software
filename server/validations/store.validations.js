@@ -30,14 +30,14 @@ const createStoreValidator = [
     .withMessage("Country is required"),
 
   body("latitude")
-    .notEmpty()
-    .withMessage("Latitude is required")
+    .optional()
+    // .withMessage("Latitude is required")
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
 
   body("longitude")
-    .notEmpty()
-    .withMessage("Longitude is required")
+    .optional()
+    // .withMessage("Longitude is required")
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
 
@@ -71,10 +71,12 @@ const updateStoreValidation = [
 
 
   body("latitude")
+  .optional()
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
 
   body("longitude")
+  .optional()
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
 

@@ -40,7 +40,6 @@ const addTruckValidation = [
     body("capacity")
         .notEmpty()
         .withMessage("Capacity required")
-        .isInt({ max: 50 })
         .withMessage("Invalid capacity"),
     
     body().custom((value, { req }) => {

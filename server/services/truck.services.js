@@ -25,6 +25,29 @@ const uploadFile = async (file, folder) => {
 }
 
 
+const document_stattus = async(expiry_date)=>{
+    const today = new Date()
+    const expiry = new Date(expiry_date)
+
+    // Remove time for accurate day comparison
+    today.setHours(0,0,0,0)
+    expiry.setHours(0,0,0,0)
+
+    const diffTime = expiry - today
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (daysRemaining <= 0) {
+        return "expired"
+    }
+
+    if (daysRemaining <= 30) {
+        return "expiring"
+    }
+
+    return "valid"
+}
+
+
 const addTruckservice = async (data) => {
     const {
         registration_no,
@@ -33,31 +56,62 @@ const addTruckservice = async (data) => {
         capacity,
         registration_cert,
         insurance_doc,
-        PUC_cert
+        PUC_cert,
+        rc_expiry,
+        insurance_expiry,
+        puc_expiry
     } = data;
-
+    
     const [truck] = await sql`
         INSERT INTO "Trucks"
         (
             "registration_no",
             "model",
             "type",
-            "capacity",
-            "registration_cert",
-            "insurance_doc",
-            "PUC_cert"
+            "capacity"
+           
         )
         VALUES
         (
             ${registration_no},
             ${model},
             ${type},
-            ${capacity},
-            ${registration_cert},
-            ${insurance_doc},
-            ${PUC_cert}
+            ${capacity}
+            
         )
         RETURNING *
+    `;
+
+    const documents = await sql`
+        INSERT INTO "truck_documents" (
+            file_url,
+            expiry_date,
+            document_status,
+            doc_type,
+            truck_id
+        )
+        VALUES (
+            ${registration_cert},
+            ${rc_expiry},
+            ${await document_stattus(rc_expiry)},
+            'registration_cert',
+            ${truck.id}
+        ),
+        (
+            ${insurance_doc},
+            ${insurance_expiry},
+            ${await document_stattus(insurance_expiry)},
+            'insurance_doc',
+            ${truck.id}
+        ),
+        (
+            ${PUC_cert},
+            ${puc_expiry},
+            ${await document_stattus(puc_expiry)},
+            'PUC_cert',
+            ${truck.id}
+        )
+        RETURNING *;
     `;
 
     return truck;
@@ -92,44 +146,87 @@ const truckExistByIDService = async (id) => {
 
 const getTruckDataService = async (id) => {
     const [truck] = await sql`
-        SELECT * FROM "Trucks"
-        WHERE "id" = ${id}
-
+        SELECT 
+            t.*, 
+            json_agg(
+            json_build_object(
+                'file_url', td.file_url,
+                'doc_type', td.doc_type,
+                'document_status', td.document_status,
+                'expiry_date', td.expiry_date
+            )
+            ) AS documents
+        FROM "Trucks" t
+        LEFT JOIN "truck_documents" td
+            ON t.id = td.truck_id
+        WHERE t.id = ${id}
+        GROUP BY t.id
     `
     return truck
 }
 const updateTruckDataService = async (id, data) => {
 
-    const updateFields = []
-    const values = []
+    const {
+    registration_no,
+    model,
+    type,
+    capacity,
+    truck_status,
+    registration_cert = null,
+    insurance_doc = null,
+    PUC_cert = null,
+    rc_expiry = null,
+    insurance_expiry = null,
+    puc_expiry = null
+  } = data;
 
-    let index = 1
-
-    for (const key in data) {
-        if (data[key] !== undefined) {
-            updateFields.push(`"${key}" = $${index}`)
-            values.push(data[key])
-            index++
-        }
-    }
-
-    if (updateFields.length === 0) {
-        throw new Error("No fields to update")
-    }
-
-    values.push(id)
-
-    const query = `
+  // Update Truck
+    const [truck] = await sql`
         UPDATE "Trucks"
-        SET ${updateFields.join(", ")},
-        "updated_at" = NOW()
-        WHERE "id" = $${index}
+        SET
+        registration_no = ${registration_no},
+        model = ${model},
+        type = ${type},
+        capacity = ${capacity},
+        status = ${truck_status}
+        WHERE id = ${id}
         RETURNING *
-    `
+    `;
 
-    const [truck] = await sql.unsafe(query, values)
+    // Update Registration Certificate
+    await sql`
+        UPDATE "truck_documents"
+        SET
+        file_url = ${registration_cert},
+        expiry_date = ${rc_expiry},
+        document_status = ${await document_stattus(rc_expiry)}
+        WHERE truck_id = ${id}
+        AND doc_type = 'registration_cert'
+    `;
 
-    return truck
+    // Update Insurance
+    await sql`
+        UPDATE "truck_documents"
+        SET
+        file_url = ${insurance_doc},
+        expiry_date = ${insurance_expiry},
+        document_status = ${await document_stattus(insurance_expiry)}
+        WHERE truck_id = ${id}
+        AND doc_type = 'insurance_doc'
+    `;
+
+    // Update PUC
+    await sql`
+        UPDATE "truck_documents"
+        SET
+        file_url = ${PUC_cert},
+        expiry_date = ${puc_expiry},
+        document_status = ${await document_stattus(puc_expiry)}
+        WHERE truck_id = ${id}
+        AND doc_type = 'PUC_cert'
+    `;
+
+    return truck;
 }
 
 const deleteTruckService = async (id) => {
@@ -235,7 +332,7 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit,
     console.log("dcId:", dcId)
     const trucks = await sql`
         SELECT 
-            tr.id, tr.registration_no, tr.type, tr.capacity, tr.model, tr.status, tr."registration_cert", tr."insurance_doc", tr."PUC_cert",
+            tr.id, tr.registration_no, tr.type, tr.capacity, tr.model, tr.status,
             COUNT(t.id) AS total_trips,
             MAX(t.departed_at) AS last_trip
         FROM "Trucks" tr
@@ -250,7 +347,6 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit,
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
             
-            AND tr.dc_id = ${dcId}
             
           
         GROUP BY tr.id, tr.registration_no, tr.type, tr.model, tr.status
@@ -268,7 +364,7 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit,
                 OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
-            AND tr.dc_id = ${dcId}
+            
     `
 
     const total = Number(countRow.count)

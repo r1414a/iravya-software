@@ -235,7 +235,7 @@ const getAllStoreService = async (filters) => {
             WHERE DATE(t.departed_at) = CURRENT_DATE
         ) AS today_deliveries,
 
-        COUNT(*) OVER() AS total_count
+        COUNT(t.id) AS total_deliveries
 
     FROM "Stores" s
 
@@ -252,6 +252,10 @@ const getAllStoreService = async (filters) => {
         ON t.id = ts.trip_id
 
     WHERE 1=1
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
 
     ${brand_id ? sql`
     AND s.brand_id = ${brand_id}

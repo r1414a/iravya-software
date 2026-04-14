@@ -85,8 +85,8 @@ const getAllDriverList = asyncHandler(async (req, res) => {
 });
 
 const getAllDriverListBySearch = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10  } = req.params;
-  const {search = "" } = req.body
+  const { page = 1, limit = 10  } = req.query;
+  const {search = "" } = req.query
 
   const user_id = req.user.id
     console.log(user_id)

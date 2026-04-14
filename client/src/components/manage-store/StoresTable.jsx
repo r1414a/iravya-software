@@ -106,7 +106,8 @@ const stores = [
     },
 ]
 
-export default function StoresTable() {
+export default function StoresTable({ stores, setPage,brands, columnFilters,
+    setColumnFilters, totalPages, page, onPrevious, onNext, isFetching }) {
 
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -114,6 +115,15 @@ export default function StoresTable() {
                 <DataTable
                     columns={columns}
                     data={stores}
+                    meta={{brands}}
+                    setPage={setPage}
+                    columnFilters={columnFilters}
+                    setColumnFilters={setColumnFilters}
+                    totalPages={totalPages}
+                    page={page}
+                    onPrevious={onPrevious}
+                    onNext={onNext}
+                    isFetching={isFetching}
                 />
             </div>
 

@@ -15,6 +15,7 @@ import {
     Road,
 } from "lucide-react"
 import { useState } from "react"
+import { format, parseISO } from "date-fns"
 
 const statusStyles = {
     active: "bg-green-100 text-green-700",
@@ -58,7 +59,7 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                     </div>
                     <p className="text-xs text-gray-400 mt-2 wrap-break-words">{dc.address}</p>
                 </SheetHeader>
-                <div className="flex-1 overflow-y-auto px-3 pb-3 sm:p-4">
+                <div className="flex-1 overflow-y-auto px-3 pb-3 sm:px-4 sm:pb-4">
                     {/* ── Fleet summary — same 2-col grid as TruckDetailDrawer info grid ── */}
                     <div className="pb-4 border-b">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -66,12 +67,12 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3">
                             {[
-                                { icon: Truck, label: "Trucks", value: `${dc.active_trucks} active / ${dc.total_trucks} total` },
-                                { icon: Users, label: "Drivers", value: `${dc.total_drivers} registered` },
+                                // { icon: Truck, label: "Trucks", value: `${dc.active_trucks} active / ${dc.total_trucks} total` },
+                                // { icon: Users, label: "Drivers", value: `${dc.total_drivers} registered` },
                                 // { icon: LocateFixed, label: "GPS devices", value: `${dc.devicesAvailable} available / ${dc.total_devices} total` },
-                                { icon: Road, label: "Active trips", value: dc.activ_trips },
+                                { icon: Road, label: "Active trips", value: dc.active_trips },
                                 { icon: CheckCircle2, label: "Total trips", value: dc.total_trips },
-                                { icon: Clock, label: "Operating since", value: dc.created_at },
+                                { icon: Clock, label: "Operating since", value: format(new Date(dc.created_at), 'MMM, yyyy') },
                             ].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="bg-gray-50 border border-gray-100 rounded-lg p-2 sm:p-3">
                                     <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 mb-1">

@@ -16,7 +16,7 @@ const storeExistByStoreCode = async(store_code)=>{
 }
 
 const addStoreService = async(data)=>{
-    const {brand_id, name, address, city, state, country, latitude, longitude, manager_name, manager_phone, manager_email,store_code} = data
+    const {brand_id, name, address, city, state, latitude, longitude, manager_name, manager_phone, manager_email,store_code} = data
     const name_= manager_name.split(" ")
     const [newUser] = await sql`
         INSERT INTO "User"
@@ -55,8 +55,6 @@ const addStoreService = async(data)=>{
         "name",
         "address",
         "city",
-        "state",
-        "country",
         "latitude",
         "longitude",
         "store_manager",
@@ -68,8 +66,6 @@ const addStoreService = async(data)=>{
         ${name},
         ${address},
         ${city},
-        ${state},
-        ${country},
         ${latitude},
         ${longitude},
         ${newUser.id}
@@ -214,17 +210,18 @@ const getAllStoreService = async (filters) => {
     } = filters;
 
     const offset = (page - 1) * limit;
-    const [dc] = await sql`
-            SELECT "id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
-        `
-    const dcID = dc?.id || null
+    // const [dc] = await sql`
+    //         SELECT "id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+    //     `
+    // const dcID = dc?.id || null
 
     const stores = await sql`
         SELECT 
         s.id,
-        s.name AS store_name,
+        s.name,
         s.address,
         s.city,
+        s.brand_id,
         s.status,
         s.store_code,
 
@@ -255,7 +252,6 @@ const getAllStoreService = async (filters) => {
         ON t.id = ts.trip_id
 
     WHERE 1=1
-    AND s.dc_id = ${dcID}
 
     ${brand_id ? sql`
     AND s.brand_id = ${brand_id}

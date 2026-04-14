@@ -47,7 +47,7 @@ function ActionsCell({ row }) {
         try {
             await deleteDC(dc.id).unwrap();
         } catch (err) {
-            console.error("Failed to delete truck", err);
+            console.error("Failed to delete dc", err);
         }
     };
     return (
@@ -96,53 +96,12 @@ export const columns = [
                 <div className="-space-y-0.5">
                     <p className="font-semibold text-sm">{dc_name}</p>
                     <p className="text-xs text-gray-400 flex items-center gap-1">
-                        <MapPin size={10} /> {city}
+                        <MapPin size={10} /> {address}
                     </p>
                 </div>
             )
         },
     },
-
-    // Brand — column header has radio filter dropdown
-    // {
-    //     accessorKey: "brand",
-    //     header: ({ column }) => {
-    //         const current = column.getFilterValue() || "all"
-    //         return (
-    //             <div className="flex items-center gap-2">
-    //                 <span>Brand</span>
-    //                 <DropdownMenu>
-    //                     <DropdownMenuTrigger asChild>
-    //                         <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-    //                             {current === "all" ? "All" : current.split(" ")[1] ?? current}
-    //                         </Button>
-    //                     </DropdownMenuTrigger>
-    //                     <DropdownMenuContent className="w-40 bg-white border shadow-md">
-    //                         <DropdownMenuRadioGroup
-    //                             value={current}
-    //                             onValueChange={(val) =>
-    //                                 column.setFilterValue(val === "all" ? undefined : val)
-    //                             }
-    //                         >
-    //                             <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-    //                             {BRANDS.map((b) => (
-    //                                 <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
-    //                             ))}
-    //                         </DropdownMenuRadioGroup>
-    //                     </DropdownMenuContent>
-    //                 </DropdownMenu>
-    //             </div>
-    //         )
-    //     },
-    //     cell: ({ row }) => (
-    //         <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
-    //     ),
-    //     filterFn: (row, id, value) => {
-    //         if (!value) return true
-    //         return row.getValue(id) === value
-    //     },
-    // },
-
     // Contact person
     {
         accessorKey: "contactName",
@@ -159,29 +118,29 @@ export const columns = [
     },
 
     // Fleet stats — trucks + drivers + devices in one cell
-    {
-        accessorKey: "totalTrucks",
-        header: "Fleet",
-        cell: ({ row }) => {
-            const { total_trucks, active_trucks, total_drivers, total_devices, active_devices } = row.original
-            return (
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <Truck size={11} className="text-gray-400" />
-                        <span>{active_trucks}/{total_trucks} trucks active</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <Users size={11} className="text-gray-400" />
-                        <span>{total_drivers} drivers</span>
-                    </div>
-                    {/* <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <LocateFixed size={11} className="text-gray-400" />
-                        <span>{active_devices}/{total_devices} devices available</span>
-                    </div> */}
-                </div>
-            )
-        },
-    },
+    // {
+    //     accessorKey: "totalTrucks",
+    //     header: "Fleet",
+    //     cell: ({ row }) => {
+    //         const { total_trucks, active_trucks, total_drivers, total_devices, active_devices } = row.original
+    //         return (
+    //             <div className="flex flex-col gap-1">
+    //                 <div className="flex items-center gap-1.5 text-xs text-gray-600">
+    //                     <Truck size={11} className="text-gray-400" />
+    //                     <span>{active_trucks}/{total_trucks} trucks active</span>
+    //                 </div>
+    //                 <div className="flex items-center gap-1.5 text-xs text-gray-600">
+    //                     <Users size={11} className="text-gray-400" />
+    //                     <span>{total_drivers} drivers</span>
+    //                 </div>
+    //                 {/* <div className="flex items-center gap-1.5 text-xs text-gray-600">
+    //                     <LocateFixed size={11} className="text-gray-400" />
+    //                     <span>{active_devices}/{total_devices} devices available</span>
+    //                 </div> */}
+    //             </div>
+    //         )
+    //     },
+    // },
 
     // Trips
     {

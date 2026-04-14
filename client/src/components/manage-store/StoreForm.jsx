@@ -27,84 +27,146 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Plus, Store, Pencil } from "lucide-react"
-import { useState } from "react"
+import { useEffect } from "react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
-
-export default function StoreForm({ mode, store }) {
-    const isEdit = mode === "edit"
-    // Auto-generate slug from store name
-    //  {
-    //     id: 1,
-    //     name: "Westside — Koregaon Park",
-    //     city: "Pune",
-    //     address: "Shop 12, Phoenix Market City, Nagar Rd, Pune 411006",
-    //     brand: "Tata Westside",
-    //     managerName: "Arjun Joshi",
-    //     managerPhone: "+91 98201 44321",
-    //     managerEmail: "arjun.j@westside.com",
-    //     publicTrackingSlug: "westside-koregaon",
-    //     deliveriesToday: 2,
-    //     totalDeliveries: 184,
-    //     currentDevices: ["GPS-003-PUNE"],
-    //     lastDelivery: "Today, 10:45 AM",
-    //     status: "active",
-    //     createdAt: "Jan 2023",
-    // },
-    const [form, setForm] = useState({
-        brand: store?.brand || "",
-        name: store?.name || "",
-        city: store?.city || "",
-        address: store?.address || "",
-        publicTrackingSlug: store?.publicTrackingSlug || "",
-        managerName: store?.managerName || "",
-        managerPhone: store?.managerPhone || "",
-        managerEmail: store?.managerEmail || "",
-        status: store?.status || ""
-    })
-    // console.log(form);
+import { useAddStoreMutation, useUpdateStoreMutation } from "@/lib/features/stores/storeApi"
+import { Controller, useForm } from "react-hook-form"
+import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
+import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 
-    function handleFieldChange(name, value) {
-        setForm(prev => ({ ...prev, [name]: value }))
+const storeSchema = z.object({
+    brand_id: z.string().min(1, "Brand is required"),
+    name: z.string().min(2, "Store name must be at least 2 characters").max(100, "Store name is too long"),
+    city: cityV,
+    address: addressV,
+    state: z.string().default("Maharashtra"),
+    manager_name: fullNameV,
+    manager_phone: phoneV,
+    manager_email: emailV,
+    status: z.enum(["active", "inactive"]).optional(),
+});
+
+
+export default function StoreForm({ store = null, brands, open, onClose }) {
+    console.log("storeForm", store, brands);
+
+    // const isEdit = mode === "edit"
+   
+    const [addStore, { isLoading }] = useAddStoreMutation();
+    const [updateStore, { isLoading: isUpdating }] = useUpdateStoreMutation();
+    // const {data} = useGetAllBrandsQuery();
+    // console.log(data);
+
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        setValue,
+        watch,
+        formState: { errors, isSubmitSuccessful },
+    } = useForm({
+        resolver: zodResolver(storeSchema),
+        defaultValues: {
+            brand_id: String(store?.brand_id) || "",
+            name: store?.name || "",
+            address: store?.address || "",
+            city: store?.city || "",
+            state: "Maharashtra",
+            manager_name: store?.manager_name || "",
+            manager_phone: store?.manager_phone || "",
+            manager_email: store?.manager_email || "",
+            status: store?.status || "active",
+        },
+    });
+
+    useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset();
+            // onClose?.(false)
+        }
+    }, [isSubmitSuccessful, reset]);
+
+    const selectedStatus = watch('status')
+
+    const onSubmit = async (data) => {
+        console.log(data);
+
+        try {
+            if (store) {
+                await updateStore({ id: store.id, ...data }).unwrap();
+            } else {
+                await addStore(data).unwrap();
+            }
+
+        } catch (err) {
+            console.error(err);
+
+        }
     }
 
-    const slug = form.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-")
-
     return (
-        <Sheet direction="right">
+        <Sheet direction="right" open={open} onOpenChange={onClose}>
             {
-                isEdit ? (
-                    <SheetTrigger asChild>
-                        <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-                    </SheetTrigger>
+                store ? (
+                    null
+                    // <SheetTrigger asChild>
+                    //     <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                    // </SheetTrigger>
                 ) : (
                     <CreateFormSheetTrigger text={'Add Store'} />
                 )
             }
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
-                <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle> {isEdit ? "Edit store" : "Add new store"}</SheetTitle>
-                    <SheetDescription>
-                        {isEdit
-                            ? "Update store details"
-                            : "Register a retail store and assign it to a brand"}
-                    </SheetDescription>
-                </SheetHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                    <SheetHeader className="border-b border-gray-200">
+                        <SheetTitle> {store ? "Edit store" : "Add new store"}</SheetTitle>
+                        <SheetDescription>
+                            {store
+                                ? "Update store details"
+                                : "Register a retail store and assign it to a brand"}
+                        </SheetDescription>
+                    </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-                    <FieldGroup>
-                        <FieldSet>
-                            <FieldGroup>
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                        <FieldGroup>
+                            <FieldSet>
+                                <FieldGroup>
 
-                                {/* Brand */}
-                                <Field>
-                                    <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
-                                    <Select value={form.brand} onValueChange={(value) => console.log(value)
+                                    {/* Brand */}
+                                    <Field>
+                                        <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
+                                        <Controller
+                                            name="brand_id"
+                                            control={control}
+                                            rules={{ required: "Brand is required" }}
+                                            render={({ field }) => (
+                                                <Select value={field.value} onValueChange={field.onChange}>
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Select brand..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border shadow-md">
+                                                        <SelectGroup>
+                                                            <SelectLabel>Brands</SelectLabel>
+                                                            {
+                                                                brands?.map(b => (
+                                                                    <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                                                                ))
+                                                            }
+                                                            {/* <SelectItem value="Mumbai">Zudio</SelectItem>
+                                                                <SelectItem value="Nashik">Tata Cliq</SelectItem>
+                                                                <SelectItem value="Nagpur">Tanishq</SelectItem>
+                                                                <SelectItem value="Kolhapur">Croma</SelectItem> */}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        {/* <Select value={form.brand} onValueChange={(value) => console.log(value)
                                     }>
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select brand..." />
@@ -118,56 +180,88 @@ export default function StoreForm({ mode, store }) {
                                                 <SelectItem value="Tanishq">Tanishq</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
-                                    </Select>
-                                </Field>
+                                    </Select> */}
+                                    </Field>
 
-                                {/* Store name + city */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <Field className="basis-[65%]">
-                                        <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
+                                    {/* Store name + city */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <Field className="basis-[65%]">
+                                            <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
+                                            <Input
+                                                name="name"
+                                                placeholder="Westside — Koregaon Park"
+                                                {...register("name", {
+                                                    required: "Store name is required",
+                                                })}
+                                                className="w-full placeholder:text-sm text-sm sm:text-md"
+                                            />
+
+                                            {errors.name && (
+                                                <p className="text-red-500 text-xs">
+                                                    {errors.name.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                        <Field className="basis-[35%]">
+                                            <FieldLabel>
+                                                City <span className="text-red-500">*</span>
+                                            </FieldLabel>
+
+                                            <Controller
+                                                name="city"
+                                                control={control}
+                                                rules={{ required: "City is required" }}
+                                                render={({ field }) => (
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select city..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-white border shadow-md">
+                                                            <SelectGroup>
+                                                                <SelectLabel>Cities</SelectLabel>
+                                                                <SelectItem value="Pune">Pune</SelectItem>
+                                                                <SelectItem value="Mumbai">Mumbai</SelectItem>
+                                                                <SelectItem value="Nashik">Nashik</SelectItem>
+                                                                <SelectItem value="Nagpur">Nagpur</SelectItem>
+                                                                <SelectItem value="Kolhapur">Kolhapur</SelectItem>
+                                                                <SelectItem value="Amravati">Amravati</SelectItem>
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+
+                                            {errors.city && (
+                                                <p className="text-red-500 text-xs">
+                                                    {errors.city.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                    </div>
+
+                                    {/* Full address */}
+                                    <Field>
+                                        <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
                                         <Input
-                                            name="name"
-                                            placeholder="Westside — Koregaon Park"
-                                            value={form.name}
-                                            className="w-full placeholder:text-sm text-sm sm:text-md"
-                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)}
+                                            name="address"
+                                            {...register("address", {
+                                                required: "Address is required",
+                                            })}
+                                            placeholder="Shop no., mall/building, area, pincode"
+                                            className="placeholder:text-sm text-sm sm:text-md"
                                         />
+                                        <FieldDescription className="text-xs">
+                                            Used to place the store pin on the map and compute geofence
+                                        </FieldDescription>
+                                        {errors.address && (
+                                            <p className="text-red-500 text-xs">
+                                                {errors.address.message}
+                                            </p>
+                                        )}
                                     </Field>
-                                    <Field className="basis-[35%]">
-                                        <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
-                                        <Select value={form.city} onValueChange={(value) => handleFieldChange('city', value)}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select city..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Cities</SelectLabel>
-                                                    <SelectItem value="Pune">Pune</SelectItem>
-                                                    <SelectItem value="Mumbai">Mumbai</SelectItem>
-                                                    <SelectItem value="Nashik">Nashik</SelectItem>
-                                                    <SelectItem value="Nagpur">Nagpur</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </Field>
-                                </div>
 
-                                {/* Full address */}
-                                <Field>
-                                    <FieldLabel>Full address <span className="text-red-500">*</span></FieldLabel>
-                                    <Input
-                                        name="address"
-                                        value={form.address}
-                                        onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="Shop no., mall/building, area, pincode"
-                                        className="placeholder:text-sm text-sm sm:text-md"
-                                    />
-                                    <FieldDescription className="text-xs">
-                                        Used to place the store pin on the map and compute geofence
-                                    </FieldDescription>
-                                </Field>
-
-                                {/* Geofence radius */}
-                                {/* <Field>
+                                    {/* Geofence radius */}
+                                    {/* <Field>
                                     <FieldLabel>Geofence radius (metres)</FieldLabel>
                                     <Input type="number" placeholder="e.g. 200" defaultValue={200} />
                                     <FieldDescription className="text-xs">
@@ -175,8 +269,8 @@ export default function StoreForm({ mode, store }) {
                                     </FieldDescription>
                                 </Field> */}
 
-                                {/* Public tracking slug — auto generated, editable */}
-                                <Field>
+                                    {/* Public tracking slug — auto generated, editable */}
+                                    {/* <Field>
                                     <FieldLabel>Public tracking URL slug</FieldLabel>
                                     <div className="flex items-center border rounded-md overflow-hidden">
                                         <span className="bg-gray-100 text-gray-500 text-xs px-3 py-2.5 border-r whitespace-nowrap">
@@ -192,76 +286,98 @@ export default function StoreForm({ mode, store }) {
                                     <FieldDescription className="text-xs">
                                         Auto-generated from store name. Store can share this URL for public delivery tracking.
                                     </FieldDescription>
-                                </Field>
+                                </Field> */}
 
-                                {/* Store manager */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <Field>
-                                        <FieldLabel>Manager name</FieldLabel>
-                                        <Input
-                                            name="managerName"
-                                            value={form.managerName}
-                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel>Manager phone</FieldLabel>
-                                        <Input
-                                            name="managerPhone"
-                                            value={form.managerPhone}
-                                            onChange={({ target: { name, value } }) => handleFieldChange(name, value)} placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
-                                    </Field>
-                                </div>
-
-                                <Field>
-                                    <FieldLabel>Manager email</FieldLabel>
-                                    <Input
-                                        name="managerEmail"
-                                        value={form.managerEmail}
-                                        onChange={({ target: { name, value } }) => handleFieldChange(name, value)}
-                                        type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
-                                    <FieldDescription className="text-xs">
-                                        A user account with store manager role will be created for this email
-                                    </FieldDescription>
-                                </Field>
-
-                                {/* Status */}
-                                {
-                                    isEdit && (
+                                    {/* Store manager */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
-                                            <FieldLabel>Status</FieldLabel>
-                                            <Select defaultValue={form.status}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white border shadow-md">
-                                                    <SelectGroup>
-                                                        <SelectLabel>Status</SelectLabel>
-                                                        <SelectItem value="active">Active</SelectItem>
-                                                        <SelectItem value="inactive">Inactive</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                            <FieldDescription className="text-xs">
-                                                Inactive stores won't appear in new trip assignments.
-                                            </FieldDescription>
+                                            <FieldLabel>Manager name <span className="text-red-500">*</span></FieldLabel>
+                                            <Input
+                                                name="managerName"
+                                                {...register("manager_name")}
+                                                placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
+                                            {errors.manager_name && (
+                                                <p className="text-red-500 text-xs">
+                                                    {errors.manager_name.message}
+                                                </p>
+                                            )}
                                         </Field>
-                                    )
-                                }
+                                        <Field>
+                                            <FieldLabel>Manager phone <span className="text-red-500">*</span></FieldLabel>
+                                            <Input
+                                                name="managerPhone"
+                                                {...register("manager_phone")}
+                                                placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
+                                            {errors.manager_phone && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.manager_phone.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                    </div>
+
+                                    <Field>
+                                        <FieldLabel>Manager email <span className="text-red-500">*</span></FieldLabel>
+                                        <Input
+                                            name="managerEmail"
+                                            {...register("manager_email")}
+                                            type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
+                                        <FieldDescription className="text-xs">
+                                            A user account with store manager role will be created for this email
+                                        </FieldDescription>
+                                        {errors.manager_email && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.manager_email.message}
+                                            </p>
+                                        )}
+                                    </Field>
+
+                                    {/* Status */}
+                                    {
+                                        store && (
+                                            <Field>
+                                                <FieldLabel>Status</FieldLabel>
+                                                <Select value={selectedStatus}
+                                                    onValueChange={(val) => setValue("status", val)}>
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border shadow-md">
+                                                        <SelectGroup>
+                                                            <SelectLabel>Status</SelectLabel>
+                                                            <SelectItem value="active">Active</SelectItem>
+                                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FieldDescription className="text-xs">
+                                                    Inactive stores won't appear in new trip assignments.
+                                                </FieldDescription>
+                                            </Field>
+                                        )
+                                    }
 
 
-                            </FieldGroup>
-                        </FieldSet>
-                    </FieldGroup>
-                </div>
+                                </FieldGroup>
+                            </FieldSet>
+                        </FieldGroup>
+                    </div>
 
-                <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
-                    <Button className="basis-1/2 bg-maroon hover:bg-maroon-dark">
-                        {isEdit ? "Save Changes" : "Add Store"} <Store className="ml-1" size={15} />
-                    </Button>
-                    <SheetClose className="basis-1/2" asChild>
-                        <Button className="w-full" variant="outline">Cancel</Button>
-                    </SheetClose>
-                </SheetFooter>
+                    <SheetFooter className="flex flex-row items-center w-full border-t border-gray-200">
+                        <Button type="submit" disabled={isLoading} className="basis-1/2 bg-maroon hover:bg-maroon-dark">
+                            {/* {isEdit ? "Save Changes" : "Add Store"}  */}
+                            {
+                                store
+                                    ? (isUpdating ? "Updating..." : "Update Store")
+                                    : (isLoading ? "Adding..." : "Add Store")
+                            }
+                            <Store className="ml-1" size={15} />
+                        </Button>
+                        <SheetClose className="basis-1/2" asChild>
+                            <Button className="w-full" variant="outline">Cancel</Button>
+                        </SheetClose>
+                    </SheetFooter>
+                </form>
             </SheetContent>
         </Sheet>
     )

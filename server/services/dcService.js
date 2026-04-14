@@ -140,18 +140,6 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
             u.phone_number AS dc_manager_phone,
             u.email AS dc_manager_email,
 
-            COUNT(DISTINCT t.id) AS total_trucks,
-            COUNT(DISTINCT t.id) FILTER (
-                WHERE t.status = 'idle'
-            ) AS active_trucks,
-
-            COUNT(DISTINCT d.id) AS total_drivers,
-
-            COUNT(DISTINCT g.id) AS total_devices,
-            COUNT(DISTINCT g.id) FILTER (
-                WHERE g.status = 'in_transit'
-            ) AS active_devices,
-
             COUNT(DISTINCT tr.id) AS total_trips,
             COUNT(DISTINCT tr.id) FILTER (
                 WHERE tr.status = 'in_transit' OR tr.status = 'scheduled'
@@ -163,12 +151,6 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
 
         LEFT JOIN "User" u
         ON u.id = dc.dc_manager
-
-        LEFT JOIN "Trucks" t
-        ON t.dc_id = dc.id
-
-        LEFT JOIN "Drivers" d
-        ON d.brand_id = dc.brand_id
 
         LEFT JOIN "GPS_devices" g
         ON g.dc_id = dc.id

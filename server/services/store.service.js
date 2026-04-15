@@ -2,7 +2,26 @@ import bcrypt from "bcryptjs"
 import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 
+const getUserDataService = async()=>{
 
+    const users = await sql`
+        SELECT 
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.role
+
+        FROM "User" u
+        LEFT JOIN "Stores" s 
+            ON s.store_manager = u.id
+
+        WHERE 
+            u.role = 'store_manager'
+            AND s.id IS NULL
+    `
+    return users
+
+}
 const storeExistByStoreCode = async(store_code)=>{
     const [result] = await sql`
         SELECT EXISTS (
@@ -16,6 +35,7 @@ const storeExistByStoreCode = async(store_code)=>{
 }
 
 const addStoreService = async(data)=>{
+<<<<<<< Updated upstream
     const {brand_id, name, address, city, state, latitude, longitude, manager_name, manager_phone, manager_email,store_code} = data
     const name_= manager_name.split(" ")
     const [newUser] = await sql`
@@ -48,6 +68,40 @@ const addStoreService = async(data)=>{
             "user_status"
     `;
 console.log(newUser);
+=======
+    const {brand_id, name, address, city, state, latitude, longitude,store_code, store_manager} = data
+    // const name_= manager_name.split(" ")
+    // const [newUser] = await sql`
+    //     INSERT INTO "User"
+    //     (
+    //         "first_name",
+    //         "last_name",
+    //         "role",
+    //         "email",
+    //         "phone_number",
+    //         "status",
+
+    //     )
+    //     VALUES
+    //     (
+        
+    //         ${name_[0]},
+    //         ${name_[1]},
+    //         ${"store_manager"},
+    //         ${manager_email},
+    //         ${manager_phone},
+    //         true
+    //     )
+    //     RETURNING
+    //         "id",
+    //         "first_name",
+    //         "last_name",
+    //         "email",
+    //         "phone_number"
+    //         "role",
+    //         "status"
+    // `;
+>>>>>>> Stashed changes
 
     const [newStore] = await sql`
         INSERT INTO "Stores" (
@@ -55,6 +109,7 @@ console.log(newUser);
         "name",
         "address",
         "city",
+        "state",
         "latitude",
         "longitude",
         "store_manager",
@@ -66,9 +121,14 @@ console.log(newUser);
         ${name},
         ${address},
         ${city},
+        ${state},
         ${latitude},
         ${longitude},
+<<<<<<< Updated upstream
         ${newUser.id},
+=======
+        ${store_manager}
+>>>>>>> Stashed changes
         ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
         ${store_code}
         )
@@ -305,5 +365,6 @@ export{
     updateStoreService,
     deleteStoreService,
     deleveryDetailService,
-    getAllStoreService
+    getAllStoreService,
+    getUserDataService
 }

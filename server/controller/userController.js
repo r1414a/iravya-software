@@ -12,7 +12,8 @@ import {registerUserService,
     setUserStatusService,
     getAllUserService,
     updateUserService,
-    getUserbySearchService
+    getUserbySearchService,
+    setUserPasswordService
 }  from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 import sendResponse from "../utils/sendResponse.js";
@@ -213,6 +214,17 @@ const resetPassword = asyncHandler(async(req, res)=>{
     }   
 }) 
 
+const setUserPassword = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    const user = await setUserPasswordService(req.body, id)
+    if(user.length){
+        sendResponse(res, 200, user, "Password reset successfully")
+    }
+    else{
+        throw new ApiError(200, "User not found")
+    }
+})
+
 const setUserStatus = asyncHandler(async (req, res) => {
     const {id} = req.params
     const {status} = req.body
@@ -332,5 +344,6 @@ export {
   getAllUser,
   getUserID,
   updateUser,
-  getUserbySearch
+  getUserbySearch,
+  setUserPassword
 }

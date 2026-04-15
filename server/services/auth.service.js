@@ -121,6 +121,44 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
     return user[0]
 }
 
+const setUserPasswordService = async (data,id) => {
+    const {new_pass} =  data
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(new_pass, salt)
+    const user = (await sql`
+        UPDATE "User"
+        SET "password" = ${hashedPassword}
+        WHERE "id" = ${id}
+        RETURNING 
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "status",
+            "last_login"
+            RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
+    `)[0]
+    await sendEmail({
+        to: user.email,
+        subject: "Welcome to Iravya | Password changed",
+        html: `
+
+            <p>Hi ${user.first_name},<br/>
+            We wanted to let you know that your password has been changed,
+            you can now log in to your account using your new password. </p>
+            <p>Account Details:</p>
+            <p>Name: ${user.first_name} ${user.last_name}</p>
+            <p>Email: ${user.email}</p>
+            <p>Password: ${new_pass}</p>
+            <div >
+                <a href="https://iravya-software-eight.vercel.app/">Signin to Your Account →</a>
+            </div>
+        `
+    })
+    return user[0]
+}
+
 const setUserStatusService = async(id, status)=>{
 
     const user = (await sql`
@@ -238,5 +276,6 @@ export {
     setUserStatusService,
     getAllUserService,
     updateUserService,
-    getUserbySearchService
+    getUserbySearchService,
+    setUserPasswordService
 }

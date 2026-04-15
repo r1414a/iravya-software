@@ -34,6 +34,7 @@ import { Controller, useForm } from "react-hook-form"
 import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { getCoordinatesFromAddress } from "@/lib/utils/getCoordinatesFromAddress"
 
 
 const storeSchema = z.object({
@@ -46,11 +47,13 @@ const storeSchema = z.object({
     manager_phone: phoneV,
     manager_email: emailV,
     status: z.enum(["active", "inactive"]).optional(),
+    store_code:  z.string()
+  .length(15, { message: "GSTIN must be exactly 15 characters" })
 });
 
 
 export default function StoreForm({ store = null, brands, open, onClose }) {
-    console.log("storeForm", store, brands);
+    // console.log("storeForm", store, brands);
 
     // const isEdit = mode === "edit"
    
@@ -71,7 +74,8 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
     } = useForm({
         resolver: zodResolver(storeSchema),
         defaultValues: {
-            brand_id: String(store?.brand_id) || "",
+            // brand_id: String(store?.brand_id) || "",
+            brand_id: store?.brand_id ? String(store.brand_id) : undefined,
             name: store?.name || "",
             address: store?.address || "",
             city: store?.city || "",
@@ -80,6 +84,7 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
             manager_phone: store?.manager_phone || "",
             manager_email: store?.manager_email || "",
             status: store?.status || "active",
+            store_code: store?.store_code || ""
         },
     });
 
@@ -93,13 +98,18 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
     const selectedStatus = watch('status')
 
     const onSubmit = async (data) => {
-        console.log(data);
-
         try {
+            const { lat, lng } = await getCoordinatesFromAddress(data.address);
+
+        const payload = {
+            ...data,
+            latitude: lat,
+            longitude: lng,
+        };
             if (store) {
-                await updateStore({ id: store.id, ...data }).unwrap();
+                await updateStore({ id: store.id, ...payload }).unwrap();
             } else {
-                await addStore(data).unwrap();
+                await addStore(payload).unwrap();
             }
 
         } catch (err) {
@@ -137,6 +147,7 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
                             <FieldSet>
                                 <FieldGroup>
 
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {/* Brand */}
                                     <Field>
                                         <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
@@ -182,6 +193,29 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
                                         </SelectContent>
                                     </Select> */}
                                     </Field>
+
+                                    {/* Store Code */}
+                                    <Field>
+                                        <FieldLabel>GSTIN (Store code) <span className="text-red-500">*</span></FieldLabel>
+                                        <Input
+                                            name="store_code"
+                                            {...register("store_code", {
+                                                required: "GSTIN code is required",
+                                            })}
+                                            placeholder="27ABCDE1234F1Z5"
+                                            className="placeholder:text-sm text-sm sm:text-md"
+                                        />
+                                        {/* <FieldDescription className="text-xs">
+                                            Used to uniquely identify a store
+                                        </FieldDescription> */}
+                                        {errors.store_code && (
+                                            <p className="text-red-500 text-xs">
+                                                {errors.store_code.message}
+                                            </p>
+                                        )}
+                                    </Field>
+
+                                    </div>
 
                                     {/* Store name + city */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

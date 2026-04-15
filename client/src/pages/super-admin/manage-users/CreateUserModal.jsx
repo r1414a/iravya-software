@@ -54,18 +54,35 @@ const createUserSchema = z.object({
     role: roleV
 })
 
-export default function CreateUserModal() {
+export default function CreateUserModal({users = null, open, onClose}) {
     // const [selectedRole, setSelectedRole] = useState("dc_manager");
     const [createUser, {isLoading, isError, error}] = useCreateUserMutation();
     const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        formState: { errors }
-    } = useForm({
-        resolver: zodResolver(createUserSchema)
-    })
+            register,
+            handleSubmit,
+            reset,
+            control,
+            setValue,
+            watch,
+            formState: { errors, isSubmitSuccessful },
+        } = useForm({
+            resolver: zodResolver(storeSchema),
+            defaultValues: {
+                first_name: users?.name || "",
+                last_name: users?.address || "",
+                email: users?.city || "",
+                password: "Maharashtra",
+                role: users?.manager_name || "",
+                status: users?.status || "active",
+            },
+        });
+
+         useEffect(() => {
+                if (isSubmitSuccessful) {
+                    reset();
+                    // onClose?.(false)
+                }
+            }, [isSubmitSuccessful, reset]);
 
 
     async function handleCreateUser(data) {
@@ -149,8 +166,6 @@ export default function CreateUserModal() {
                                             <FieldLabel>Role <span className="text-red-500">*</span></FieldLabel>
                                             <Select
                                                 value={watch('role') || ""}
-                                                // {...register("role")}     
-                                                // defaultValue="dc_manager"
                                                 onValueChange={(val) => setValue("role", val)}
                                             >
                                                 <SelectTrigger className="w-full">

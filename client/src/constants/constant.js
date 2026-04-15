@@ -34,3 +34,10 @@ export const LICENCE_CLASSES = [
         full: "HTV - heavy transport vehicles"
     },
 ]
+
+ export const TRIP_STATUS_COLORS = {
+        in_transit: { label: "In Transit", className: "bg-blue-100 text-blue-700 border-blue-200" },
+        completed: { label: "Completed", className: "bg-green-100 text-green-700 border-green-200" },
+        scheduled: { label: "Scheduled", className: "bg-gray-100 text-gray-600 border-gray-200" },
+        cancelled: { label: "Cancelled", className: "bg-red-100 text-red-600 border-red-200" },
+    }

@@ -21,13 +21,13 @@ const createStoreValidator = [
     .notEmpty()
     .withMessage("City is required"),
 
-  body("state")
-    .notEmpty()
-    .withMessage("State is required"),
+  // body("state")
+  //   .notEmpty()
+  //   .withMessage("State is required"),
 
-  body("country")
-    .notEmpty()
-    .withMessage("Country is required"),
+  // body("country")
+  //   .notEmpty()
+  //   .withMessage("Country is required"),
 
   body("latitude")
     .optional()

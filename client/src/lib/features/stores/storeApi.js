@@ -15,12 +15,12 @@ export const storeApi = api.injectEndpoints({
                 return { url: `/api/v1/stores/stores?${p}`, skipToast: true }
             },
             // shape: { data: [], pagination: { total, page, limit, total_pages } }
-            providesTags: ["Stores"]
+            // providesTags: ["Stores"]
             
-            // providesTags: (result) =>
-            //     result
-            //         ? [...result.data.map(({ id }) => ({ type: "Stores", id })), { type: "Stores", id: "LIST" }]
-            //         : [{ type: "Stores", id: "LIST" }],
+            providesTags: (result) =>
+                result
+                    ? [...result?.data?.data.map(({ id }) => ({ type: "Stores", id })), { type: "Stores", id: "LIST" }]
+                    : [{ type: "Stores", id: "LIST" }],
         }),
  
         // GET /store/:id

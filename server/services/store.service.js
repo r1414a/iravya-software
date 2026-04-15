@@ -26,8 +26,7 @@ const addStoreService = async(data)=>{
             "role",
             "email",
             "phone_number",
-            "status",
-
+            "user_status"
         )
         VALUES
         (
@@ -37,7 +36,7 @@ const addStoreService = async(data)=>{
             ${"store_manager"},
             ${manager_email},
             ${manager_phone},
-            true
+            ${"active"}
         )
         RETURNING
             "id",
@@ -46,8 +45,9 @@ const addStoreService = async(data)=>{
             "email",
             "phone_number"
             "role",
-            "status"
+            "user_status"
     `;
+console.log(newUser);
 
     const [newStore] = await sql`
         INSERT INTO "Stores" (
@@ -68,8 +68,9 @@ const addStoreService = async(data)=>{
         ${city},
         ${latitude},
         ${longitude},
-        ${newUser.id}
-        ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+        ${newUser.id},
+        ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
+        ${store_code}
         )
         RETURNING *;
     `;
@@ -193,7 +194,7 @@ const deleveryDetailService = async (id) => {
 
     ORDER BY t.departed_at DESC
 
-    LIMIT 10
+    LIMIT 5
     `;
     return trips
 }
@@ -252,10 +253,7 @@ const getAllStoreService = async (filters) => {
         ON t.id = ts.trip_id
 
     WHERE 1=1
-<<<<<<< Updated upstream
-=======
     
->>>>>>> Stashed changes
 
     ${brand_id ? sql`
     AND s.brand_id = ${brand_id}

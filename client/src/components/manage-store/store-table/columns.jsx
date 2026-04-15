@@ -50,7 +50,7 @@ function ActionsCell({ row, table }) {
 
     const handleDelete = async () => {
         try {
-            await deleteStore(dc.id).unwrap();
+            await deleteStore(store.id).unwrap();
         } catch (err) {
             console.error("Failed to delete store", err);
         }

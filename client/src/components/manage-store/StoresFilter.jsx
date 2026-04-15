@@ -14,7 +14,7 @@ export default function StoresFilter({CreateButton,  searchInput, setSearchInput
                     <InputGroup>
                         <InputGroupInput 
                         value={searchInput}
-                            onChange={e => setSearchInput(e.target.value)}placeholder="Search store name, city..." className="placeholder:text-xs lg:placeholder:text-sm" />
+                            onChange={e => setSearchInput(e.target.value)} placeholder="Search store name, city..." className="placeholder:text-xs lg:placeholder:text-sm" />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>

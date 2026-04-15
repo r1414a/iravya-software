@@ -33,7 +33,7 @@ export default function SuperAdminManageStores() {
     )
     const { data: brandsData } = useGetAllBrandsQuery();
 const brands = brandsData?.data || [];
-console.log("super admin parent", brands);
+// console.log("super admin parent", brands);
 
 
 

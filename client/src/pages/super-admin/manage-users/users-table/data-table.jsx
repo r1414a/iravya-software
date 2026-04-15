@@ -15,22 +15,16 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import EditUserDrawer from "./EditUserDrawer"
 
 export function DataTable({
-    columns,
-    data = [],
-    page = 1,
-    totalPages = 1,
-    onPrevious,
-    onNext,
-    isFetching = false
+    columns, data,setPage, columnFilters, 
+        setColumnFilters ,
+        totalPages = 1,
+        page = 1,
+        onPrevious,
+        onNext,
+        isFetching = false,
 }) {
-
-    console.log(page,totalPages)
-    // const [open, setOpen] = useState(false)
-    const [columnFilters, setColumnFilters] = useState([])
-    // const [selectedUser, setSelectedUser] = useState(null)
 
     const table = useReactTable({
         data,
@@ -39,6 +33,11 @@ export function DataTable({
         getFilteredRowModel: getFilteredRowModel(),
         state: { columnFilters },
         onColumnFiltersChange: setColumnFilters,
+         manualFiltering: true,
+            meta: {
+                // ...meta,
+                updatePage: (page) => setPage(page)
+            }
     })
 
     return (
@@ -74,10 +73,6 @@ export function DataTable({
                             <TableRow
                                 key={row.id}
                                 className="hover:bg-muted cursor-pointer"
-                                // onClick={() => {
-                                //     setSelectedUser(row.original);
-                                //     setOpen(true);
-                                // }}
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
@@ -95,7 +90,7 @@ export function DataTable({
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                No drivers found
+                                No users found
                             </TableCell>
                         </TableRow>
                     )}
@@ -125,12 +120,6 @@ export function DataTable({
                     </Button>
                 </div>
             </div>
-
-            {/* <EditUserDrawer
-                open={open}
-                setOpen={setOpen}
-                selectedUser={selectedUser}
-            /> */}
         </div>
     )
 }

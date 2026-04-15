@@ -103,3 +103,14 @@ export const updateUserValidation = [
         .isBoolean()
         .withMessage("Status must be boolean (true/false)")
 ]
+
+export const setUserPasswordValidation =[
+    body("new_password")
+        .trim()
+        .notEmpty()
+        .withMessage("Password is required")
+        .isLength({ min: 6 })
+        .withMessage("Password must be at least 6 characters")
+        .matches(/^(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+        .withMessage("Password must contain at least one uppercase letter and one special character"),
+]

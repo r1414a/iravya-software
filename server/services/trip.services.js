@@ -1,4 +1,5 @@
 import sql from "../db/database.js"
+import * as turf from '@turf/turf';
 
 async function generateTrackingCode() {
     const [row] = await sql`
@@ -30,7 +31,7 @@ const addTripService = async(data, dc_manager)=>{
     
     const tracking_code = await generateTrackingCode()
     const [source_dc] = await sql`
-        SELECT "id", "logitude", "latitude" FROM "Distribution_center"
+        SELECT "id", "longitude", "latitude" FROM "Distribution_center"
         WHERE dc_manager = ${dc_manager}
     `
     // const gps_points = []
@@ -38,9 +39,10 @@ const addTripService = async(data, dc_manager)=>{
     //     const {longitude, latitude} = delivery_stops[i]
     //     gps_points.append([longitude, latitude])
     // }
-
-    const gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
-    const total_distance = calculateGeodistance(gps_points)
+    console.log(source_dc)
+    let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
+    gps_points.unshift([source_dc.longitude, source_dc.latitude])
+    const total_distance = await calculateGeodistance(gps_points)
 
     const [trip] = await sql`
         INSERT INTO "Trips" (
@@ -65,9 +67,110 @@ const addTripService = async(data, dc_manager)=>{
         }
     }
 
+    return trip
+
+}
+
+const allTripsService = async({ page, limit, status, search, user_id, role })=>{
+    const offset = (page - 1) * limit
+
+    // DC manager: only see their own DC's trips
+    let dcId = null
+    if (role === "dc_manager") {
+        const [dc] = await sql`
+            SELECT id FROM "Distribution_center" WHERE dc_manager = ${user_id}
+        `
+        dcId = dc?.id || null
+    }
+    const trips = await sql`
+        SELECT
+            t.id,
+            t.tracking_code,
+            t.status,
+            t.scheduled_at,
+            t.departed_at,
+            t.completed_at,
+            t.distance,
+            t.created_at,
+
+            dc.name            AS dc_name,
+            dc.city            AS dc_city,
+
+            tr.registration_no AS truck_reg,
+            tr.model           AS truck_model,
+
+            CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
+            u.phone_number     AS driver_phone,
+
+            COUNT(ts.id)                                        AS total_stops,
+            COUNT(ts.id) FILTER (WHERE ts.status = 'confirmed') AS completed_stops,
+
+            COALESCE(
+                json_agg(
+                    json_build_object(
+                        'stop_id', ts.id,
+                        'store_id', s.id,
+                        'store_name', s.name,
+                        'eta', ts.eta,
+                        'arrived_at', ts.arrived_at,
+                        'status', ts.status
+                    )
+                ) FILTER (WHERE ts.id IS NOT NULL),
+                '[]'
+            ) AS stops,
+
+            COUNT(*) OVER() AS total_count
+
+        FROM "Trips" t
+        JOIN "Distribution_center" dc ON dc.id = t.source_dc_id
+        JOIN "Trucks" tr ON tr.id = t.truck_id
+        JOIN "Drivers" d ON d.id = t.driver_id
+        JOIN "User" u ON u.id = d.user_id
+
+        LEFT JOIN "Trip_stops" ts ON ts.trip_id = t.id
+        LEFT JOIN "Stores" s ON s.id = ts.store_id
+
+        WHERE 1=1
+            ${dcId   ? sql`AND t.source_dc_id = ${dcId}` : sql``}
+            ${status ? sql`AND t.status = ${status}`     : sql``}
+            ${search ? sql`AND t.tracking_code ILIKE ${'%' + search + '%'}` : sql``}
+
+        GROUP BY
+            t.id,
+            dc.name, dc.city,
+            tr.registration_no, tr.model,
+            u.first_name, u.last_name, u.phone_number
+
+        ORDER BY t.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+    `
+
+    const total = trips.length ? Number(trips[0].total_count) : 0
+    return {data: trips,
+        pagination: {       // FIX 2: was missing opening brace here
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        },}
+}
+
+const cancelTripService = async (id) => {
+
+    const trip = await sql `
+        UPDATE "Trips"
+        SET "status" = 'cancelled'
+        WHERE "id" = ${id}
+        RETURNING *   
+    `
+
+    return trip
+    
 }
 
 
 export{
-    addTripService
+    addTripService,
+    allTripsService,
+    cancelTripService
 }

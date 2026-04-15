@@ -9,7 +9,7 @@ import driverRoutes from './routes/driverRoutes.js'
 import truckRoutes from './routes/truckRoutes.js'
 import storeRoutes from "./routes/storeRoutes.js"
 import brandRoutes from "./routes/brandRoutes.js"
-// import tripRoutes from "/routes/tripRoutes.js"
+import settingsRoutes from "./routes/settingsRoutes.js"
 import tripRoutes from "./routes/tripRoutes.js"
 
 const app = express()
@@ -33,6 +33,7 @@ app.use('/api/v1/trucks',truckRoutes)
 app.use('/api/v1/stores',storeRoutes)
 app.use('/api/v1/brands',brandRoutes)
 app.use('/api/v1/trips',tripRoutes)
+app.use('/api/v1/settings', settingsRoutes)
 
 app.use(globalErrorHandler);
 

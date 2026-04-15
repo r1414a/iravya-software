@@ -8,7 +8,8 @@ import { registerUser ,
     getAllUser,
     getUserID,
     updateUser,
-    getUserbySearch
+    getUserbySearch,
+    setUserPassword
 } from "../controller/userController.js";
 import { protect } from "../middleware/authmiddleware.js";
 import { authorize } from "../middleware/authoriseRoleMiddleware.js";
@@ -22,7 +23,8 @@ import {
   loginValidation,
   resetPasswordValidation,
   setUserStatusValidator,
- updateUserValidation
+ updateUserValidation,
+ setUserPasswordValidation
 } from "../validations/auth.validation.js"
  
 
@@ -57,7 +59,7 @@ router.put("/update_user/:id", protect, authorize('super_admin'), updateUserVali
 router.get("/all_users",protect, authorize('super_admin'), getAllUser)
 router.get("/user/:id",protect, authorize('super_admin'), getUserID)
 router.post("/users_by_search",protect, authorize('super_admin'), getUserbySearch)
-
+router.post("/password",protect, authorize('super_admin'),setUserPasswordValidation, validate, setUserPassword)
 
 export default router
 

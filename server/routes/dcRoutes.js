@@ -6,7 +6,8 @@ import { addDc,
     getDc,
     updateDc ,
     deleteDc,
-    getAllDc
+    getAllDc,
+    getUserData
 } from "../controller/dcController.js";
 
 import { updatedcValidation, adddcValidation } from "../validations/dc.validation.js";
@@ -18,4 +19,5 @@ router.get('/getDc/:id',protect, authorize('super_admin', 'dc_manager'), getDc)
 router.put('/updatDc/:id', protect, authorize('super_admin', 'dc_manager'),updatedcValidation, validate, updateDc)
 router.delete('/deleteDc/:id', protect, authorize('super_admin', 'dc_manager'), deleteDc)
 router.get('/dc',protect, authorize('super_admin', 'dc_manager'),getAllDc)
+router.get('/managers',protect, authorize('super_admin', 'dc_manager'),getUserData)
 export default router

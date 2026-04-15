@@ -8,8 +8,15 @@ import { addStoreService ,
     updateStoreService,
     deleteStoreService,
     deleveryDetailService,
-    getAllStoreService
+    getAllStoreService,
+    getUserDataService
 } from "../services/store.service.js";
+
+
+const getUserData = asyncHandler(async (req, res) => {
+    const users = await getUserDataService()
+    sendResponse(res, 200, users, "User data")
+})
 
 const addStore = asyncHandler(async(req, res)=>{
 
@@ -118,5 +125,6 @@ export{
     updateStore,
     deleteStore,
     deleveryDetails,
-    getAllStores
+    getAllStores,
+    getUserData
 }

@@ -9,9 +9,14 @@ import { addDcService,
     getDcByIdService,
     updateDcService,
     deleteDcService,
-    getAllDcService
+    getAllDcService,
+    getUserDataService
  } from "../services/dcService.js";
 
+const getUserData = asyncHandler(async (req, res) => {
+    const users = await getUserDataService()
+    sendResponse(res, 200, users, "User data")
+})
 
 const addDc = asyncHandler(async(req, res)=>{
     const {name} = req.body
@@ -98,5 +103,6 @@ export{
     getDc,
     updateDc,
     deleteDc,
-    getAllDc
+    getAllDc,
+    getUserData
 }

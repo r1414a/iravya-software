@@ -7,11 +7,13 @@ import { addStore,
     updateStore,
     deleteStore,
     deleveryDetails,
-    getAllStores
+    getAllStores,
+    getUserData
  } from "../controller/storeController.js";
 import { createStoreValidator,
     updateStoreValidation
  } from "../validations/store.validations.js";
+
 
 const router = express.Router()
 
@@ -21,4 +23,5 @@ router.put("/store/:id", protect, authorize('super_admin',"dc_manager"), updateS
 router.delete("/store/:id", protect, authorize('super_admin',"dc_manager"), deleteStore)
 router.get("/store-deliveries/:id", protect, authorize('super_admin',"dc_manager"),deleveryDetails)
 router.get("/stores", protect, authorize('super_admin',"dc_manager"), getAllStores)
+router.get("/managers",protect, authorize('super_admin',"dc_manager"), getUserData)
 export default router

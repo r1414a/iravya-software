@@ -4,42 +4,60 @@ import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
 import asyncHandler from "../utils/asyncHandler.js"
 
+const getUserDataService = async () => {
+    const users = await sql`
+         SELECT 
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.role
 
+        FROM "User" u
+        LEFT JOIN "Distribution_center" dc 
+            ON dc.dc_manager = u.id
+
+        WHERE 
+            u.role = 'dc_manager'
+            AND dc.id IS NULL
+    `
+
+    return users
+}
 const addDcService = async(data) =>{
-    const {name, address, city, state, contact_name, contact_phone, contact_email} = data
+    const {name, address, city, state, dc_manager} = data
     
-    const name_= contact_name.split(" ")
-    const [newUser] = await sql`
-        INSERT INTO "User"
-        (
-            "first_name",
-            "last_name",
-            "role",
-            "email",
-            "phone_number",
-            "user_status"
+    // const name_= contact_name.split(" ")
+    // const [newUser] = await sql`
+    //     INSERT INTO "User"
+    //     (
+    //         "first_name",
+    //         "last_name",
+    //         "role",
+    //         "email",
+    //         "phone_number",
+    //         "user_status"
 
-        )
-        VALUES
-        (
+    //     )
+    //     VALUES
+    //     (
         
-            ${name_[0]},
-            ${name_[1]},
-            ${"dc_manager"},
-            ${contact_email},
-            ${contact_phone},
-            ${"active"}
-        )
-        RETURNING
-            "id",
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number"
-            "role",
-            "user_status"
+    //         ${name_[0]},
+    //         ${name_[1]},
+    //         ${"dc_manager"},
+    //         ${contact_email},
+    //         ${contact_phone},
+    //         ${"active"}
+    //     )
+    //     RETURNING
+    //         "id",
+    //         "first_name",
+    //         "last_name",
+    //         "email",
+    //         "phone_number"
+    //         "role",
+    //         "user_status"
             
-    `;
+    // `;
     
     const dc = await sql`
         INSERT INTO "Distribution_center"
@@ -56,7 +74,7 @@ const addDcService = async(data) =>{
             ${address},
             ${city},
             ${state},
-            ${newUser.id}
+            ${dc_manager}
             )
             RETURNING *
     `
@@ -202,5 +220,6 @@ export {
     getDcByIdService,
     updateDcService,
     deleteDcService,
-    getAllDcService
+    getAllDcService,
+    getUserDataService
 }

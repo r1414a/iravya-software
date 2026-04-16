@@ -14,9 +14,16 @@ import { addDcService,
  } from "../services/dcService.js";
 
 const getUserData = asyncHandler(async (req, res) => {
-    const users = await getUserDataService()
-    sendResponse(res, 200, users, "User data")
-})
+  const { page = 1, limit = 10, search = "" } = req.query;
+
+  const users = await getUserDataService({
+    page: Number(page),
+    limit: Number(limit),
+    search,
+  });
+
+  sendResponse(res, 200, users, "User data");
+});
 
 const addDc = asyncHandler(async(req, res)=>{
     const {name} = req.body

@@ -33,13 +33,12 @@ const statusStyles = {
     inactive: "bg-gray-100 text-gray-500",
 }
 
-const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
 const CITIES = ["Pune", "Mumbai", "Nashik", "Nagpur"]
 
 
 function ActionsCell({ row, table }) {
     const store = row.original;
-    console.log(store);
+    // console.log(store);
 
     const brands = table.options.meta?.brands || []
     const { pathname } = useLocation();

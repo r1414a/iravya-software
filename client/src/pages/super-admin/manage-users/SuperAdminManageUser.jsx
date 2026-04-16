@@ -14,7 +14,8 @@ export default function SuperAdminManageUser() {
         const [debouncedSearch, setDebouncedSearch] = useState("");
         const [columnFilters, setColumnFilters] = useState([]);
 
-        const statusFilter = columnFilters.find(f => f.id === "status")?.value || "";
+        const statusFilter = columnFilters.find(f => f.id === "user_status")?.value || "";
+        const roleFilter = columnFilters.find(f => f.id === "role")?.value || "";
 
          // Handle debouncing manually
             useEffect(() => {
@@ -30,13 +31,16 @@ export default function SuperAdminManageUser() {
         page,
         limit,
         search: debouncedSearch,
-        status: statusFilter
+        status: statusFilter,
+        role: roleFilter
     });
 
 
-    const users = data?.data?.data || [];
-    const totalPages = data?.data?.pagination?.totalPages || 1;
-    const currentPage = data?.data?.pagination?.page || 1;
+    const users = data?.data?.users || [];
+    console.log("all users", users);
+    
+    const totalPages = data?.data?.totalPages || 1;
+    const currentPage = data?.data?.page || 1;
 
     const handleClear = () => {
         setSearchInput("");
@@ -64,7 +68,6 @@ export default function SuperAdminManageUser() {
             <UsersTable
                 users={users}
                 setPage={setPage}
-                brands={brands}
                 columnFilters={columnFilters}
                 setColumnFilters={setColumnFilters}
                 totalPages={totalPages}

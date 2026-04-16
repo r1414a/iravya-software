@@ -95,7 +95,7 @@ const dcs = [
     },
 ]
 
-export default function DCsTable({ dcs, setPage, columnFilters,
+export default function DCsTable({ dcs,managers, setEditDc, setEditOpen, setPage, columnFilters,
     setColumnFilters, totalPages, page, onPrevious, onNext, isFetching }) {
 
     return (
@@ -104,6 +104,7 @@ export default function DCsTable({ dcs, setPage, columnFilters,
                 <DataTable
                     columns={columns}
                     data={dcs}
+                    meta={{managers, setEditDc, setEditOpen}}
                     setPage={setPage}
                     columnFilters={columnFilters}
                     setColumnFilters={setColumnFilters}

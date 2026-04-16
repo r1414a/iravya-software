@@ -11,28 +11,59 @@ import {
 } from "@/components/ui/dropdown-menu"
 import EditUserDrawer from "./EditUserDrawer"
 import { useState } from "react"
-import { Pencil } from "lucide-react"
+import { KeyRound, Pencil } from "lucide-react"
 import DeleteModal from "@/components/DeleteModal"
 import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { ROLES, STATUS } from "@/constants/constant"
 import {formatDistanceToNow, parseISO} from "date-fns"
-
+import CreateUserModal from "../CreateUserModal"
+import { useDeleteUserMutation } from "@/lib/features/users/userApi"
+import EditPasswordModal from "../EditPasswordModal"
 
 function ActionsCell({ row }) {
   const user = row.original;
   const [editUser, setEditUser] = useState(false);
+  const [password, setPassword] = useState(false);
+  const [deleteStore, { isLoading: isDeleting }] = useDeleteUserMutation()
+  const handleDelete = async () => {
+        try {
+            await deleteStore(user.id).unwrap();
+        } catch (err) {
+            console.error("Failed to delete user", err);
+        }
+    };
   return (
     <>
-      <EditUserDrawer
-        open={editUser} setOpen={setEditUser} selectedUser={user}
+      <CreateUserModal
+        users={user}
+        open={editUser} 
+        onClose={() => setEditUser(false)}
+      />
+
+      <EditPasswordModal
+        user={user}
+        open={password}
+        onClose={setPassword}
       />
 
       <div className="flex items-center gap-2 justify-end">
+
+{
+        user.role !== 'driver' && (
+          <Button variant="outline" size="xs" onClick={() => setPassword(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><KeyRound size={16} /></Button>
+        )
+      }
+
         <Button variant="outline" size="xs" onClick={() => setEditUser(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Pencil size={16} /></Button>
+
         <DeleteModal
-          who={user.name}
+          who={`${user.first_name} ${user.last_name}`}
           m1active="User will immediately lose access to the platform"
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
         />
+
+        
 
       </div>
     </>
@@ -114,6 +145,14 @@ export const columns = [
   {
     accessorKey: "scope",
     header: "SCOPE",
+    cell: ({row}) => {
+        const scope = row.getValue("scope");
+        if(!scope) return <span className="text-gray-400">-</span>
+
+        return(
+        <p className="text-gray-600 capitalize">{scope}</p>
+      )
+    }
   },
   {
     accessorKey: "last_login",
@@ -122,7 +161,7 @@ export const columns = [
       const lastLogin = row.getValue("last_login");
       // console.log(lastLogin);
 
-      if(!lastLogin) return <span className="text-gray-400">-</span>
+      if(!lastLogin) return <span className="text-gray-400 text-center">-</span>
 
       const relativeTime = formatDistanceToNow(parseISO(lastLogin), {
         addSuffix: true
@@ -137,6 +176,9 @@ export const columns = [
     accessorKey: "user_status",
     header: ({ column }) => {
       const currentValue = column.getFilterValue() || "all";
+
+      // console.log("user_status",currentValue);
+      
 
       return (
         <div className="flex items-center gap-2">

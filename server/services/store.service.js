@@ -35,40 +35,6 @@ const storeExistByStoreCode = async(store_code)=>{
 }
 
 const addStoreService = async(data)=>{
-<<<<<<< Updated upstream
-    const {brand_id, name, address, city, state, latitude, longitude, manager_name, manager_phone, manager_email,store_code} = data
-    const name_= manager_name.split(" ")
-    const [newUser] = await sql`
-        INSERT INTO "User"
-        (
-            "first_name",
-            "last_name",
-            "role",
-            "email",
-            "phone_number",
-            "user_status"
-        )
-        VALUES
-        (
-        
-            ${name_[0]},
-            ${name_[1]},
-            ${"store_manager"},
-            ${manager_email},
-            ${manager_phone},
-            ${"active"}
-        )
-        RETURNING
-            "id",
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number"
-            "role",
-            "user_status"
-    `;
-console.log(newUser);
-=======
     const {brand_id, name, address, city, state, latitude, longitude,store_code, store_manager} = data
     // const name_= manager_name.split(" ")
     // const [newUser] = await sql`
@@ -101,7 +67,6 @@ console.log(newUser);
     //         "role",
     //         "status"
     // `;
->>>>>>> Stashed changes
 
     const [newStore] = await sql`
         INSERT INTO "Stores" (
@@ -124,11 +89,7 @@ console.log(newUser);
         ${state},
         ${latitude},
         ${longitude},
-<<<<<<< Updated upstream
-        ${newUser.id},
-=======
         ${store_manager}
->>>>>>> Stashed changes
         ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
         ${store_code}
         )
@@ -296,7 +257,8 @@ const getAllStoreService = async (filters) => {
             WHERE DATE(t.departed_at) = CURRENT_DATE
         ) AS today_deliveries,
 
-        COUNT(t.id) AS total_deliveries
+        COUNT(t.id) AS total_deliveries,
+        COUNT(*) OVER() AS total_count
 
     FROM "Stores" s
 
@@ -347,10 +309,10 @@ const getAllStoreService = async (filters) => {
 
     return {
         data: stores,
-        total: stores[0]?.total_count || 0,
+        total: Number(stores[0]?.total_count) || 0,
         page,
         limit,
-        total_pages: Math.ceil((stores[0]?.total_count || 0) / limit)
+        total_pages: Math.ceil((stores[0]?.total_count|| 0) / limit)
     };
 };
     

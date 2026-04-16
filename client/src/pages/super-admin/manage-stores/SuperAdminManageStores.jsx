@@ -38,8 +38,8 @@ const brands = brandsData?.data || [];
 
 
     const stores = data?.data?.data || [];
-    const totalPages = data?.data?.pagination?.totalPages || 1;
-    const currentPage = data?.data?.pagination?.page || 1;
+    const totalPages = data?.data?.total_pages || 1;
+    const currentPage = data?.data?.page || 1;
 
     const handleClear = () => {
         setSearchInput("");

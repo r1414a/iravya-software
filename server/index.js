@@ -3,27 +3,19 @@ import dotenv from "dotenv"
 // import connectDB from "./db/index.js";
 import app from './app.js'
 import sql from "./db/database.js";
+import http from "http"
+import {initSocket} from "./config/socket.js"
+
 dotenv.config({
     path: './.env'
 })
 
 const PORT = process.env.PORT || 5000;
 
+const server = http.createServer(app);
 
 
-// Load env
-// dotenv.config();
-
-
-
-
-
-
-
-dotenv.config({
-  path: "./.env",
-});
-
+initSocket(server)
 
 
 async function startServer() {
@@ -31,9 +23,11 @@ async function startServer() {
     await sql`SELECT 1`;
     console.log("✅ Database Connected");
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
+
+    
 
   } catch (error) {
     console.error("❌ Database connection failed");

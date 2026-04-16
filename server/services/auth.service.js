@@ -185,11 +185,36 @@ const setUserStatusService = async(id, status)=>{
 const getAllUserService = async(page = 1, limit = 10)=>{
     const offset = (page - 1) * limit
     const users = await sql
-        `SELECT * FROM "User"
-        ORDER BY "created_at" DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-        RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
+        `SELECT 
+        u.id,
+        u.email,
+        u.first_name,
+        u.last_name,
+        u.role,
+        u.last_login,
+        u.created_at,
+        u.updated_at,
+
+        dc.name  AS dc_name,
+        dc.city  AS dc_city,
+
+        s.name   AS store_name,
+        s.city   AS store_city,
+
+        COUNT(*) OVER() AS total_count
+
+    FROM "User" u
+
+    LEFT JOIN "Distribution_center" dc 
+        ON dc.dc_manager = u.id
+
+    LEFT JOIN "Stores" s 
+        ON s.store_manager = u.id
+
+    ORDER BY u.created_at DESC
+
+    LIMIT ${limit}
+    OFFSET ${offset}
         `
     const [{ count }] = await sql`
         SELECT COUNT(*) FROM "User"
@@ -207,7 +232,40 @@ const getAllUserService = async(page = 1, limit = 10)=>{
 const getUserbySearchService = async(page = 1, limit = 10, search, role, status) =>{
     const offset = (page - 1) * limit
 
+    // const users = await sql`
+    //     SELECT 
+    //         "id",
+    //         "email",
+    //         "first_name",
+    //         "last_name",
+    //         "role",
+    //         "status",
+    //         "last_login",
+    //         "created_at",
+    //         "updated_at",
+    //         COUNT(*) OVER() AS total_count
+    //     FROM "User"
+    //     WHERE 1=1
+
+    //     ${search ? sql`
+    //     AND (
+    //         "first_name" ILIKE ${'%' + search + '%'}
+    //         OR "last_name" ILIKE ${'%' + search + '%'}
+    //         OR "email" ILIKE ${'%' + search + '%'}
+    //     )
+    //     ` : sql``}
+
+    //     ${role ? sql`AND "role" = ${role}` : sql``}
+
+    //     ${status ? sql`AND "status" = ${status}` : sql``}
+
+    //     ORDER BY "created_at" DESC
+    //     LIMIT ${limit}
+    //     OFFSET ${offset};
+    // `;
+
     const users = await sql`
+<<<<<<< Updated upstream
     SELECT 
         u."id",
         u."email",
@@ -218,6 +276,42 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
         u."last_login",
         u."created_at",
         u."updated_at",
+=======
+        SELECT 
+            u.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            u.role,
+            u.user_status,
+            u.last_login,
+            u.created_at,
+            u.updated_at,
+
+            CASE 
+                WHEN u.role = 'dc_manager' THEN dc.name
+                WHEN u.role = 'store_manager' THEN s.name
+                ELSE NULL
+            END AS scope,
+
+            CASE 
+                WHEN u.role = 'dc_manager' THEN dc.city
+                WHEN u.role = 'store_manager' THEN s.city
+                ELSE NULL
+            END AS scope_city,
+
+            COUNT(*) OVER() AS total_count
+
+        FROM "User" u
+
+        LEFT JOIN "Distribution_center" dc 
+            ON dc.dc_manager = u.id
+
+        LEFT JOIN "Stores" s 
+            ON s.store_manager = u.id
+
+        WHERE 1=1
+>>>>>>> Stashed changes
 
         -- ✅ Scope logic
         CASE 
@@ -262,6 +356,7 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
     WHERE 1=1
     ${search ? sql`
         AND (
+<<<<<<< Updated upstream
             u."first_name" ILIKE ${'%' + search + '%'}
             OR u."last_name" ILIKE ${'%' + search + '%'}
             OR u."email" ILIKE ${'%' + search + '%'}
@@ -270,6 +365,26 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
     ${role ? sql`AND u."role" = ${role}` : sql``}
     ${status ? sql`AND u."user_status" = ${status}` : sql``}
 `;
+=======
+            u.first_name ILIKE ${'%' + search + '%'}
+            OR u.last_name ILIKE ${'%' + search + '%'}
+            OR u.email ILIKE ${'%' + search + '%'}
+        )
+        ` : sql``}
+
+        ${role ? sql`AND u.role = ${role}` : sql``}
+
+        ${status ? sql`AND u.status = ${status}` : sql``}
+
+        ORDER BY u.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+    `
+
+    const [{ count }] = await sql`
+        SELECT COUNT(*) FROM "User"
+    `
+>>>>>>> Stashed changes
     return {
         users,
         page,

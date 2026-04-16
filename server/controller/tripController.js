@@ -24,13 +24,16 @@ const getData = asyncHandler(async (req, res) => {
 
     const trucks = await sql`
         SELECT * FROM "Trucks"
+        WHERE "status" = 'idle'
     `
 
     const drivers = await sql`
         SELECT * FROM "Drivers"
+        WHERE "status" = 'available'
     `
     const stores = await sql `
-        SELECT * FROM "Stores"    
+        SELECT * FROM "Stores"  
+        WHERE "status" = 'active'  
     `
 
     sendResponse(res, 200, { gps_devices, trucks, drivers, stores }, "Fetched Data")
@@ -39,6 +42,7 @@ const getData = asyncHandler(async (req, res) => {
 
 const addTrip = asyncHandler(async(req, res)=>{
     const trip = await addTripService(req.body,req.user.id)
+    // console.log(trip)
     sendResponse(res, 200, trip, "Trip data added successfully")
 })
 

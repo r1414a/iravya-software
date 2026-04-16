@@ -1,5 +1,7 @@
 import sql from "../db/database.js"
 import * as turf from '@turf/turf';
+import axios from "axios";
+
 
 async function generateTrackingCode() {
     const [row] = await sql`
@@ -14,13 +16,22 @@ async function generateTrackingCode() {
 }
 
 const calculateGeodistance = async(gps_points)=>{
-    const line = turf.lineString(gps_points);
+    // const line = turf.lineString(gps_points);
 
-    const totalDistance = turf.length(line, {
-        units: 'kilometers'
-    });
+    // const totalDistance = turf.length(line, {
+    //     units: 'kilometers'
+    // });
 
-    return totalDistance
+    const coordsString = gps_points
+    .map(c => c.join(","))
+    .join(";");
+
+    const response = await axios.get(
+    `https://api.mapbox.com/directions/v5/mapbox/driving/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
+    );
+    // console.log(response.data.routes)
+
+    return response.data
 }
 
 const addTripService = async(data, dc_manager)=>{
@@ -28,7 +39,7 @@ const addTripService = async(data, dc_manager)=>{
     if (truck.status  === "on_trip") throw new ApiError(400, "Truck is already on a trip")
     if (driver.status === "on_trip") throw new ApiError(400, "Driver is already on a trip")
     if (gps_device.status === "in_transit") throw new ApiError(400, "GPS device is already in use")
-    
+    console.log(dc_manager)
     const tracking_code = await generateTrackingCode()
     const [source_dc] = await sql`
         SELECT "id", "longitude", "latitude" FROM "Distribution_center"
@@ -42,17 +53,22 @@ const addTripService = async(data, dc_manager)=>{
     console.log(source_dc)
     let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
     gps_points.unshift([source_dc.longitude, source_dc.latitude])
-    const total_distance = await calculateGeodistance(gps_points)
-
+    
+    const geodata = await calculateGeodistance(gps_points)
+    const total_distance = geodata.routes[0].distance / 1000
+    const geopath = geodata.routes[0].geometry.coordinates
+    
+    
     const [trip] = await sql`
         INSERT INTO "Trips" (
             "source_dc_id", "truck_id", "driver_id", "device_id",
-            "tracking_code", "status", "created_by", "scheduled_at", "distance"
+            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath"
         ) VALUES (
             ${source_dc.id}, ${truck}, ${driver}, ${gps_device},
             ${tracking_code}, 'scheduled', ${dc_manager},
             ${departure ?? null},
-            ${total_distance}
+            ${total_distance},
+            ${geopath}
         )
         RETURNING *
     `

@@ -13,9 +13,9 @@ const registerUserService = async (userData) => {
 
     // Insert user
     const newUser = await sql`
-        INSERT INTO "User" ("email", "first_name", "last_name", "password", "role", "status")
+        INSERT INTO "User" ("email", "first_name", "last_name", "password", "role", "user_status")
     VALUES (${email}, ${first_name}, ${last_name}, ${hashedPassword}, ${role}, ${status})
-    RETURNING "id", "first_name", "last_name", "email", "role", "status"
+    RETURNING "id", "first_name", "last_name", "email", "role", "user_status"
     `
     await sendEmail({
         to: email,
@@ -74,14 +74,16 @@ const userExistbyemailService = async (email) =>{
     return userExists
 }
 
-const userExistbyidService = async (id) =>{
+const userExistbyidService = async (id) => {
     console.log(id)
     const userExists = await sql`
-        SELECT * FROM "User" WHERE "id" = ${id}
-        RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
+        SELECT "id", "email", "first_name", "last_name", "role", "last_login" 
+        FROM "User" 
+        WHERE "id" = ${id}
     `
     return userExists
 }
+
 
 
 const resetPasswordService = async (id, old_pass , new_pass)=>{
@@ -97,7 +99,7 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             "last_name",
             "email",
             "role",
-            "status",
+            "user_status",
             "last_login"
             RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
@@ -122,9 +124,9 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
 }
 
 const setUserPasswordService = async (data,id) => {
-    const {new_pass} =  data
+    const {password} =  data
     const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(new_pass, salt)
+    const hashedPassword = await bcrypt.hash(password, salt)
     const user = (await sql`
         UPDATE "User"
         SET "password" = ${hashedPassword}
@@ -135,10 +137,11 @@ const setUserPasswordService = async (data,id) => {
             "last_name",
             "email",
             "role",
-            "status",
+            "user_status",
             "last_login"
-            RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
+
+    console.log(user);
     await sendEmail({
         to: user.email,
         subject: "Welcome to Iravya | Password changed",
@@ -150,20 +153,20 @@ const setUserPasswordService = async (data,id) => {
             <p>Account Details:</p>
             <p>Name: ${user.first_name} ${user.last_name}</p>
             <p>Email: ${user.email}</p>
-            <p>Password: ${new_pass}</p>
+            <p>Password: ${password}</p>
             <div >
                 <a href="https://iravya-software-eight.vercel.app/">Signin to Your Account →</a>
             </div>
         `
     })
-    return user[0]
+    return user;
 }
 
 const setUserStatusService = async(id, status)=>{
 
     const user = (await sql`
         UPDATE "User"
-        SET "status" = ${status}
+        SET "user_status" = ${status}
         WHERE "id" = ${id}
         RETURNING 
             "id",
@@ -171,7 +174,7 @@ const setUserStatusService = async(id, status)=>{
             "last_name",
             "email",
             "role",
-            "status",
+            "user_status",
             "last_login"
             RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
@@ -205,40 +208,68 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
     const offset = (page - 1) * limit
 
     const users = await sql`
-        SELECT 
-            "id",
-            "email",
-            "first_name",
-            "last_name",
-            "role",
-            "status",
-            "last_login",
-            "created_at",
-            "updated_at",
-            COUNT(*) OVER() AS total_count
-        FROM "User"
-        WHERE 1=1
+    SELECT 
+        u."id",
+        u."email",
+        u."first_name",
+        u."last_name",
+        u."role",
+        u."user_status",
+        u."last_login",
+        u."created_at",
+        u."updated_at",
 
-        ${search ? sql`
+        -- ✅ Scope logic
+        CASE 
+            WHEN u."role" = 'dc_manager' THEN d."name"
+            WHEN u."role" = 'store_manager' THEN s."name"
+            ELSE NULL
+        END AS scope,
+
+        COUNT(*) OVER() AS total_count
+
+    FROM "User" u
+
+    -- ✅ Join DC table
+    LEFT JOIN "Distribution_center" d 
+        ON u."id" = d."dc_manager"
+
+    -- ✅ Join Store table
+    LEFT JOIN "Stores" s 
+        ON u."id" = s."store_manager"
+
+    WHERE 1=1
+
+    ${search ? sql`
+    AND (
+        u."first_name" ILIKE ${'%' + search + '%'}
+        OR u."last_name" ILIKE ${'%' + search + '%'}
+        OR u."email" ILIKE ${'%' + search + '%'}
+    )
+    ` : sql``}
+
+    ${role ? sql`AND u."role" = ${role}` : sql``}
+
+    ${status ? sql`AND u."user_status" = ${status}` : sql``}
+
+    ORDER BY u."created_at" DESC
+    LIMIT ${limit}
+    OFFSET ${offset};
+`;
+
+   const [{ count }] = await sql`
+    SELECT COUNT(*) FROM "User" u
+    WHERE 1=1
+    ${search ? sql`
         AND (
-            "first_name" ILIKE ${'%' + search + '%'}
-            OR "last_name" ILIKE ${'%' + search + '%'}
-            OR "email" ILIKE ${'%' + search + '%'}
+            u."first_name" ILIKE ${'%' + search + '%'}
+            OR u."last_name" ILIKE ${'%' + search + '%'}
+            OR u."email" ILIKE ${'%' + search + '%'}
         )
-        ` : sql``}
-
-        ${role ? sql`AND "role" = ${role}` : sql``}
-
-        ${status ? sql`AND "status" = ${status}` : sql``}
-
-        ORDER BY "created_at" DESC
-        LIMIT ${limit}
-        OFFSET ${offset};
-    `;
-
-    const [{ count }] = await sql`
-        SELECT COUNT(*) FROM "User"
-    `
+    ` : sql``}
+    ${role ? sql`AND u."role" = ${role}` : sql``}
+    ${status ? sql`AND u."user_status" = ${status}` : sql``}
+`;
     return {
         users,
         page,
@@ -257,7 +288,7 @@ const updateUserService = async(id, data)=>{
                 "last_name" = ${data.last_name},
                 "email" = ${data.email},
                 "role" = ${data.role},
-                "status" = ${data.status}
+                "user_status" = ${data.status}
             WHERE id = ${id}
             RETURNING "id", "email", "first_name", "last_name", "role", "last_login","created_at","updated_at"
                 

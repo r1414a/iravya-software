@@ -34,12 +34,12 @@ const statusStyles = {
     inactive: "bg-gray-100 text-gray-500",
 }
 
-const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
-
-function ActionsCell({ row }) {
-    const dc = row.original
+function ActionsCell({ row, table }) {
+    const dc = row.original;
+    // const managers = table.options.meta?.managers || []
     const [viewDetails, setViewDetails] = useState(false)
-    const [editOpen, setEditOpen] = useState(false)
+    // const [editOpen, setEditOpen] = useState(false)
+    const { managers, setEditDc, setEditOpen } = table.options.meta;
 
     const [deleteDC, { isLoading: isDeleting }] = useDeleteDcMutation();
 
@@ -58,17 +58,21 @@ function ActionsCell({ row }) {
                 onClose={() => setViewDetails(false)}
             />
 
-            <AddDCForm
+            {/* <AddDCForm
                 dc={dc}
+                managers={managers}
                 open={editOpen}
                 onClose={() => setEditOpen(false)}
-            />
+            /> */}
 
 
 
             <div className="flex items-center gap-2 justify-end">
                 <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16} /></Button>
-                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                <Button variant="outline" size="xs" onClick={() => {
+                    setEditDc(dc)
+                    setEditOpen(true)
+                    }} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
                 <DeleteModal
                     who={dc.dc_name}
@@ -217,6 +221,6 @@ export const columns = [
     },
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table}/>,
     },
 ]

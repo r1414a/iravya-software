@@ -1,3 +1,4 @@
+import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
 import {
     InputGroup,
     InputGroupAddon,
@@ -5,7 +6,7 @@ import {
 } from "@/components/ui/input-group"
 import { Search, X } from "lucide-react"
 
-export default function DCsFilter({CreateButton,  searchInput, setSearchInput, handleClear}) {
+export default function DCsFilter({setEditDc, setEditOpen, CreateButton,  searchInput, setSearchInput, handleClear}) {
     return (
 
         <section className="mt-6 px-4 lg:px-10">
@@ -33,11 +34,12 @@ export default function DCsFilter({CreateButton,  searchInput, setSearchInput, h
                     </InputGroup>
 
                 </div>
-                {CreateButton && (
+                {/* {CreateButton && ( */}
                     <div className="flex justify-end order-1 sm:order-2">
-                        {CreateButton}
+                        {/* {CreateButton} */}
+                        <CreateFormSheetTrigger text={'Add a DC'} setEditDc={setEditDc} setEditOpen={setEditOpen}/>
                     </div>
-                )}
+                {/* // )} */}
             </div>
         </section>
     )

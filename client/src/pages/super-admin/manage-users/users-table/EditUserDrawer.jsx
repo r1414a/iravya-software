@@ -298,69 +298,6 @@ export default function EditUserDrawer({ open, setOpen, selectedUser }) {
                                             </div>
                                         )}
 
-                                        {/* Deactivate */}
-                                        {/* <div className={`flex flex-col sm:flex-row items-start justify-between gap-3 p-3 rounded-lg border ${selectedUser.status === "active"
-                                        ? "border-red-200 bg-red-50"
-                                        : "border-green-200 bg-green-50"
-                                        }`}>
-                                        <div className="flex items-start gap-2">
-                                            <Ban size={14} className={`mt-0.5 shrink-0 ${selectedUser.status === "active" ? "text-red-500" : "text-green-600"}`} />
-                                            <div>
-                                                <p className={`text-sm font-medium ${selectedUser.status === "active" ? "text-red-700" : "text-green-700"}`}>
-                                                    {selectedUser.status === "active" ? "Deactivate account" : "Reactivate account"}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-0.5">
-                                                    {selectedUser.status === "active"
-                                                        ? "User will immediately lose access to the platform"
-                                                        : "User will regain access to the platform"}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setShowDeactivate(!showDeactivate)}
-                                            className={`w-full sm:w-auto text-xs ${selectedUser.status === "active"
-                                                ? "text-red-600 border-red-300 hover:bg-red-100"
-                                                : "text-green-600 border-green-300 hover:bg-green-100"
-                                                }`}
-                                        >
-                                            {selectedUser.status === "active" ? "Deactivate" : "Reactivate"}
-                                        </Button>
-                                    </div> */}
-
-                                        {/* Deactivate confirm */}
-                                        {/* {showDeactivate && (
-                                        <div className="mt-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                            <p className="text-xs text-red-700 break-words">
-                                                {selectedUser.status === "active"
-                                                    ? `Deactivate ${selectedUser.name}? They will lose access immediately.`
-                                                    : `Reactivate ${selectedUser.name}? They will regain access immediately.`}
-                                            </p>
-
-                                            <div className="flex gap-2 w-full sm:w-auto">
-                                                <Button
-                                                    size="sm"
-                                                    className={`w-1/2 sm:w-auto text-white text-xs h-7 ${selectedUser.status === "active"
-                                                        ? "bg-red-600 hover:bg-red-700"
-                                                        : "bg-green-600 hover:bg-green-700"
-                                                        }`}
-                                                >
-                                                    Confirm
-                                                </Button>
-
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="w-1/2 sm:w-auto text-xs h-7"
-                                                    onClick={() => setShowDeactivate(false)}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )} */}
                                     </div>
 
                                 </FieldGroup>

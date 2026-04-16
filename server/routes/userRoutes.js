@@ -54,12 +54,12 @@ router.post(
 router.post("/signout", protect, logoutUser);
 router.delete("/delete_user/:id",protect, authorize('super_admin'), protect, deleteUser)
 router.post("/reset_pass/:id",protect,authorize('super_admin'), resetPasswordValidation, validate, resetPassword)
-router.put("/change_user_status/:id",protect, authorize('super_admin'),setUserStatusValidator, validate, setUserStatus)
+// router.put("/change_user_status/:id",protect, authorize('super_admin'),setUserStatusValidator, validate, setUserStatus)
 router.put("/update_user/:id", protect, authorize('super_admin'), updateUserValidation, validate, updateUser)
-router.get("/all_users",protect, authorize('super_admin'), getAllUser)
+// router.get("/all_users",protect, authorize('super_admin'), getAllUser)
 router.get("/user/:id",protect, authorize('super_admin'), getUserID)
-router.post("/users_by_search",protect, authorize('super_admin'), getUserbySearch)
-router.post("/password",protect, authorize('super_admin'),setUserPasswordValidation, validate, setUserPassword)
+router.get("/users_by_search",protect, authorize('super_admin'), getUserbySearch)
+router.post("/password/:id",protect, authorize('super_admin'),setUserPasswordValidation, validate, setUserPassword)
 
 export default router
 

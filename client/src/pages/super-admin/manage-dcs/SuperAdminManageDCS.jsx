@@ -3,6 +3,7 @@ import AddDCForm from "@/components/super-admin/manage-dcs/AddDcForm"
 import DCsFilter from "@/components/super-admin/manage-dcs/DcsFilter"
 import DCsTable from "@/components/super-admin/manage-dcs/DcsTable"
 import { useGetAllDcsQuery } from "@/lib/features/dcs/dcApi"
+import { useGetAvailableManagersQuery } from "@/lib/features/users/userApi"
 import { useState, useEffect } from "react"
 
 const limit = 10;
@@ -12,6 +13,11 @@ export default function SuperAdminManageDCs() {
     const [searchInput, setSearchInput] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [columnFilters, setColumnFilters] = useState([]);
+    // const [managerSearch, setManagerSearch] = useState("");
+    // // const [debouncedManagerSearch, setDebouncedManagerSearch] = useState("");
+    const [editDc, setEditDc] = useState(null);
+    const [editOpen, setEditOpen] = useState(false);
+
 
     const statusFilter = columnFilters.find(f => f.id === "status")?.value || "";
 
@@ -26,10 +32,24 @@ export default function SuperAdminManageDCs() {
         return () => clearTimeout(handler); // Cleanup on every keystroke
     }, [searchInput]);
 
+    // useEffect(() => {
+    //     const t = setTimeout(() => {
+    //         setDebouncedManagerSearch(managerSearch);
+    //     }, 500);
+
+    //     return () => clearTimeout(t);
+    // }, [managerSearch]);
+
     const { data, isLoading, isFetching } = useGetAllDcsQuery(
         { page, limit, search: debouncedSearch, dc_status: statusFilter }
     )
-
+    // const { data: managersData, isLoading: loadingManagers } = useGetAvailableManagersQuery({
+    //     page: 1,
+    //     limit: 10,
+    //     search: debouncedManagerSearch,
+    // });
+    // const { data: managersData, isLoading: loadingManagers } = useGetAvailableManagersQuery();
+    // const managers = managersData?.data?.users || [];
 
     const dcs = data?.data?.data || [];
     const totalPages = data?.data?.pagination?.totalPages || 1;
@@ -49,8 +69,25 @@ export default function SuperAdminManageDCs() {
                 subh="All data centers across all brands — add, edit, assign operators and manage trucks"
 
             />
-            <DCsFilter 
-                CreateButton={<AddDCForm />} 
+
+
+            <AddDCForm
+                dc={editDc}
+                // managers={managers}
+                open={editOpen}
+                onClose={setEditOpen}
+                hideTrigger
+            />
+
+            <DCsFilter
+                setEditDc={setEditDc}
+                setEditOpen={setEditOpen}
+                // CreateButton={<AddDCForm
+                    // managers={managers}
+                // loadingManagers={loadingManagers}
+                // managerSearch={managerSearch}
+                // setManagerSearch={setManagerSearch}
+                // />}
                 searchInput={searchInput}
                 setSearchInput={(val) => {
                     setSearchInput(val);
@@ -58,8 +95,11 @@ export default function SuperAdminManageDCs() {
                 }}
                 handleClear={handleClear}
             />
-            <DCsTable 
+            <DCsTable
                 dcs={dcs}
+                // managers={managers}
+                setEditDc={setEditDc}
+                setEditOpen={setEditOpen}
                 setPage={setPage}
                 columnFilters={columnFilters}
                 setColumnFilters={setColumnFilters}

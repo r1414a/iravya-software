@@ -26,6 +26,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from "@/components/ui/combobox"
 import { Plus, Warehouse } from "lucide-react"
 import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
 import { useAddDcMutation, useUpdateDcMutation } from "@/lib/features/dcs/dcApi"
@@ -48,7 +56,7 @@ const dcSchema = z.object({
         .default("active").optional(),
 })
 
-export default function AddDCForm({ dc = null, open, onClose }) {
+export default function AddDCForm({ dc = null, hideTrigger,open, onClose, managers, loadingManagers, managerSearch, setManagerSearch }) {
 
     // console.log(dc);
 
@@ -106,12 +114,11 @@ export default function AddDCForm({ dc = null, open, onClose }) {
 
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {
-                dc ?
-                    null
-                    :
+            {/* {
+                !hideTrigger && !dc && (
                     <CreateFormSheetTrigger text='Add a DC' />
-            }
+                )
+            } */}
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
@@ -120,11 +127,11 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                         <SheetDescription>
                             {
                                 dc ?
-                                "Update warehouse details"
-                                :
-                                "Register a new data center and assign it to a brand"
+                                    "Update warehouse details"
+                                    :
+                                    "Register a new data center and assign it to a brand"
                             }
-                            
+
                         </SheetDescription>
                     </SheetHeader>
 
@@ -187,27 +194,6 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                             )}
                                         </Field>
 
-                                        {/* <Field>
-                                            <FieldLabel>City <span className="text-red-500">*</span></FieldLabel>
-                                            <Select
-                                                value={selectedCity}
-                                                onValueChange={(val) => setValue("city", val)}
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select city..." />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white border shadow-md">
-                                                    <SelectGroup>
-                                                        <SelectLabel>Cities</SelectLabel>
-                                                        <SelectItem value="Pune">Pune</SelectItem>
-                                                        <SelectItem value="Mumbai">Mumbai</SelectItem>
-                                                        <SelectItem value="Nashik">Nashik</SelectItem>
-                                                        <SelectItem value="Nagpur">Nagpur</SelectItem>
-                                                        <SelectItem value="Kolhapur">Kolhapur</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </Field> */}
                                     </div>
 
                                     {/* Full address */}
@@ -230,17 +216,9 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                         )}
                                     </Field>
 
-                                    {/* Geofence radius */}
-                                    {/* <Field>
-                                    <FieldLabel>Geofence radius (metres)</FieldLabel>
-                                    <Input type="number" placeholder="e.g. 300" defaultValue={300} />
-                                    <FieldDescription className="text-xs">
-                                        Truck entering this radius triggers a "returned to DC" event
-                                    </FieldDescription>
-                                </Field> */}
 
                                     {/* Contact person */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
                                             <FieldLabel>Operator name <span className="text-red-500">*</span></FieldLabel>
                                             <Input
@@ -272,9 +250,9 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                                 </p>
                                             )}
                                         </Field>
-                                    </div>
+                                    </div> */}
 
-                                    <Field>
+                                    {/* <Field>
                                         <FieldLabel>Operator email <span className="text-red-500">*</span></FieldLabel>
                                         <Input
                                             {...register("contact_email", {
@@ -295,7 +273,7 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                                 {errors.contact_email.message}
                                             </p>
                                         )}
-                                    </Field>
+                                    </Field> */}
 
                                     {
                                         dc &&
@@ -322,6 +300,52 @@ export default function AddDCForm({ dc = null, open, onClose }) {
                                             </FieldDescription>
                                         </Field>
                                     }
+
+                                    {/* <Field>
+                                        <FieldLabel>
+                                            Assign Manager <span className="text-red-500">*</span>
+                                        </FieldLabel>
+
+                                        <Controller
+                                            name="manager_id"
+                                            control={control}
+                                            rules={{ required: "Manager is required" }}
+                                            render={({ field }) => (
+                                                <Combobox
+                                                    items={managers}
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                >
+                                                    <ComboboxInput
+                                                        placeholder="Search manager..."
+                                                        onChange={(e) => setManagerSearch(e.target.value)}
+                                                    />
+
+                                                    <ComboboxContent>
+                                                        <ComboboxEmpty>
+                                                            {loadingManagers ? "Loading..." : "No managers found"}
+                                                        </ComboboxEmpty>
+
+                                                        <ComboboxList>
+                                                            {(item) => (
+                                                                <ComboboxItem key={item.id} value={item.id}>
+                                                                    {item.first_name} {item.last_name}
+                                                                </ComboboxItem>
+                                                            )}
+                                                        </ComboboxList>
+                                                    </ComboboxContent>
+                                                </Combobox>
+                                            )}
+                                        />
+
+                                        {errors.manager_id && (
+                                            <p className="text-red-500 text-xs">
+                                                {errors.manager_id.message}
+                                            </p>
+                                        )}
+                                    </Field> */}
+
+
 
 
                                 </FieldGroup>

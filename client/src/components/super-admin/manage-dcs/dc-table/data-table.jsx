@@ -22,7 +22,7 @@
         page = 1,
         onPrevious,
         onNext,
-        isFetching = false  }) {
+        isFetching = false, meta  }) {
         // const [columnFilters, setColumnFilters] = useState([])
 
         const table = useReactTable({
@@ -35,6 +35,7 @@
             onColumnFiltersChange: setColumnFilters,
             manualFiltering: true,
             meta: {
+                ...meta,
                 updatePage: (page) => setPage(page)
             }
         })

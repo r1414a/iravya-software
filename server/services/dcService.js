@@ -4,25 +4,40 @@ import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
 import asyncHandler from "../utils/asyncHandler.js"
 
-const getUserDataService = async () => {
-    const users = await sql`
-         SELECT 
-            u.id,
-            u.first_name,
-            u.last_name,
-            u.role
+const getUserDataService = async ({ page, limit, search }) => {
+  const offset = (page - 1) * limit;
 
-        FROM "User" u
-        LEFT JOIN "Distribution_center" dc 
-            ON dc.dc_manager = u.id
+  const users = await sql`
+    SELECT 
+      u.id,
+      u.first_name,
+      u.last_name,
+      u.email,
+      u.phone_number,
+      u.role,
+      COUNT(*) OVER() AS total_count
+    FROM "User" u
+    LEFT JOIN "Distribution_center" dc 
+      ON dc.dc_manager = u.id
+    WHERE 
+      u.role = 'dc_manager'
+      AND dc.id IS NULL
+      AND (
+        u.first_name ILIKE ${"%" + search + "%"}
+        OR u.last_name ILIKE ${"%" + search + "%"}
+      )
+    ORDER BY u.first_name ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
 
-        WHERE 
-            u.role = 'dc_manager'
-            AND dc.id IS NULL
-    `
-
-    return users
-}
+  return {
+    users,
+    total: users[0]?.total_count || 0,
+    page,
+    limit,
+  };
+};
 const addDcService = async(data) =>{
     const {name, address, city, state, dc_manager} = data
     

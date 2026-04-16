@@ -32,10 +32,16 @@ export const registerValidation = [
         .withMessage("Invalid role"),
 
     body("status")
-        .notEmpty()
-        .withMessage("Status is required")
-        .isBoolean()
-        .withMessage("Status must be boolean (true/false)")
+    .exists()
+    .withMessage("Status is required")
+    .custom((value) => {
+        // Allows null, or specifically 'active' / 'inactive'
+        if (value === null || ['active', 'inactive'].includes(value)) {
+            return true;
+        }
+        throw new Error("Status must be 'active', 'inactive', or null");
+    })
+
 ]
 
 
@@ -68,10 +74,16 @@ export const resetPasswordValidation = [
 export const setUserStatusValidator = [
 
     body("status")
-        .notEmpty()
-        .withMessage("Status is required")
-        .isBoolean()
-        .withMessage("Status must be boolean (true/false)")
+    .exists()
+    .withMessage("Status is required")
+    .custom((value) => {
+        // Allows null, or specifically 'active' / 'inactive'
+        if (value === null || ['active', 'inactive'].includes(value)) {
+            return true;
+        }
+        throw new Error("Status must be 'active', 'inactive', or null");
+    })
+
 ]
 
 export const updateUserValidation = [
@@ -98,14 +110,20 @@ export const updateUserValidation = [
         .withMessage("Invalid role"),
 
     body("status")
-        .notEmpty()
-        .withMessage("Status is required")
-        .isBoolean()
-        .withMessage("Status must be boolean (true/false)")
+    .exists()
+    .withMessage("Status is required")
+    .custom((value) => {
+        // Allows null, or specifically 'active' / 'inactive'
+        if (value === null || ['active', 'inactive'].includes(value)) {
+            return true;
+        }
+        throw new Error("Status must be 'active', 'inactive', or null");
+    })
+
 ]
 
 export const setUserPasswordValidation =[
-    body("new_password")
+    body("password")
         .trim()
         .notEmpty()
         .withMessage("Password is required")

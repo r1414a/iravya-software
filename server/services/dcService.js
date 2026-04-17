@@ -117,11 +117,7 @@ const getDcByIdService = async(id)=>{
 }
 
 const updateDcService = async(id, data) =>{
-<<<<<<< HEAD
-    const {name, address, city, status, dc_manager} = data
-=======
     const {name, address, city, dc_manager, status} = data
->>>>>>> bb89cfb (API changes-> store(getUserData, getUserDataService),Dc service(UpadateDCService ))
     const dc = (await sql`
             UPDATE "Distribution_center"
             SET 

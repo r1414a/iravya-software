@@ -36,10 +36,9 @@ const statusStyles = {
 
 function ActionsCell({ row, table }) {
     const dc = row.original;
-    // const managers = table.options.meta?.managers || []
     const [viewDetails, setViewDetails] = useState(false)
     // const [editOpen, setEditOpen] = useState(false)
-    const { managers, setEditDc, setEditOpen } = table.options.meta;
+    const { setEditDc, setEditOpen } = table.options.meta;
 
     const [deleteDC, { isLoading: isDeleting }] = useDeleteDcMutation();
 
@@ -57,15 +56,6 @@ function ActionsCell({ row, table }) {
                 open={viewDetails}
                 onClose={() => setViewDetails(false)}
             />
-
-            {/* <AddDCForm
-                dc={dc}
-                managers={managers}
-                open={editOpen}
-                onClose={() => setEditOpen(false)}
-            /> */}
-
-
 
             <div className="flex items-center gap-2 justify-end">
                 <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16} /></Button>

@@ -38,7 +38,7 @@ import { Plus, Warehouse } from "lucide-react"
 import CreateFormSheetTrigger from "@/components/CreateFormSheetTrigger"
 import { useAddDcMutation, useUpdateDcMutation } from "@/lib/features/dcs/dcApi"
 import { Controller, useForm } from "react-hook-form"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
@@ -48,15 +48,13 @@ const dcSchema = z.object({
     name: z.string().min(2, "DC name must be at least 2 characters").max(100, "DC name is too long"),
     city: cityV,
     address: addressV,
-    contact_name: fullNameV,
-    contact_email: emailV,
-    contact_phone: phoneV,
+    dc_manager: z.string().min(1, "Manager is required"),
     status: z
         .enum(["active", "inactive"])
         .default("active").optional(),
 })
 
-export default function AddDCForm({ dc = null, hideTrigger,open, onClose, managers, loadingManagers, managerSearch, setManagerSearch }) {
+export default function AddDCForm({ dc, open, onClose, managers, managerSearch, loadingManagers, setManagerSearch }) {
 
     // console.log(dc);
 
@@ -74,22 +72,42 @@ export default function AddDCForm({ dc = null, hideTrigger,open, onClose, manage
     } = useForm({
         resolver: zodResolver(dcSchema),
         defaultValues: {
-            name: dc?.dc_name || "",
-            city: dc?.city || "",
-            state: "Maharashtra",
-            address: dc?.address || "",
-            contact_name: dc?.dc_manager_name || "",
-            contact_phone: dc?.dc_manager_phone || "",
-            contact_email: dc?.dc_manager_email || "",
-            status: dc?.status || "active",
-        },
+            name: "",
+            city: "",
+            address: "",
+            dc_manager: "",
+            status: "active",
+        }
     })
+
+
+    useEffect(() => {
+        if (dc) {
+            reset({
+                name: dc.dc_name || "",
+                city: dc.city || "",
+                state: "Maharashtra",
+                address: dc.address || "",
+                dc_manager: dc.dc_manager || "",
+                status: dc.status || "active",
+            });
+        } else {
+            reset({
+                name: "",
+                city: "",
+                state: "Maharashtra",
+                address: "",
+                dc_manager: "",
+                status: "active",
+            });
+        }
+    }, [dc, reset]);
 
 
     useEffect(() => {
         if (isSubmitSuccessful) {
             reset();
-            // onClose?.(false)
+            onClose?.(false)
         }
     }, [isSubmitSuccessful, reset]);
 
@@ -97,15 +115,16 @@ export default function AddDCForm({ dc = null, hideTrigger,open, onClose, manage
     const selectedStatus = watch('status')
 
     const onSubmit = async (data) => {
-        console.log(data);
-
+        console.log("on submit", data);
+        //get coordinates from address here
+        const payload = {state: "Maharashtra", ...data}
         try {
             if (dc) {
-                await updateDc({ id: dc.id, ...data }).unwrap();
+                await updateDc({ id: dc.id, ...payload }).unwrap();
             } else {
-                await addDc(data).unwrap();
+                await addDc(payload).unwrap();
             }
-
+            onClose(false)
         } catch (err) {
             console.error(err);
 
@@ -114,12 +133,6 @@ export default function AddDCForm({ dc = null, hideTrigger,open, onClose, manage
 
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {/* {
-                !hideTrigger && !dc && (
-                    <CreateFormSheetTrigger text='Add a DC' />
-                )
-            } */}
-
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                     <SheetHeader className="border-b border-gray-200">
@@ -301,49 +314,83 @@ export default function AddDCForm({ dc = null, hideTrigger,open, onClose, manage
                                         </Field>
                                     }
 
-                                    {/* <Field>
+                                    <Field>
                                         <FieldLabel>
                                             Assign Manager <span className="text-red-500">*</span>
                                         </FieldLabel>
 
                                         <Controller
-                                            name="manager_id"
+                                            name="dc_manager"
                                             control={control}
                                             rules={{ required: "Manager is required" }}
-                                            render={({ field }) => (
-                                                <Combobox
-                                                    items={managers}
-                                                    value={field.value}
-                                                    onValueChange={field.onChange}
-                                                >
-                                                    <ComboboxInput
-                                                        placeholder="Search manager..."
-                                                        onChange={(e) => setManagerSearch(e.target.value)}
-                                                    />
+                                            render={({ field }) => {
+                                                const [isOpen, setIsOpen] = useState(false);
 
-                                                    <ComboboxContent>
-                                                        <ComboboxEmpty>
-                                                            {loadingManagers ? "Loading..." : "No managers found"}
-                                                        </ComboboxEmpty>
+                                                const selectedManager = managers.find(
+                                                    (m) => String(m.id) === String(field.value)
+                                                );
 
-                                                        <ComboboxList>
-                                                            {(item) => (
-                                                                <ComboboxItem key={item.id} value={item.id}>
-                                                                    {item.first_name} {item.last_name}
-                                                                </ComboboxItem>
-                                                            )}
-                                                        </ComboboxList>
-                                                    </ComboboxContent>
-                                                </Combobox>
-                                            )}
+                                                return (
+                                                    <div className="relative">
+                                                        {/* Input */}
+                                                        <Input
+                                                            placeholder="Search manager..."
+                                                            value={
+                                                                selectedManager
+                                                                    ? `${selectedManager.first_name} ${selectedManager.last_name}`
+                                                                    : managerSearch
+                                                            }
+                                                            onFocus={() => setIsOpen(true)} // ✅ OPEN on focus
+                                                            onChange={(e) => {
+                                                                field.onChange(""); // clear selection
+                                                                setManagerSearch(e.target.value);
+                                                                setIsOpen(true); // keep open while typing
+                                                            }}
+                                                            onBlur={() => {
+                                                                // delay so click event can fire
+                                                                setTimeout(() => setIsOpen(false), 200);
+                                                            }}
+                                                        />
+
+                                                        {/* Dropdown */}
+                                                        {isOpen && (
+                                                            <div className="absolute z-50 w-full bg-white border rounded-md mt-1 max-h-48 overflow-y-auto shadow-md">
+                                                                {loadingManagers ? (
+                                                                    <p className="p-2 text-sm">Loading...</p>
+                                                                ) : managers.length === 0 ? (
+                                                                    <p className="p-2 text-sm">No managers found</p>
+                                                                ) : (
+                                                                    managers.map((item) => (
+                                                                        <div
+                                                                            key={item.id}
+                                                                            className={`p-2 cursor-pointer text-sm ${String(field.value) === String(item.id)
+                                                                                    ? "bg-gray-200"
+                                                                                    : "hover:bg-gray-100"
+                                                                                }`}
+                                                                            onMouseDown={() => {
+                                                                                // ✅ use onMouseDown instead of onClick (important)
+                                                                                field.onChange(item.id);
+                                                                                setManagerSearch("");
+                                                                                setIsOpen(false);
+                                                                            }}
+                                                                        >
+                                                                            {item.first_name} {item.last_name}
+                                                                        </div>
+                                                                    ))
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }}
                                         />
 
-                                        {errors.manager_id && (
+                                        {errors.dc_manager && (
                                             <p className="text-red-500 text-xs">
-                                                {errors.manager_id.message}
+                                                {errors.dc_manager.message}
                                             </p>
                                         )}
-                                    </Field> */}
+                                    </Field>
 
 
 

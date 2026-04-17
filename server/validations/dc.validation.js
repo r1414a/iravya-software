@@ -53,21 +53,21 @@ export const updatedcValidation = [
         .notEmpty()
         .withMessage("City is required"),
 
-    body("contact_name")
-        .notEmpty()
-        .withMessage("Contact name is required"),
+    // body("contact_name")
+    //     .notEmpty()
+    //     .withMessage("Contact name is required"),
 
-    body("contact_phone")
-        .notEmpty()
-        .withMessage("Contact phone is required")
-        .isMobilePhone()
-        .withMessage("Invalid phone number"),
+    // body("contact_phone")
+    //     .notEmpty()
+    //     .withMessage("Contact phone is required")
+    //     .isMobilePhone()
+    //     .withMessage("Invalid phone number"),
 
-    body("contact_email")
-        .notEmpty()
-        .withMessage("Contact email is required")
-        .isEmail()
-        .withMessage("Invalid email"),
+    // body("contact_email")
+    //     .notEmpty()
+    //     .withMessage("Contact email is required")
+    //     .isEmail()
+    //     .withMessage("Invalid email"),
 
     // body("status")
     //     .optional()

@@ -2,11 +2,11 @@ import { SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function CreateFormSheetTrigger({ text, setEditDc, setEditOpen }) {
+export default function CreateFormSheetTrigger({ text, setEditWho, setEditOpen }) {
   return (
       <Button
       onClick={() => {
-        setEditDc(null)
+        setEditWho(null)
     setEditOpen(true)
       }}
         className="w-full sm:w-auto bg-maroon hover:bg-maroon-dark text-white"

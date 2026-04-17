@@ -167,6 +167,7 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
             dc.city,
             dc.address,
             dc.status,
+            dc.dc_manager,
             dc.created_at,
 
             CONCAT(u.first_name,' ',u.last_name) AS dc_manager_name,

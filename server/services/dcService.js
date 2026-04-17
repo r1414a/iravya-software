@@ -117,7 +117,7 @@ const getDcByIdService = async(id)=>{
 }
 
 const updateDcService = async(id, data) =>{
-    const {name, address, city, contact_name, contact_phone, contact_email, status} = data
+    const {name, address, city, status, dc_manager} = data
     const dc = (await sql`
             UPDATE "Distribution_center"
             SET 
@@ -129,20 +129,20 @@ const updateDcService = async(id, data) =>{
             RETURNING *
         `)
 
-        const name_ = contact_name?.split(" ") || [];
-        await sql`
-            UPDATE "User"
-            SET
-                "first_name" = COALESCE(${name_[0]}, "first_name"),
-                "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
-                "email" = COALESCE(${contact_email}, "email"),
-                "phone_number" = COALESCE(${contact_phone}, "phone_number")
-            WHERE "id" = (
-                SELECT "dc_manager"
-                FROM "Distribution_center"
-                WHERE "id" = ${id}
-            )
-            `;
+        // const name_ = contact_name?.split(" ") || [];
+        // await sql`
+        //     UPDATE "User"
+        //     SET
+        //         "first_name" = COALESCE(${name_[0]}, "first_name"),
+        //         "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+        //         "email" = COALESCE(${contact_email}, "email"),
+        //         "phone_number" = COALESCE(${contact_phone}, "phone_number")
+        //     WHERE "id" = (
+        //         SELECT "dc_manager"
+        //         FROM "Distribution_center"
+        //         WHERE "id" = ${id}
+        //     )
+        //     `;
 
         return dc
 }

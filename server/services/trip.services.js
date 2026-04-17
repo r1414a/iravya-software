@@ -27,18 +27,35 @@ const calculateGeodistance = async(gps_points)=>{
     .join(";");
 
     const response = await axios.get(
-    `https://api.mapbox.com/directions/v5/mapbox/driving/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
+    `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
     );
-    // console.log(response.data.routes)
+    // console.log(response)
 
     return response.data
 }
 
+function getEndTime(dateString, seconds) {
+    // convert to ISO-safe format
+    const date = new Date(dateString.replace(" ", "T"));
+
+    // add seconds
+    const newDate = new Date(date.getTime() + seconds * 1000);
+
+    // format back to "YYYY-MM-DD HH:mm:ss"
+    const pad = (n) => String(n).padStart(2, "0");
+
+    return `${newDate.getFullYear()}-${
+        pad(newDate.getMonth() + 1)
+    }-${pad(newDate.getDate())} ${
+        pad(newDate.getHours())
+    }:${pad(newDate.getMinutes())}:${pad(newDate.getSeconds())}`;
+}
+
 const addTripService = async(data, dc_manager)=>{
     const {truck, gps_device, driver, delivery_stops, departure} = data
-    if (truck.status  === "on_trip") throw new ApiError(400, "Truck is already on a trip")
-    if (driver.status === "on_trip") throw new ApiError(400, "Driver is already on a trip")
-    if (gps_device.status === "in_transit") throw new ApiError(400, "GPS device is already in use")
+    // if (truck.status  === "on_trip") throw new ApiError(400, "Truck is already on a trip")
+    // if (driver.status === "on_trip") throw new ApiError(400, "Driver is already on a trip")
+    // if (gps_device.status === "in_transit") throw new ApiError(400, "GPS device is already in use")
     console.log(dc_manager)
     const tracking_code = await generateTrackingCode()
     const [source_dc] = await sql`
@@ -59,16 +76,20 @@ const addTripService = async(data, dc_manager)=>{
     const geopath = geodata.routes[0].geometry.coordinates
     
     
+    const duration = geodata.routes[0].duration
+    const endtime = getEndTime(departure, duration)
     const [trip] = await sql`
         INSERT INTO "Trips" (
             "source_dc_id", "truck_id", "driver_id", "device_id",
-            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath"
+            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time"
         ) VALUES (
             ${source_dc.id}, ${truck}, ${driver}, ${gps_device},
             ${tracking_code}, 'scheduled', ${dc_manager},
             ${departure ?? null},
             ${total_distance},
-            ${geopath}
+            ${geopath},
+            ${departure},
+            ${endtime}
         )
         RETURNING *
     `
@@ -82,6 +103,8 @@ const addTripService = async(data, dc_manager)=>{
             `
         }
     }
+
+    
 
     return trip
 
@@ -184,9 +207,75 @@ const cancelTripService = async (id) => {
     
 }
 
+const trackTripService = async (data) => {
+    const {tracking_code} = data
+    const trip = await sql `
+        SELECT
+            t.id,
+            t.tracking_code,
+            t.status,
+            t.scheduled_at,
+            t.departed_at,
+            t.completed_at,
+            t.end_time,
+            t.distance,
+            t.created_at,
+
+            dc.name AS dc_name,
+            dc.city AS dc_city,
+
+            tr.registration_no AS truck_reg,
+            tr.model AS truck_model,
+            tr.type AS truck_type,
+            tr.status AS truck_status,
+            
+
+            CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
+            u.phone_number AS driver_phone,
+            d.total_trips AS drivers_total_trip,
+
+            COUNT(ts.id) AS total_stops,
+            COUNT(ts.id) FILTER (WHERE ts.status = 'confirmed') AS completed_stops,
+
+            COALESCE(
+                json_agg(
+                    json_build_object(
+                        'stop_id', ts.id,
+                        'store_id', s.id,
+                        'store_name', s.name,
+                        'eta', ts.eta,
+                        'arrived_at', ts.arrived_at,
+                        'status', ts.status
+                    )
+                ) FILTER (WHERE ts.id IS NOT NULL),
+                '[]'
+            ) AS stops
+        FROM "Trips" t
+        JOIN "Distribution_center" dc ON dc.id = t.source_dc_id
+        JOIN "Trucks" tr ON tr.id = t.truck_id
+        JOIN "Drivers" d ON d.id = t.driver_id
+        JOIN "User" u ON u.id = d.user_id
+
+        LEFT JOIN "Trip_stops" ts ON ts.trip_id = t.id
+        LEFT JOIN "Stores" s ON s.id = ts.store_id
+
+        WHERE t.tracking_code = 'TRP-0047'
+
+        GROUP BY
+            t.id,
+            dc.id,
+            tr.id,
+            d.id,
+            u.id;
+    `
+
+    return trip
+}
+
 
 export{
     addTripService,
     allTripsService,
-    cancelTripService
+    cancelTripService,
+    trackTripService
 }

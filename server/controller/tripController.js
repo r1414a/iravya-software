@@ -5,7 +5,8 @@ import sendResponse from "../utils/sendResponse.js";
 import sql from "../db/database.js"
 import { addTripService,
     allTripsService,
-    cancelTripService
+    cancelTripService,
+    trackTripService
  } from "../services/trip.services.js";
 
 const getData = asyncHandler(async (req, res) => {
@@ -70,9 +71,18 @@ const cancelTrip = asyncHandler(async (req, res) => {
     }
 })
 
+
+const trackTrip = asyncHandler(async(req, res)=>{
+    
+    const trip = await trackTripService(req.body)
+    sendResponse(res, 200, trip, "Trip data found")
+
+})
+
 export{
     getData,
     addTrip,
     allTrips,
-    cancelTrip
+    cancelTrip,
+    trackTrip
 }

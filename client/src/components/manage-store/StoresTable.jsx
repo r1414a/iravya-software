@@ -106,7 +106,7 @@ const stores = [
     },
 ]
 
-export default function StoresTable({ stores, setPage,brands, columnFilters,
+export default function StoresTable({ stores, setEditStore, setEditOpen, setPage,columnFilters,
     setColumnFilters, totalPages, page, onPrevious, onNext, isFetching }) {
 
     return (
@@ -115,7 +115,7 @@ export default function StoresTable({ stores, setPage,brands, columnFilters,
                 <DataTable
                     columns={columns}
                     data={stores}
-                    meta={{brands}}
+                    meta={{setEditStore, setEditOpen}}
                     setPage={setPage}
                     columnFilters={columnFilters}
                     setColumnFilters={setColumnFilters}

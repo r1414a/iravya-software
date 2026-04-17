@@ -43,25 +43,15 @@ const storeSchema = z.object({
     city: cityV,
     address: addressV,
     state: z.string().default("Maharashtra"),
-    manager_name: fullNameV,
-    manager_phone: phoneV,
-    manager_email: emailV,
     status: z.enum(["active", "inactive"]).optional(),
-    store_code:  z.string()
-  .length(15, { message: "GSTIN must be exactly 15 characters" })
+    store_code: z.string()
+        .length(15, { message: "GSTIN must be exactly 15 characters" })
 });
 
 
-export default function StoreForm({ store = null, brands, open, onClose }) {
-    // console.log("storeForm", store, brands);
-
-    // const isEdit = mode === "edit"
-   
+export default function StoreForm({ store, brands, open, onClose, managers, managerSearch, loadingManagers, setManagerSearch }) {
     const [addStore, { isLoading }] = useAddStoreMutation();
     const [updateStore, { isLoading: isUpdating }] = useUpdateStoreMutation();
-    // const {data} = useGetAllBrandsQuery();
-    // console.log(data);
-
 
     const {
         register,
@@ -74,24 +64,45 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
     } = useForm({
         resolver: zodResolver(storeSchema),
         defaultValues: {
-            // brand_id: String(store?.brand_id) || "",
-            brand_id: store?.brand_id ? String(store.brand_id) : undefined,
-            name: store?.name || "",
-            address: store?.address || "",
-            city: store?.city || "",
+            brand_id: undefined,
+            name: "",
+            address: "",
+            city: "",
             state: "Maharashtra",
-            manager_name: store?.manager_name || "",
-            manager_phone: store?.manager_phone || "",
-            manager_email: store?.manager_email || "",
-            status: store?.status || "active",
-            store_code: store?.store_code || ""
+            status: "active",
+            store_code: ""
         },
     });
+
+
+    useEffect(() => {
+        if (store) {
+            reset({
+                brand_id: store?.brand_id ? String(store.brand_id) : undefined,
+                name: store?.name || "",
+                address: store?.address || "",
+                city: store?.city || "",
+                state: "Maharashtra",
+                status: store?.status || "active",
+                store_code: store?.store_code || ""
+            });
+        } else {
+            reset({
+                brand_id: undefined,
+                name: "",
+                address: "",
+                city: "",
+                state: "Maharashtra",
+                status: "active",
+                store_code: ""
+            });
+        }
+    }, [store, reset]);
 
     useEffect(() => {
         if (isSubmitSuccessful) {
             reset();
-            // onClose?.(false)
+            onClose?.(false)
         }
     }, [isSubmitSuccessful, reset]);
 
@@ -101,17 +112,17 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
         try {
             const { lat, lng } = await getCoordinatesFromAddress(data.address);
 
-        const payload = {
-            ...data,
-            latitude: lat,
-            longitude: lng,
-        };
+            const payload = {
+                ...data,
+                latitude: lat,
+                longitude: lng,
+            };
             if (store) {
                 await updateStore({ id: store.id, ...payload }).unwrap();
             } else {
                 await addStore(payload).unwrap();
             }
-
+            onClose(false)
         } catch (err) {
             console.error(err);
 
@@ -120,17 +131,6 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
 
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {
-                store ? (
-                    null
-                    // <SheetTrigger asChild>
-                    //     <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-                    // </SheetTrigger>
-                ) : (
-                    <CreateFormSheetTrigger text={'Add Store'} />
-                )
-            }
-
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                     <SheetHeader className="border-b border-gray-200">
@@ -148,72 +148,58 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
                                 <FieldGroup>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {/* Brand */}
-                                    <Field>
-                                        <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
-                                        <Controller
-                                            name="brand_id"
-                                            control={control}
-                                            rules={{ required: "Brand is required" }}
-                                            render={({ field }) => (
-                                                <Select value={field.value} onValueChange={field.onChange}>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Select brand..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-white border shadow-md">
-                                                        <SelectGroup>
-                                                            <SelectLabel>Brands</SelectLabel>
-                                                            {
-                                                                brands?.map(b => (
-                                                                    <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
-                                                                ))
-                                                            }
-                                                            {/* <SelectItem value="Mumbai">Zudio</SelectItem>
+                                        {/* Brand */}
+                                        <Field>
+                                            <FieldLabel>Brand <span className="text-red-500">*</span></FieldLabel>
+                                            <Controller
+                                                name="brand_id"
+                                                control={control}
+                                                rules={{ required: "Brand is required" }}
+                                                render={({ field }) => (
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select brand..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-white border shadow-md">
+                                                            <SelectGroup>
+                                                                <SelectLabel>Brands</SelectLabel>
+                                                                {
+                                                                    brands?.map(b => (
+                                                                        <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                                                                    ))
+                                                                }
+                                                                {/* <SelectItem value="Mumbai">Zudio</SelectItem>
                                                                 <SelectItem value="Nashik">Tata Cliq</SelectItem>
                                                                 <SelectItem value="Nagpur">Tanishq</SelectItem>
                                                                 <SelectItem value="Kolhapur">Croma</SelectItem> */}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
-                                        {/* <Select value={form.brand} onValueChange={(value) => console.log(value)
-                                    }>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select brand..." />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border shadow-md">
-                                            <SelectGroup>
-                                                <SelectLabel>Brands</SelectLabel>
-                                                <SelectItem value="Tata Westside">Tata Westside</SelectItem>
-                                                <SelectItem value="Zudio">Zudio</SelectItem>
-                                                <SelectItem value="Tata Cliq">Tata Cliq</SelectItem>
-                                                <SelectItem value="Tanishq">Tanishq</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select> */}
-                                    </Field>
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                           
+                                        </Field>
 
-                                    {/* Store Code */}
-                                    <Field>
-                                        <FieldLabel>GSTIN (Store code) <span className="text-red-500">*</span></FieldLabel>
-                                        <Input
-                                            name="store_code"
-                                            {...register("store_code", {
-                                                required: "GSTIN code is required",
-                                            })}
-                                            placeholder="27ABCDE1234F1Z5"
-                                            className="placeholder:text-sm text-sm sm:text-md"
-                                        />
-                                        {/* <FieldDescription className="text-xs">
+                                        {/* Store Code */}
+                                        <Field>
+                                            <FieldLabel>GSTIN (Store code) <span className="text-red-500">*</span></FieldLabel>
+                                            <Input
+                                                name="store_code"
+                                                {...register("store_code", {
+                                                    required: "GSTIN code is required",
+                                                })}
+                                                placeholder="27ABCDE1234F1Z5"
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                            />
+                                            {/* <FieldDescription className="text-xs">
                                             Used to uniquely identify a store
                                         </FieldDescription> */}
-                                        {errors.store_code && (
-                                            <p className="text-red-500 text-xs">
-                                                {errors.store_code.message}
-                                            </p>
-                                        )}
-                                    </Field>
+                                            {errors.store_code && (
+                                                <p className="text-red-500 text-xs">
+                                                    {errors.store_code.message}
+                                                </p>
+                                            )}
+                                        </Field>
 
                                     </div>
 
@@ -294,36 +280,8 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
                                         )}
                                     </Field>
 
-                                    {/* Geofence radius */}
-                                    {/* <Field>
-                                    <FieldLabel>Geofence radius (metres)</FieldLabel>
-                                    <Input type="number" placeholder="e.g. 200" defaultValue={200} />
-                                    <FieldDescription className="text-xs">
-                                        Truck entering this radius triggers the "arrived" event for the store manager
-                                    </FieldDescription>
-                                </Field> */}
-
-                                    {/* Public tracking slug — auto generated, editable */}
-                                    {/* <Field>
-                                    <FieldLabel>Public tracking URL slug</FieldLabel>
-                                    <div className="flex items-center border rounded-md overflow-hidden">
-                                        <span className="bg-gray-100 text-gray-500 text-xs px-3 py-2.5 border-r whitespace-nowrap">
-                                            /track/
-                                        </span>
-                                        <Input
-                                            className="border-0 rounded-none focus-visible:ring-0 font-mono text-sm placeholder:text-sm sm:text-md"
-                                            value={slug}
-                                            placeholder="auto-generated"
-                                            readOnly
-                                        />
-                                    </div>
-                                    <FieldDescription className="text-xs">
-                                        Auto-generated from store name. Store can share this URL for public delivery tracking.
-                                    </FieldDescription>
-                                </Field> */}
-
                                     {/* Store manager */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
                                             <FieldLabel>Manager name <span className="text-red-500">*</span></FieldLabel>
                                             <Input
@@ -364,7 +322,7 @@ export default function StoreForm({ store = null, brands, open, onClose }) {
                                                 {errors.manager_email.message}
                                             </p>
                                         )}
-                                    </Field>
+                                    </Field> */}
 
                                     {/* Status */}
                                     {

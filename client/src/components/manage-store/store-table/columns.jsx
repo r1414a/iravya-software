@@ -40,10 +40,10 @@ function ActionsCell({ row, table }) {
     const store = row.original;
     // console.log(store);
 
-    const brands = table.options.meta?.brands || []
+    const { setEditStore, setEditOpen } = table.options.meta;
     const { pathname } = useLocation();
     const [viewDetails, setViewDetails] = useState(false)
-    const [editOpen, setEditOpen] = useState(false)
+    // const [editOpen, setEditOpen] = useState(false)
 
     const [deleteStore, { isLoading: isDeleting }] = useDeleteStoreMutation();
 
@@ -61,21 +61,13 @@ function ActionsCell({ row, table }) {
                 open={viewDetails}
                 onClose={() => setViewDetails(false)}
             />
-            {
-                pathname.startsWith('/admin') && (
-
-                    <StoreForm
-                        store={store}
-                        brands={brands}
-                        open={editOpen}
-                        onClose={() => setEditOpen(false)}
-                    />
-                )}
-
-
+            
             <div className="flex items-center gap-2 justify-end">
                 <Button variant="outline" size="xs" onClick={() => setViewDetails(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Eye size={16} /></Button>
-                <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                <Button variant="outline" size="xs" onClick={() => {
+                    setEditStore(store)
+                    setEditOpen(true)
+                    }} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
                 {
                     pathname.startsWith('/admin') && (
 

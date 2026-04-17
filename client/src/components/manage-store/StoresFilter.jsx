@@ -4,8 +4,9 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group"
 import { Search, X } from "lucide-react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
-export default function StoresFilter({CreateButton,  searchInput, setSearchInput, handleClear}) {
+export default function StoresFilter({setEditStore, setEditOpen, searchInput, setSearchInput, handleClear}) {
 
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -29,11 +30,9 @@ export default function StoresFilter({CreateButton,  searchInput, setSearchInput
                     </InputGroup>
 
                 </div>
-                {CreateButton && (
                     <div className="flex justify-end order-1 sm:order-2">
-                        {CreateButton()}
+                        <CreateFormSheetTrigger text={'Add a Store'} setEditWho={setEditStore} setEditOpen={setEditOpen}/>
                     </div>
-                )}
             </div>
         </section>
     )

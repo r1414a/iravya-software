@@ -2,14 +2,15 @@ import bcrypt from "bcryptjs"
 import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 
-const getUserDataService = async()=>{
-
+const getUserDataService = async({ page, limit, search })=>{
+    const offset = (page - 1) * limit;
     const users = await sql`
         SELECT 
             u.id,
             u.first_name,
             u.last_name,
             u.role
+            COUNT(*) OVER() AS total_count
 
         FROM "User" u
         LEFT JOIN "Stores" s 
@@ -18,7 +19,14 @@ const getUserDataService = async()=>{
         WHERE 
             u.role = 'store_manager'
             AND s.id IS NULL
-    `
+            AND (
+                u.first_name ILIKE ${"%" + search + "%"}
+                OR u.last_name ILIKE ${"%" + search + "%"}
+            )
+            ORDER BY u.first_name ASC
+            LIMIT ${limit}
+            OFFSET ${offset}
+            `
     return users
 
 }
@@ -119,7 +127,8 @@ const updateStoreService = async (id, data) => {
     latitude,
     longitude,
     store_code,
-    status
+    status,
+    store_manager
   } = data;
 
   const updateFields = {};
@@ -134,7 +143,7 @@ const updateStoreService = async (id, data) => {
   if (latitude) updateFields.latitude = latitude;
   if (longitude) updateFields.longitude = longitude;
   if (status) updateFields.status = status;
-
+  if (store_manager) updateFields.status = store_manager;
   // Location update
   if (latitude && longitude) {
     updateFields.location = sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`
@@ -150,25 +159,25 @@ const updateStoreService = async (id, data) => {
   `;
 
   // Manager Update
-  const { manager_name, manager_phone, manager_email } = data;
+//   const { manager_name, manager_phone, manager_email } = data;
 
-  if (manager_name || manager_phone || manager_email) {
-    const name_ = manager_name?.split(" ") || [];
+//   if (manager_name || manager_phone || manager_email) {
+//     const name_ = manager_name?.split(" ") || [];
 
-    await sql`
-      UPDATE "User"
-      SET
-        "first_name" = COALESCE(${name_[0]}, "first_name"),
-        "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
-        "email" = COALESCE(${manager_email}, "email"),
-        "phone_number" = COALESCE(${manager_phone}, "phone_number")
-      WHERE "id" = (
-        SELECT "store_manager"
-        FROM "Stores"
-        WHERE "id" = ${id}
-      )
-    `;
-  }
+//     await sql`
+//       UPDATE "User"
+//       SET
+//         "first_name" = COALESCE(${name_[0]}, "first_name"),
+//         "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+//         "email" = COALESCE(${manager_email}, "email"),
+//         "phone_number" = COALESCE(${manager_phone}, "phone_number")
+//       WHERE "id" = (
+//         SELECT "store_manager"
+//         FROM "Stores"
+//         WHERE "id" = ${id}
+//       )
+//     `;
+//   }
   return updatedStore;
 };
 

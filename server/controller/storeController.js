@@ -14,7 +14,10 @@ import { addStoreService ,
 
 
 const getUserData = asyncHandler(async (req, res) => {
-    const users = await getUserDataService()
+    const { page = 1, limit = 10, search = "" } = req.query;
+    const users = await getUserDataService({page: Number(page),
+    limit: Number(limit),
+    search,})
     sendResponse(res, 200, users, "User data")
 })
 

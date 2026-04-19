@@ -18,10 +18,10 @@ const addDriver = asyncHandler(async (req, res) => {
     const exist_driver = await driverExistBylicenceno(licence_no)
 
     if(exist_driver.length){
-        return sendResponse(res, 200 ,exist_driver, "Driver already added")
+        return sendResponse(res, 409 ,null, "Driver already exists")
     }
     const driver = await addDriverService(req.body)
-    if(driver.length){
+    if(driver){
         return sendResponse(res, 200, driver, "Driver data is added successfully")
     }
 
@@ -42,7 +42,7 @@ const updateDriver = asyncHandler(async (req,res) => {
     const {id} = req.params
     const driver = await updateDriverService(id, req.body)
 
-    if (driver && driver.length > 0) {
+    if (driver) {
         return sendResponse(res, 200, driver[0], "Driver updated successfully");
     }
     throw new ApiError(404, "Driver not found");
@@ -85,17 +85,19 @@ const getAllDriverList = asyncHandler(async (req, res) => {
 });
 
 const getAllDriverListBySearch = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10  } = req.query;
-  const {search = "" } = req.query
+  const { page = 1, limit = 10, search = "", status, licence_class } = req.query;
 
-  const user_id = req.user.id
-    console.log(user_id)
+  const user_id = req.user.id;
+  const role = req.user.role; // ✅ IMPORTANT
 
   const drivers = await getDriversListeBySearchService(
     Number(page),
     Number(limit),
     search,
-    user_id
+    user_id,
+    role, // ✅ pass role
+    status,
+    licence_class
   );
 
   return sendResponse(res, 200, drivers, "Drivers fetched successfully");

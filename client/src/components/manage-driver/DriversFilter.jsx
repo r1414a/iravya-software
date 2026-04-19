@@ -4,8 +4,15 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group"
 import { Search, X } from "lucide-react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
-export default function DriversFilter({ CreateButton, searchInput, setSearchInput, handleClear }) {
+export default function DriversFilter({ 
+    setEditDriver, 
+    setEditOpen, 
+    searchInput, 
+    setSearchInput, 
+    handleClear 
+ }) {
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
@@ -32,11 +39,13 @@ export default function DriversFilter({ CreateButton, searchInput, setSearchInpu
                     </InputGroup>
 
                 </div>
-                {CreateButton && (
-                    <div className="flex justify-end order-1 sm:order-2">
-                        {CreateButton}
-                    </div>
-                )}
+                <div className="flex justify-end order-1 sm:order-2">
+                                    <CreateFormSheetTrigger 
+                                        text="Add Driver" 
+                                        setEditWho={setEditDriver} 
+                                        setEditOpen={setEditOpen}
+                                    />
+                                </div>
             </div>
         </section>
     )

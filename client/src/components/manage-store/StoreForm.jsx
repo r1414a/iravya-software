@@ -26,15 +26,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus, Store, Pencil } from "lucide-react"
+import { Store } from "lucide-react"
 import { useEffect } from "react"
-import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 import { useAddStoreMutation, useUpdateStoreMutation } from "@/lib/features/stores/storeApi"
 import { Controller, useForm } from "react-hook-form"
-import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
+import { addressV, cityV, } from "@/validations/validations"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { getCoordinatesFromAddress } from "@/lib/utils/getCoordinatesFromAddress"
+import AssignManagerSelect from "../super-admin/manage-dcs/AssignManagerSelect"
 
 
 const storeSchema = z.object({
@@ -177,7 +177,7 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
                                                     </Select>
                                                 )}
                                             />
-                                           
+
                                         </Field>
 
                                         {/* Store Code */}
@@ -209,7 +209,7 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
                                             <FieldLabel>Store name <span className="text-red-500">*</span></FieldLabel>
                                             <Input
                                                 name="name"
-                                                placeholder="Westside — Koregaon Park"
+                                                placeholder="Westside"
                                                 {...register("name", {
                                                     required: "Store name is required",
                                                 })}
@@ -280,50 +280,6 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
                                         )}
                                     </Field>
 
-                                    {/* Store manager */}
-                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <Field>
-                                            <FieldLabel>Manager name <span className="text-red-500">*</span></FieldLabel>
-                                            <Input
-                                                name="managerName"
-                                                {...register("manager_name")}
-                                                placeholder="e.g. Arjun Joshi" className="placeholder:text-sm text-sm sm:text-md" />
-                                            {errors.manager_name && (
-                                                <p className="text-red-500 text-xs">
-                                                    {errors.manager_name.message}
-                                                </p>
-                                            )}
-                                        </Field>
-                                        <Field>
-                                            <FieldLabel>Manager phone <span className="text-red-500">*</span></FieldLabel>
-                                            <Input
-                                                name="managerPhone"
-                                                {...register("manager_phone")}
-                                                placeholder="+91 98XXX XXXXX" className="placeholder:text-sm text-sm sm:text-md" />
-                                            {errors.manager_phone && (
-                                                <p className="text-red-500 text-xs mt-1">
-                                                    {errors.manager_phone.message}
-                                                </p>
-                                            )}
-                                        </Field>
-                                    </div>
-
-                                    <Field>
-                                        <FieldLabel>Manager email <span className="text-red-500">*</span></FieldLabel>
-                                        <Input
-                                            name="managerEmail"
-                                            {...register("manager_email")}
-                                            type="email" placeholder="manager@brand.com" className="placeholder:text-sm text-sm sm:text-md" />
-                                        <FieldDescription className="text-xs">
-                                            A user account with store manager role will be created for this email
-                                        </FieldDescription>
-                                        {errors.manager_email && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.manager_email.message}
-                                            </p>
-                                        )}
-                                    </Field> */}
-
                                     {/* Status */}
                                     {
                                         store && (
@@ -348,6 +304,25 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
                                             </Field>
                                         )
                                     }
+
+
+                                    <Field>
+                                        <FieldLabel>
+                                            Assign Manager <span className="text-red-500">*</span>
+                                        </FieldLabel>
+
+                                        <AssignManagerSelect
+                                            name={'store_manager'}
+                                            managers={managers}
+                                            control={control}
+                                            errors={errors}
+                                            setManagerSearch={setManagerSearch}
+                                            managerSearch={managerSearch}
+                                            loadingManagers={loadingManagers}
+                                        />
+                                    </Field>
+
+
 
 
                                 </FieldGroup>

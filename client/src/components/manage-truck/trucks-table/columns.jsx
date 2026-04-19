@@ -16,26 +16,15 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-// import { Checkbox } from "@/components/ui/checkbox"
-// import { FieldLabel } from "@/components/ui/field"
-import { useState } from "react"
-import CreateTripModal from "../../manage-trip/CreateNewTrip"
-import TruckDetailDrawer from "../TruckDetailDrawer"
-import AddTruckModal from "../AddTruckForm"
-import TripDetailSheet from "@/components/manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
 import { useDeleteTruckMutation } from "@/lib/features/trucks/truckApi"
-import { toast } from "sonner"
-import { showSuccessToast } from "@/lib/utils/showSuccessToast"
-import { showErrorToast } from "@/lib/utils/showErrorToast"
+import { format, formatDistanceToNow, parseISO } from "date-fns"
 
 // Truck type icon colours — a small coloured square instead of avatar initials
 // const typeColors = {
@@ -63,53 +52,57 @@ const statusLabels = {
     maintenance: "Maintenance",
 }
 
-function ActionsCell({ row }) {
-    const truck = row.original
-    const [editOpen, setEditOpen] = useState(false)
-    const [tripHistory, setTripHistory] = useState(false)
-    const [openDispatch, setOpenDispatch] = useState(false)
-    const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
+function ActionsCell({ row, table }) {
+    const truck = row.original;
+    // const [tripHistory, setTripHistory] = useState(false)
+    // const [openDispatch, setOpenDispatch] = useState(false)
     const location = useLocation();
-    // console.log(location.pathname);
+
+    const { 
+        setEditTruck, 
+        setEditOpen, 
+        setTruckHistory,
+        setTruckHistoryOpen,
+        setCurrentTrip, 
+        setCurrentTripOpen,
+        setDispatchTruck,
+    setDispatchTruckOpen, 
+    } = table.options.meta || {}
 
     const [deleteTruck, { isLoading: isDeleting }] = useDeleteTruckMutation();
 
     const handleDelete = async () => {
         try {
             await deleteTruck(truck.id).unwrap();
-            // showSuccessToast("Driver deleted successfully")
-            // toast.success("Driver deleted successfully");
         } catch (err) {
             console.error("Failed to delete truck", err);
             
-            // showErrorToast(err)
-            // toast.error(err?.data?.message || "Failed to delete driver");
         }
     };
 
 
     return (
         <>
-            <AddTruckModal
+            {/* <AddTruckModal
                 truck={truck}
                 open={editOpen}
                 onClose={() => setEditOpen(false)}
-            />
+            /> */}
 
-            <CreateTripModal
+            {/* <CreateTripModal
                 truck={truck}
                 open={openDispatch}
                 onClose={() => setOpenDispatch(false)}
-            />
+            /> */}
 
-            <TruckDetailDrawer
+            {/* <TruckDetailDrawer
                 truck={truck}
                 open={tripHistory}
                 onClose={() => setTripHistory(false)}
-            />
+            /> */}
 
             {/* Will need to fetch trip details by truck id by api call */}
-            <TripDetailSheet
+            {/* <TripDetailSheet
                 trip={{
                     id: "TRP-2840",
                     brand: "Zudio",
@@ -128,7 +121,7 @@ function ActionsCell({ row }) {
                 }}
                 open={tripDetailsOpen}
                 onClose={setTripDetailsOpen}
-            />
+            /> */}
             <div className="flex items-center gap-2 justify-end">
 
 
@@ -138,8 +131,10 @@ function ActionsCell({ row }) {
                         size="sm"
                         className="bg-maroon text-white h-7 px-3 text-xs flex items-center gap-1"
                         onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenDispatch(true)
+                            e.stopPropagation();
+                            setDispatchTruck?.(truck)
+                            setDispatchTruckOpen?.(true)
+                            // setOpenDispatch(true)
                             // navigate to /dc/dispatch?truck=regNo
                         }}
                     >
@@ -148,18 +143,21 @@ function ActionsCell({ row }) {
                     </Button>
                 )}
 
-                {
+               
+                            <Button variant="outline" size="xs" 
+                            onClick={() => {
+                                    setEditTruck?.(truck)
+                                    setEditOpen?.(true)
+                                }} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+
+                                 {
                     location.pathname.startsWith('/admin') && (
-                        <>
-                            <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
                             <DeleteModal
                                 who={truck.registration_no}
                                 m1active="Truck will not be assignable to any trip"
                                 onConfirm={handleDelete}
                                 isLoading={isDeleting}
                             />
-                            {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
-                        </>
                     )
                 }
 
@@ -171,20 +169,26 @@ function ActionsCell({ row }) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-white border shadow-md w-46">
-                        {/* <DropdownMenuItem onClick={() => setEditOpen(true)} className="gap-2 text-sm cursor-pointer">
-                            <Pencil size={14} /> Edit truck details
-                        </DropdownMenuItem> */}
                         {truck.status === "in_transit" && (
-                            <DropdownMenuItem onClick={() => setTripDetailsOpen(true)} className="gap-2 text-sm cursor-pointer">
+                            <DropdownMenuItem 
+                            onClick={() => {
+                                        setCurrentTrip(truck)
+                                        setCurrentTripOpen?.(true)
+                                    }} 
+                                    className="gap-2 text-sm cursor-pointer">
                                 <Road size={14} /> View trip details
                             </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem onClick={() => setTripHistory(true)} className="gap-2 text-sm cursor-pointer">
+                        <DropdownMenuItem 
+                        onClick={() => {
+                                setTruckHistory?.(truck)
+                                setTruckHistoryOpen?.(true)
+                            }}className="gap-2 text-sm cursor-pointer">
                             <History size={14} /> View trip history
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
+                        {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
                             <Wrench size={14} /> Mark as maintenance
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -206,7 +210,7 @@ export const columns = [
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
                                 {currentValue === "all"
-                                    ? "All classes"
+                                    ? "All types"
                                     : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)}
                             </Button>
                             {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
@@ -331,8 +335,8 @@ export const columns = [
         header: "Trips",
         cell: ({ row }) => (
             <div className="-space-y-0.5">
-                <p className="text-sm font-medium">{row.original.total_trips} total</p>
-                <p className="text-xs text-gray-400">{row.original.tripsThisMonth} this month</p>
+                <p className="text-sm font-medium">{row.original.total_trips || 0} total</p>
+                <p className="text-xs text-gray-400">{row.original.tripsThisMonth || 0} this month</p>
             </div>
         ),
     },
@@ -340,12 +344,22 @@ export const columns = [
     {
         accessorKey: "lastTrip",
         header: "Last trip",
-        cell: ({ row }) => (
+        cell: ({ row }) => {
+            const {last_trip} = row.original
+            if(!last_trip){
+                return(
+                    <span className="text-sm mx-auto text-gray-400">-</span>
+                )
+            }
+
+            return(
             <div className="-space-y-0.5">
-                <p className="text-sm">{row.original.lastTrip}</p>
-                <p className="text-xs text-gray-400">{row.original.lastTripDate}</p>
+                <p className="text-sm">{formatDistanceToNow(parseISO(last_trip), { addSuffix: true })}</p>
+                <p className="text-xs text-gray-400">{format(parseISO(last_trip), 'MMM dd, hh:mm a')}</p>
+                
             </div>
-        ),
+        )
+    },
     },
     // Status badge
     {
@@ -411,6 +425,6 @@ export const columns = [
     // Actions — idle trucks get a "Dispatch now" quick button; others get the 3-dot menu only
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table}/>,
     },
 ]

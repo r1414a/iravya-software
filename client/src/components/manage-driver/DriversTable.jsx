@@ -1,7 +1,7 @@
 import { columns } from "./drivers-table/column"
 import { DataTable } from "./drivers-table/data-table"
 
- 
+
 const drivers = [
     {
         id: 1,
@@ -89,14 +89,45 @@ const drivers = [
         status: "available",
     },
 ]
- 
-export default function DriversTable({drivers, totalPages, page, onPrevious, onNext, isFetching}) {
+
+export default function DriversTable({
+    drivers,
+    setEditDriver,
+    setEditOpen,
+    setDriverHistory,
+    setDriverHistoryOpen,
+    setCurrentTrip,
+    setCurrentTripOpen,
+    setPage,
+    columnFilters,
+    setColumnFilters,
+    totalPages,
+    page,
+    onPrevious,
+    onNext,
+    isFetching
+}) {
+    const meta = useMemo(() => ({
+        setEditDriver,
+        setEditOpen,
+        setDriverHistory,
+        setDriverHistoryOpen,
+        setCurrentTrip,
+        setCurrentTripOpen
+    }), [setEditDriver, setEditOpen, setDriverHistory,
+        setDriverHistoryOpen,setCurrentTrip,setCurrentTripOpen])
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="border rounded-lg">
-                <DataTable 
-                    columns={columns} 
-                    data={drivers} 
+                <DataTable
+                    columns={columns}
+                    data={drivers}
+                    meta={meta}
+                    // setEditDriver={setEditDriver}
+                    // setEditOpen={setEditOpen}
+                    setPage={setPage}
+                    columnFilters={columnFilters}
+                    setColumnFilters={setColumnFilters}
                     totalPages={totalPages}
                     page={page}
                     onPrevious={onPrevious}

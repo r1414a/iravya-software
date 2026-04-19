@@ -7,6 +7,9 @@ import {
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Truck, User } from "lucide-react"
+import { useGetDriverCurrentTripQuery } from "@/lib/features/drivers/driverApi"
+import { format, parseISO } from "date-fns"
+import { useGetTruckRecentTripQuery } from "@/lib/features/trucks/truckApi"
 
 const statusStyles = {
   in_transit: "bg-blue-100 text-blue-700",
@@ -15,8 +18,26 @@ const statusStyles = {
 }
 
 
-export default function TripDetailSheet({ trip, open, onClose }) {
-  if (!trip) return null
+export default function TripDetailSheet({ entity, type, open, onClose }) {
+  const { data: driverTrip, isLoading: driverLoading } =
+    useGetDriverCurrentTripQuery(entity?.id, {
+      skip: type !== "driver" || !entity?.id
+    })
+
+  const { data: truckTrip, isLoading: truckLoading } =
+    useGetTruckRecentTripQuery(entity?.id, {
+      skip: type !== "truck" || !entity?.id
+    })
+
+  const isLoading = type === "driver" ? driverLoading : truckLoading
+
+  const trip =
+    type === "driver"
+      ? driverTrip?.data?.[0]
+      : truckTrip?.data?.[0]
+
+
+  if (!entity) return null
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -28,101 +49,101 @@ export default function TripDetailSheet({ trip, open, onClose }) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="p-3 sm:p-4 flex flex-col gap-6 text-sm flex-1 overflow-y-auto" >
+        {isLoading ? (
+          <p className="text-sm text-gray-400 ps-4">Loading deliveries...</p>
+        ) : !trip ? (
+          <p className="text-sm text-gray-400 ps-4">No deliveries found</p>
+        ) : (
+          <div className="p-3 sm:p-4 flex flex-col gap-6 text-sm flex-1 overflow-y-auto" >
 
-          {/* Top Info */}
-          <div className="flex justify-between items-center">
+            {/* Top Info */}
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-xs text-gray-500">Trip ID</p>
+                <p className="font-mono text-xs sm:text-sm text-maroon font-semibold">{trip.tracking_code}</p>
+              </div>
+              {/* {
+                trip.gpsDevice &&
+                <div>
+                  <p className="text-xs text-gray-500">GPS Device</p>
+                  <p className="font-mono text-xs sm:text-sm text-maroon font-semibold">{trip.gpsDevice}</p>
+                </div>
+              } */}
+
+
+              <Badge className={`${statusStyles[trip.status]} border-0 text-xs`}>
+                {trip.status?.replace("_", " ") || "_"}
+              </Badge>
+            </div>
+
+            {/* Truck + Driver */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Truck size={16} />
+                <div>
+                  <p className="text-xs text-gray-500">Truck</p>
+                  <p className="font-medium text-xs sm:text-sm">{trip.registration_no}</p>
+                  <p className="text-muted-foreground text-xs">Model: {trip.model}</p>
+                  <p className="text-muted-foreground text-xs">Capacity: {trip.capacity}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <User size={16} />
+                <div>
+                  <p className="text-xs text-gray-500">Driver</p>
+                  <p className="font-medium text-xs sm:text-sm">{trip.driver_name}</p>
+                  <p className="text-muted-foreground text-xs">{trip.phone_number}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Source */}
             <div>
-              <p className="text-xs text-gray-500">Trip ID</p>
-              <p className="font-mono text-xs sm:text-sm text-maroon font-semibold">{trip.id}</p>
-            </div>
-            {
-              trip.gpsDevice &&
-              <div>
-                <p className="text-xs text-gray-500">GPS Device</p>
-                <p className="font-mono text-xs sm:text-sm text-maroon font-semibold">{trip.gpsDevice}</p>
-              </div>
-            }
-
-
-            <Badge className={`${statusStyles[trip.status]} border-0 text-xs`}>
-              {trip.status?.replace("_", " ") || "_"}
-            </Badge>
-          </div>
-
-          {/* Truck + Driver */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <Truck size={16} />
-              <div>
-                <p className="text-xs text-gray-500">Truck</p>
-                <p className="font-medium text-xs sm:text-sm">{trip.truck}</p>
-              </div>
+              <p className="text-xs text-gray-500 mb-1">Source DC</p>
+              <p className="font-medium text-xs sm:text-sm">{trip.source_dc_name}</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <User size={16} />
-              <div>
-                <p className="text-xs text-gray-500">Driver</p>
-                <p className="font-medium text-xs sm:text-sm">{trip.driver}</p>
-                <p className="text-muted-foreground text-xs">{trip.phone}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Source */}
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Source DC</p>
-            <p className="font-medium text-xs sm:text-sm">{trip.sourceDC}</p>
-          </div>
-
-          {/* Stops */}
-          <div>
-            <p className="text-xs text-gray-500 mb-2">Stops</p>
-            <div className="flex flex-col gap-2">
-              {trip.stops.map((stop, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center gap-2 border px-3 py-2 rounded-md ${stop.status === "completed"
+            {/* Stops */}
+            <div>
+              <p className="text-xs text-gray-500 mb-2">Stops</p>
+              <div className="flex flex-col gap-2">
+                {trip.stops.map((stop, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-2 border px-3 py-2 rounded-md ${stop.status === "confirmed"
                       ? "bg-green-50 border-green-200"
                       : "bg-gray-50"
-                    }`}
-                >
-                  <span className="text-xs text-gray-500">{i + 1}.</span>
-                  <MapPin size={14} />
-                  <span className="text-xs sm:text-sm">{stop.name}</span>
+                      }`}
+                  >
+                    <span className="text-xs text-gray-500">{i + 1}.</span>
+                    <MapPin size={14} />
+                    <span className="text-xs sm:text-sm">{stop.store_name}</span>
 
-                  {stop.status === "completed" && (
-                    <span className="ml-auto text-xs text-green-600">Done</span>
-                  )}
-                </div>
-                // <div
-                //   key={i}
-                //   className="flex items-center gap-2 bg-gray-50 border px-3 py-2 rounded-md"
-                // >
-                //   <span className="text-xs text-gray-500">{i + 1}.</span>
-                //   <MapPin size={14} />
-                //   <span>{stop}</span>
-                // </div>
-              ))}
+                    {stop.status === "completed" && (
+                      <span className="ml-auto text-xs text-green-600">Done</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-gray-500">Departed</p>
+                <p className="text-xs sm:text-sm">{format(parseISO(trip.departed_at), "MMM d, hh:mm a")|| "—"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500">
+                  {trip.completedAt ? "Completed" : "ETA"}
+                </p>
+                <p className="text-xs sm:text-sm">{format(parseISO(trip.completed_at), "MMM d, hh:mm a") || trip.eta || "—"}</p>
+              </div>
             </div>
           </div>
-
-          {/* Timeline */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-gray-500">Departed</p>
-              <p className="text-xs sm:text-sm">{trip.departedAt || "—"}</p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">
-                {trip.completedAt ? "Completed" : "ETA"}
-              </p>
-              <p className="text-xs sm:text-sm">{trip.completedAt || trip.eta || "—"}</p>
-            </div>
-          </div>
-        </div>
+        )}
       </SheetContent>
     </Sheet>
   )

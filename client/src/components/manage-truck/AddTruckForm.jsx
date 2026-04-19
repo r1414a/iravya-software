@@ -1,4 +1,8 @@
-// ─── AddTruckModal.jsx ────────────────────────────────────────────────────────
+// AddTruckModal.jsx (Complete & Fixed)
+import { useEffect, useState, useRef } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import z from "zod"
 import { Button } from "@/components/ui/button"
 import {
     Sheet,
@@ -8,10 +12,10 @@ import {
     SheetFooter,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
 } from "@/components/ui/sheet"
 import {
     Field,
+    FieldDescription,
     FieldGroup,
     FieldLabel,
     FieldSet,
@@ -26,97 +30,209 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {
-    Plus, Truck, Upload, X, FileText, CheckCircle2,
-    ShieldCheck, AlertTriangle, ExternalLink,
-    Wind,
-} from "lucide-react"
-import { useState, useRef, useEffect } from "react"
-import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
-import { useAddTruckMutation } from "@/lib/features/trucks/truckApi"
-import { useForm } from "react-hook-form"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+    Truck,
+    Upload,
+    FileText,
+    ShieldCheck,
+    AlertTriangle,
+    ExternalLink,
+    Wind,
+    Wrench,
+} from "lucide-react"
+import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
+import { useAddTruckMutation, useUpdateTruckMutation } from "@/lib/features/trucks/truckApi"
+import { toast } from "sonner"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
 
-// ── Mock documents (simulate uploaded files) ──────────────────────────────────
-// In a real app these would come from the truck object / API
-const mockDocs = {
-    rc: { name: "RC_MH12AB1234.pdf", size: "318 KB", expiry: null, status: "valid" },
-    insurance: { name: "Insurance_2024.pdf", size: "512 KB", expiry: "Dec 2025", status: "expiring" },
-    puc: { name: "PUC_Mar2025.pdf", size: "128 KB", expiry: "Sep 2026", status: "valid" },
+// ─── Validation Schema ───────────────────────────────────────────────────────
+const TRUCK_SCHEMA = z.object({
+    registration_no: z.string()
+        .min(6, "Registration number must be at least 6 characters")
+        .max(15, "Registration number is too long")
+        .regex(/^[A-Z0-9]+$/, "Only uppercase letters and numbers allowed"),
+    model: z.string().min(2, "Model is required").max(50, "Model name is too long"),
+    type: z.enum(["mini_truck", "medium", "heavy"], {
+        required_error: "Truck type is required"
+    }),
+    capacity: z.string().min(1, "Capacity is required"),
+    rc_expiry: z.string().optional(),
+    insurance_expiry: z.string().optional(),
+    puc_expiry: z.string().optional(),
+    truck_status: z.enum(["idle", "maintenance", "in_transit"]).optional(),
+})
+
+const TRUCK_TYPES = [
+    { value: "mini_truck", label: "Mini truck" },
+    { value: "medium", label: "Medium" },
+    { value: "heavy", label: "Heavy" },
+]
+
+// ─── Helper Functions ────────────────────────────────────────────────────────
+const formatDisplayExpiry = (dateStr) => {
+    if (!dateStr) return ""
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return dateStr
+
+    return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    })
 }
 
-// ── Document status config ────────────────────────────────────────────────────
-const docStatusConfig = {
-    valid: { color: "text-green-600", bg: "bg-green-50  border-green-200", label: "Valid" },
-    expiring: { color: "text-amber-600", bg: "bg-amber-50  border-amber-200", label: "Expiring soon" },
-    expired: { color: "text-red-600", bg: "bg-red-50    border-red-200", label: "Expired" },
-    missing: { color: "text-gray-400", bg: "bg-gray-50   border-dashed border-gray-200", label: "Not uploaded" },
+const getDocStatus = (expiry) => {
+    if (!expiry) return "missing"
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const expDate = new Date(expiry)
+    expDate.setHours(0, 0, 0, 0)
+
+    const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return "expired"
+    if (diffDays <= 30) return "expiring"
+    return "valid"
 }
 
-// ── Document icons ────────────────────────────────────────────────────────────
-const docIcons = {
+const createFileDocObject = (file, expiry = "") => {
+    if (!file) return null
+
+    return {
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(0)} KB`,
+        file,
+        url: URL.createObjectURL(file),
+        expiry: formatDisplayExpiry(expiry),
+        rawExpiry: expiry,
+        status: getDocStatus(expiry),
+    }
+}
+
+const createExistingDocObject = (url, expiry = "", docStatus = "") => {
+    if (!url) return null
+
+    return {
+        name: url.split("/").pop() || "Document.pdf",
+        size: "—",
+        url,
+        expiry: formatDisplayExpiry(expiry),
+        rawExpiry: expiry || "",
+        status: docStatus || getDocStatus(expiry),
+        file: null,
+    }
+}
+
+// ─── Document Status Config ──────────────────────────────────────────────────
+const DOC_STATUS_CONFIG = {
+    valid: {
+        color: "text-green-600",
+        bg: "bg-green-50 border-green-200",
+        label: "Valid",
+    },
+    expiring: {
+        color: "text-amber-600",
+        bg: "bg-amber-50 border-amber-200",
+        label: "Expiring soon",
+    },
+    expired: {
+        color: "text-red-600",
+        bg: "bg-red-50 border-red-200",
+        label: "Expired",
+    },
+    missing: {
+        color: "text-gray-400",
+        bg: "bg-gray-50 border-dashed border-gray-200",
+        label: "Not uploaded",
+    },
+}
+
+const DOC_ICONS = {
     registration_cert: <FileText size={15} />,
     insurance_doc: <ShieldCheck size={15} />,
     PUC_cert: <Wind size={15} />,
 }
-const docLabels = {
+
+const DOC_LABELS = {
     registration_cert: "RC",
     insurance_doc: "Insurance",
     PUC_cert: "PUC",
 }
 
-// ── Single document row ───────────────────────────────────────────────────────
+// ─── Document Row Component ──────────────────────────────────────────────────
 function DocRow({ docKey, doc, onChange }) {
     const inputRef = useRef(null)
-    const [replaced, setReplaced] = useState(null) // locally replaced file (not persisted)
 
-    const cfg = docStatusConfig[doc?.status ?? "missing"]
-    // const displayName = replaced?.name ?? doc?.name
-    const displayName = replaced?.name ?? (typeof doc === "string" ? doc.split("/").pop() : null)
-    // const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : doc?.size
-    const displaySize = replaced ? `${(replaced.size / 1024).toFixed(0)} KB` : ""
+    const normalizedDoc = doc?.file instanceof File
+        ? {
+            name: doc.file.name,
+            size: `${(doc.file.size / 1024).toFixed(0)} KB`,
+            status: doc.status || "valid",
+            expiry: doc.expiry,
+            url: doc.url,
+        }
+        : doc && typeof doc === "object"
+            ? doc
+            : null
+
+    const cfg = DOC_STATUS_CONFIG[normalizedDoc?.status ?? "missing"]
+    const displayName = normalizedDoc?.name ?? null
+    const displaySize = normalizedDoc?.size ?? ""
 
     return (
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border ${cfg.bg} transition-colors`}>
-            {/* Icon */}
             <span className={`shrink-0 ${cfg.color}`}>
-                {docIcons[docKey]}
+                {DOC_ICONS[docKey]}
             </span>
 
-            {/* Info */}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                    <p className="text-xs sm:text-sm font-medium text-gray-800">{docLabels[docKey]}</p>
-                    {doc?.expiry && (
-                        <span className={`text-[8px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${doc.status === "expiring" ? "bg-amber-100 text-amber-700"
-                            : doc.status === "expired" ? "bg-red-100 text-red-600"
-                                : "bg-green-100 text-green-700"
-                            }`}>
-                            {doc.status === "expiring" ? "⚠ " : ""} Exp {doc.expiry}
+                    <p className="text-xs sm:text-sm font-medium text-gray-800">
+                        {DOC_LABELS[docKey]}
+                    </p>
+
+                    {normalizedDoc?.expiry && (
+                        <span className={`text-[8px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                            normalizedDoc.status === "expiring"
+                                ? "bg-amber-100 text-amber-700"
+                                : normalizedDoc.status === "expired"
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-green-100 text-green-700"
+                        }`}>
+                            {normalizedDoc.status === "expiring" ? "⚠ " : ""}
+                            Exp {normalizedDoc.expiry}
                         </span>
                     )}
                 </div>
-                {displayName
-                    ? <p className="text-[10px] sm:text-xs text-gray-500 truncate">{displayName} · {displaySize}</p>
-                    : <p className="text-xs text-gray-400 italic">No file uploaded</p>
-                }
+
+                {displayName ? (
+                    <p className="text-[10px] sm:text-xs text-gray-500 truncate">
+                        {displayName} {displaySize && displaySize !== "—" ? `· ${displaySize}` : ""}
+                    </p>
+                ) : (
+                    <p className="text-xs text-gray-400 italic">
+                        No file uploaded
+                    </p>
+                )}
             </div>
 
-            {/* Actions */}
             <div className="flex items-center sm:gap-1 shrink-0">
-                {/* View / open */}
-                {doc && !replaced && (
+                {normalizedDoc?.url && (
                     <a
-                        href={doc}
+                        href={normalizedDoc.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <ExternalLink size={13} />
                     </a>
                 )}
 
-                {/* Replace / upload */}
                 <input
                     ref={inputRef}
                     type="file"
@@ -124,11 +240,12 @@ function DocRow({ docKey, doc, onChange }) {
                     className="hidden"
                     onChange={(e) => {
                         const file = e.target.files?.[0] ?? null
-                        setReplaced(file)
                         onChange?.(file)
                     }}
                 />
+
                 <button
+                    type="button"
                     onClick={() => inputRef.current?.click()}
                     className="p-1.5 rounded hover:bg-white/60 text-gray-400 hover:text-gray-700 transition-colors"
                     title={displayName ? "Replace" : "Upload"}
@@ -140,353 +257,451 @@ function DocRow({ docKey, doc, onChange }) {
     )
 }
 
-// ── Reusable single-file upload field ────────────────────────────────────────
-function DocumentUpload({ label, accept = ".pdf,.jpg,.jpeg,.png", onChange }) {
-    const [file, setFile] = useState(null)
-    const [dragOver, setDragOver] = useState(false)
-    const inputRef = useRef(null)
+// ─── Main Component ──────────────────────────────────────────────────────────
+export default function AddTruckModal({
+    truck = null,
+    open,
+    onClose,
+}) {
+    const isEdit = !!truck
 
+    const {user} = useSelector(selectUser);
+         const isadmin = user.role === 'super_admin'
 
-    const handleFile = (f) => {
-        if (!f) return
-        setFile(f)
-        onChange?.(f)
-    }
-
-    const handleDrop = (e) => {
-        e.preventDefault()
-        setDragOver(false)
-        const f = e.dataTransfer.files?.[0]
-        if (f) handleFile(f)
-    }
-
-    const clear = (e) => {
-        e.stopPropagation()
-        setFile(null)
-        onChange?.(null)
-        if (inputRef.current) inputRef.current.value = ""
-    }
-
-    return (
-        <Field>
-            <FieldLabel>
-                {label}
-                {/* {required
-                    ?  */}
-                <span className="text-red-500 ml-0.5">*</span>
-                {/* : <span className="text-gray-400 font-normal ml-1">(optional)</span>
-                } */}
-            </FieldLabel>
-
-            <input
-                ref={inputRef}
-                type="file"
-                accept={accept}
-                className="hidden"
-                onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-
-            {file ? (
-                // ── Attached state ──
-                <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-green-200 bg-green-50">
-                    <CheckCircle2 size={15} className="text-green-600 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-green-800 truncate">{file.name}</p>
-                        <p className="text-xs text-green-600">{(file.size / 1024).toFixed(0)} KB</p>
-                    </div>
-                    <button
-                        onClick={clear}
-                        className="text-green-600 hover:text-red-500 transition-colors shrink-0"
-                    >
-                        <X size={14} />
-                    </button>
-                </div>
-            ) : (
-                // ── Drop zone ──
-                <div
-                    onClick={() => inputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={handleDrop}
-                    className={`
-                        flex flex-col items-center justify-center gap-1 px-3 py-2  rounded-md border-2 border-dashed cursor-pointer transition-colors
-                        ${dragOver
-                            ? "border-maroon bg-red-50"
-                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                        }
-                    `}
-                >
-                    <Upload size={16} className="text-gray-400" />
-                    <p className="text-[10px] text-gray-500">
-                        <span className="font-medium text-gray-700">Click to upload</span> or drag &amp; drop
-                    </p>
-                    <p className="text-[10px] text-gray-400">PDF, JPG, PNG</p>
-                </div>
-            )}
-        </Field>
-    )
-}
-
-// ─── Main component ───────────────────────────────────────────────────────────
-export default function AddTruckModal({ truck = null, open, onClose }) {
-    // const [form, setForm] = useState({
-    //     regNo: truck?.regNo || "",
-    //     make: truck?.make || "",
-    //     type: truck?.type || "",
-    //     capacity: truck?.capacity || "",
-    // })
-
-    // In real app, docs would come from truck object. Using mock here.
-    const [docs, setDocs] = useState({
-        registration_cert: truck?.registration_cert || null,
-        insurance_doc: truck?.insurance_doc || null,
-        PUC_cert: truck?.PUC_cert || null,
-    })
     const [addTruck, { isLoading }] = useAddTruckMutation()
+    const [updateTruck, { isLoading: isUpdating }] = useUpdateTruckMutation()
+
+    const getInitialDocs = (truckData = null) => {
+        if (!truckData) {
+            return {
+                registration_cert: null,
+                insurance_doc: null,
+                PUC_cert: null,
+            }
+        }
+
+        // Parse truck documents from API response
+        const docs = {}
+        
+        if (truckData.documents && Array.isArray(truckData.documents)) {
+            truckData.documents.forEach(doc => {
+                docs[doc.doc_type] = createExistingDocObject(
+                    doc.file_url,
+                    doc.expiry_date,
+                    doc.document_status
+                )
+            })
+        }
+
+        return {
+            registration_cert: docs.registration_cert || null,
+            insurance_doc: docs.insurance_doc || null,
+            PUC_cert: docs.PUC_cert || null,
+        }
+    }
+
+    const [docs, setDocs] = useState(getInitialDocs(truck))
 
     const {
         register,
         handleSubmit,
         reset,
-        watch,
+        control,
         setValue,
-        formState: {
-            isSubmitSuccessful
-        }
+        watch,
+        formState: { errors },
     } = useForm({
+        resolver: zodResolver(TRUCK_SCHEMA),
         defaultValues: {
-            registration_no: truck?.registration_no || "",
-            model: truck?.model || "",
-            type: truck?.type || "",
-            capacity: truck?.capacity || "",
-            // licence_expiry: "",
-        }
+            registration_no: "",
+            model: "",
+            type: "",
+            capacity: "",
+            rc_expiry: "",
+            insurance_expiry: "",
+            puc_expiry: "",
+            truck_status: "idle",
+        },
     })
 
+    const selectedType = watch("type")
+    const rcExpiry = watch("rc_expiry")
+    const insuranceExpiry = watch("insurance_expiry")
+    const pucExpiry = watch("puc_expiry")
+    const truckStatus = watch("truck_status")
+
+    // Pre-fill form when editing
     useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset();
+        if (truck && open) {
+            const rcDoc = truck.documents?.find(d => d.doc_type === "registration_cert")
+            const insDoc = truck.documents?.find(d => d.doc_type === "insurance_doc")
+            const pucDoc = truck.documents?.find(d => d.doc_type === "PUC_cert")
+
+            reset({
+                registration_no: truck.registration_no || "",
+                model: truck.model || "",
+                type: truck.type || "",
+                capacity: truck.capacity || "",
+                truck_status: truck.status || "idle",
+                rc_expiry: rcDoc?.expiry_date || "",
+                insurance_expiry: insDoc?.expiry_date || "",
+                puc_expiry: pucDoc?.expiry_date || "",
+            })
+
+            setDocs(getInitialDocs(truck))
+        } else {
+            reset({
+                registration_no: "",
+                model: "",
+                type: "",
+                capacity: "",
+                rc_expiry: "",
+                insurance_expiry: "",
+                puc_expiry: "",
+                truck_status: "idle",
+            })
+
             setDocs({
                 registration_cert: null,
                 insurance_doc: null,
                 PUC_cert: null,
             })
-            onClose?.(false)
         }
-    }, [isSubmitSuccessful, reset]);
+    }, [truck, open, reset])
 
+    // Update doc status when expiry changes
+    useEffect(() => {
+        setDocs((prev) => ({
+            ...prev,
+            registration_cert: prev.registration_cert
+                ? {
+                    ...prev.registration_cert,
+                    expiry: formatDisplayExpiry(rcExpiry),
+                    rawExpiry: rcExpiry,
+                    status: getDocStatus(rcExpiry),
+                }
+                : prev.registration_cert,
+            insurance_doc: prev.insurance_doc
+                ? {
+                    ...prev.insurance_doc,
+                    expiry: formatDisplayExpiry(insuranceExpiry),
+                    rawExpiry: insuranceExpiry,
+                    status: getDocStatus(insuranceExpiry),
+                }
+                : prev.insurance_doc,
+            PUC_cert: prev.PUC_cert
+                ? {
+                    ...prev.PUC_cert,
+                    expiry: formatDisplayExpiry(pucExpiry),
+                    rawExpiry: pucExpiry,
+                    status: getDocStatus(pucExpiry),
+                }
+                : prev.PUC_cert,
+        }))
+    }, [rcExpiry, insuranceExpiry, pucExpiry])
 
-    const selectedType = watch('type')
-
+    const handleDocChange = (key, file, expiry) => {
+        setDocs((prev) => ({
+            ...prev,
+            [key]: file ? createFileDocObject(file, expiry) : prev[key],
+        }))
+    }
 
     const onSubmit = async (data) => {
         try {
-            console.log(data);
             const formData = new FormData()
 
             formData.append("registration_no", data.registration_no.toUpperCase().trim())
             formData.append("model", data.model)
             formData.append("type", data.type)
             formData.append("capacity", data.capacity)
+            formData.append("rc_expiry", data.rc_expiry || "")
+            formData.append("insurance_expiry", data.insurance_expiry || "")
+            formData.append("puc_expiry", data.puc_expiry || "")
 
-            if (docs.registration_cert instanceof File) {
-                formData.append("registration_cert", docs.registration_cert)
+            if (isEdit) {
+                formData.append("truck_status", data.truck_status)
             }
 
-            if (docs.insurance_doc instanceof File) {
-                formData.append("insurance_doc", docs.insurance_doc)
+            // Append document files if they are new uploads (File objects)
+            if (docs.registration_cert?.file instanceof File) {
+                formData.append("registration_cert", docs.registration_cert.file)
             }
 
-            if (docs.PUC_cert instanceof File) {
-                formData.append("PUC_cert", docs.PUC_cert)
+            if (docs.insurance_doc?.file instanceof File) {
+                formData.append("insurance_doc", docs.insurance_doc.file)
             }
 
-            await addTruck(formData).unwrap()
+            if (docs.PUC_cert?.file instanceof File) {
+                formData.append("PUC_cert", docs.PUC_cert.file)
+            }
+
+            if (isEdit) {
+                await updateTruck({ id: truck.id, formData }).unwrap()
+                
+                // toast.success("Truck updated successfully", {
+                //     description: `${data.registration_no} has been updated.`,
+                // })
+            } else {
+                await addTruck(formData).unwrap()
+                
+                // toast.success("Truck added successfully", {
+                //     description: `${data.registration_no} has been created.`,
+                // })
+
+                reset()
+                setDocs({
+                    registration_cert: null,
+                    insurance_doc: null,
+                    PUC_cert: null,
+                })
+            }
+
+            onClose?.(false)
         } catch (err) {
-            console.error(err)
+            // toast.error(isEdit ? "Failed to update truck" : "Failed to add truck", {
+            //     description: err?.data?.message || "Please try again",
+            // })
+            console.error(isEdit ? "Failed to update truck" : "Failed to add truck",err)
         }
     }
 
-
+    const isMaintenance = truckStatus === "maintenance"
 
     return (
-        <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {
-                truck ?
-                    null
-                    :
-                    <CreateFormSheetTrigger text='Add Truck' />
-            }
-
+        <Sheet open={open} onOpenChange={onClose}>
+            {/* {!isEdit && <CreateFormSheetTrigger text="Add Truck" />} */}
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
-                    <SheetHeader className="border-b border-gray-200">
-                        <SheetTitle>{truck ? "Edit truck" : "Add a truck"}</SheetTitle>
+                    <SheetHeader className="border-b border-gray-200 px-4 sm:px-6 pt-5 pb-4">
+                        <SheetTitle>
+                            {isEdit ? "Edit truck" : "Add a truck"}
+                        </SheetTitle>
                         <SheetDescription>
-                            Register a new truck, link a GPS device, and optionally assign a driver
+                            {isEdit
+                                ? "Update truck details and documents"
+                                : "Register a new truck with all required details"}
                         </SheetDescription>
                     </SheetHeader>
 
-                    {/* Scrollable body */}
-                    <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                    <div className="flex-1 overflow-y-auto px-3 pb-3 sm:px-6 sm:py-4">
                         <FieldGroup>
                             <FieldSet>
                                 <FieldGroup>
-
-                                    {/* ── Truck details ── */}
-                                    <div className="flex gap-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <Field>
-                                            <FieldLabel>Registration no.</FieldLabel>
+                                            <FieldLabel>
+                                                Registration no. <span className="text-red-500">*</span>
+                                            </FieldLabel>
                                             <Input
-                                                {...register('registration_no')}
+                                                {...register("registration_no")}
                                                 placeholder="MH12AB1234"
-                                                className="font-mono uppercase text-sm sm:text-md placeholder:text-sm" required />
-
-                                        </Field>
-                                        <Field>
-                                            <FieldLabel>Make &amp; model</FieldLabel>
-                                            <Input
-                                                {...register('model')}
-                                                className="placeholder:text-sm text-sm sm:text-md"
-                                                placeholder="Tata 407" />
-                                        </Field>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <Field>
-                                            <FieldLabel>Truck type</FieldLabel>
-                                            <Select
-                                                value={selectedType}
-                                                onValueChange={(val) => setValue("type", val)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select type" className="placeholder:text-sm text-sm sm:text-md" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white border shadow-md">
-                                                    <SelectGroup>
-                                                        <SelectLabel>Type</SelectLabel>
-                                                        <SelectItem value="mini_truck">Mini truck</SelectItem>
-                                                        <SelectItem value="medium">Medium</SelectItem>
-                                                        <SelectItem value="heavy">Heavy</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </Field>
-                                        <Field>
-                                            <FieldLabel>Capacity (in tons)</FieldLabel>
-                                            <Input
-                                                {...register('capacity')}
-                                                className="placeholder:text-sm text-sm sm:text-md"
-                                                placeholder="e.g. 4" />
-                                        </Field>
-                                    </div>
-
-                                    {
-                                        truck &&
-                                        <FieldGroup className="">
-                                        <Field orientation="horizontal">
-                                            <Checkbox
-                                                id="terms-checkbox-basic"
-                                                name="terms-checkbox-basic"
+                                                className="font-mono uppercase text-sm sm:text-md placeholder:text-sm"
                                             />
-                                            <FieldLabel htmlFor="terms-checkbox-basic">
-                                                Mark as maintenance
+                                            {errors.registration_no && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.registration_no.message}
+                                                </p>
+                                            )}
+                                        </Field>
+
+                                        <Field>
+                                            <FieldLabel>
+                                                Make &amp; model <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Input
+                                                {...register("model")}
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                                placeholder="Tata 407"
+                                            />
+                                            {errors.model && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.model.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <Field>
+                                            <FieldLabel>
+                                                Truck type <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Controller
+                                                name="type"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select type" />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-white border shadow-md">
+                                                            <SelectGroup>
+                                                                <SelectLabel>Type</SelectLabel>
+                                                                {TRUCK_TYPES.map(type => (
+                                                                    <SelectItem key={type.value} value={type.value}>
+                                                                        {type.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                            {errors.type && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.type.message}
+                                                </p>
+                                            )}
+                                        </Field>
+
+                                        <Field>
+                                            <FieldLabel>
+                                                Capacity (tons) <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Input
+                                                {...register("capacity")}
+                                                className="placeholder:text-sm text-sm sm:text-md"
+                                                placeholder="e.g. 4"
+                                            />
+                                            {errors.capacity && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.capacity.message}
+                                                </p>
+                                            )}
+                                        </Field>
+                                    </div>
+
+                                    {/* Documents Section */}
+                                    <div className="pt-2">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <FileText size={14} className="text-gray-400" />
+                                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                    Vehicle documents
+                                                </p>
+                                            </div>
+
+                                            {isEdit && Object.values(docs).some(
+                                                (d) => !d || ["expiring", "expired"].includes(d?.status)
+                                            ) && (
+                                                <span className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                                                    <AlertTriangle size={11} />
+                                                    Action needed
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-col gap-3">
+                                            {/* RC */}
+                                            <div className="space-y-2">
+                                                <DocRow
+                                                    docKey="registration_cert"
+                                                    doc={docs.registration_cert}
+                                                    onChange={(file) =>
+                                                        handleDocChange("registration_cert", file, rcExpiry)
+                                                    }
+                                                />
+                                                <Field>
+                                                    <FieldLabel>Registration expiry</FieldLabel>
+                                                    <Input
+                                                        {...register("rc_expiry")}
+                                                        min={new Date().toISOString().split("T")[0]}
+                                                        type="date"
+                                                        className="text-xs"
+                                                    />
+                                                </Field>
+                                            </div>
+
+                                            {/* Insurance */}
+                                            <div className="space-y-2">
+                                                <DocRow
+                                                    docKey="insurance_doc"
+                                                    doc={docs.insurance_doc}
+                                                    onChange={(file) =>
+                                                        handleDocChange("insurance_doc", file, insuranceExpiry)
+                                                    }
+                                                />
+                                                <Field>
+                                                    <FieldLabel>Insurance expiry</FieldLabel>
+                                                    <Input
+                                                        {...register("insurance_expiry")}
+                                                        min={new Date().toISOString().split("T")[0]}
+                                                        type="date"
+                                                        className="text-xs"
+                                                    />
+                                                </Field>
+                                            </div>
+
+                                            {/* PUC */}
+                                            <div className="space-y-2">
+                                                <DocRow
+                                                    docKey="PUC_cert"
+                                                    doc={docs.PUC_cert}
+                                                    onChange={(file) =>
+                                                        handleDocChange("PUC_cert", file, pucExpiry)
+                                                    }
+                                                />
+                                                <Field>
+                                                    <FieldLabel>PUC expiry</FieldLabel>
+                                                    <Input
+                                                        {...register("puc_expiry")}
+                                                        min={new Date().toISOString().split("T")[0]}
+                                                        type="date"
+                                                        className="text-xs"
+                                                    />
+                                                </Field>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Maintenance Checkbox */}
+                                    {isEdit && isadmin && (
+                                        <Field orientation="horizontal">
+                                            <Controller
+                                                name="truck_status"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Checkbox
+                                                        id="maintenance-checkbox"
+                                                        checked={field.value === "maintenance"}
+                                                        onCheckedChange={(checked) =>
+                                                            field.onChange(checked ? "maintenance" : "idle")
+                                                        }
+                                                        className="border border-gray-500"
+                                                    />
+                                                )}
+                                            />
+                                            <FieldLabel htmlFor="maintenance-checkbox" className="font-bold">
+                                                Mark as maintenance <Wrench size={14} />
                                             </FieldLabel>
                                         </Field>
-                                    </FieldGroup>
-                                    }
-
-                                    
-
-                                    {/* ── Documents section ── */}
-                                    {
-                                        truck
-                                            ?
-                                            <>
-                                                {/* ── Documents ── */}
-                                                <div className=" border-b">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Documents</p>
-
-                                                        {/* Warn if any doc is expiring / expired / missing */}
-                                                        {Object.values(docs).some((d) => !d || ["expiring", "expired", "missing"].includes(d?.status)) && (
-                                                            <span className="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
-                                                                <AlertTriangle size={11} />
-                                                                Action needed
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex flex-col gap-2">
-                                                        {["registration_cert", "insurance_doc", "PUC_cert"].map((key) => (
-                                                            <DocRow
-                                                                key={key}
-                                                                docKey={key}
-                                                                doc={docs[key] ?? null}
-                                                                onChange={(file) =>
-                                                                    setDocs((prev) => ({ ...prev, [key]: file }))
-                                                                }
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </>
-                                            :
-                                            <div className="pt-2">
-                                                <div className="flex items-center gap-2 mb-3">
-                                                    <FileText size={14} className="text-gray-400" />
-                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                        Vehicle documents
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex flex-col gap-3">
-                                                    <DocumentUpload
-                                                        label="RC (Registration Certificate)"
-                                                        onChange={(f) => setDocs((d) => ({ ...d, registration_cert: f }))}
-                                                    />
-
-                                                    <Field>
-                                                        <FieldLabel>Registration expiry</FieldLabel>
-                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
-                                                    </Field>
-                                                    <DocumentUpload
-                                                        label="Insurance"
-                                                        onChange={(f) => setDocs((d) => ({ ...d, insurance_doc: f }))}
-                                                    />
-                                                    <Field>
-                                                        <FieldLabel>Insurance expiry</FieldLabel>
-                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
-                                                    </Field>
-                                                    <DocumentUpload
-                                                        label="PUC Certificate"
-                                                        onChange={(f) => setDocs((d) => ({ ...d, PUC_cert: f }))}
-                                                    />
-                                                    <Field>
-                                                        <FieldLabel>PUC expiry</FieldLabel>
-                                                        <Input {...register("licence_expiry")} type="date" className="text-xs" />
-                                                    </Field>
-
-                                                </div>
-                                            </div>
-                                    }
-
-
-
-
-
-
+                                    )}
                                 </FieldGroup>
                             </FieldSet>
                         </FieldGroup>
                     </div>
 
+                    <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200 px-4 sm:px-6 py-4">
+                        <Button
+                            type="submit"
+                            disabled={isLoading || isUpdating}
+                            className="w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark"
+                        >
+                            {isEdit
+                                ? (isUpdating ? "Updating..." : "Save changes")
+                                : (isLoading ? "Adding..." : "Add Truck")}
+                            <Truck className="ml-2" />
+                        </Button>
 
-                    <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>{isLoading ? "Saving..." : truck ? "Save changes" : "Add Truck"} <Truck /></Button>
-                        <SheetClose className='basis-1/2' asChild>
-                            <Button className="w-full" variant="outline">Cancel</Button>
+                        <SheetClose className="w-full sm:w-1/2" asChild>
+                            <Button variant="outline" className="w-full">
+                                Cancel
+                            </Button>
                         </SheetClose>
                     </SheetFooter>
                 </form>

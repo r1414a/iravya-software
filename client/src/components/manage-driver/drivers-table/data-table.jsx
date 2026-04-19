@@ -19,29 +19,31 @@ import { useState } from "react"
 // import { useState } from "react"
 // import EditUserDrawer from "./EditUserDrawer"
 
-export function DataTable({ columns, data,page = 1,
+export function DataTable({ 
+    columns, 
+    data,
+    setPage, 
+    columnFilters, 
+    setColumnFilters,
     totalPages = 1,
+    page = 1,
     onPrevious,
     onNext,
-    isFetching = false }) {
-//     const [open, setOpen] = useState(false)
-// const [selectedUser, setSelectedUser] = useState(null)
-const [columnFilters, setColumnFilters] = useState([])
-    const table = useReactTable({
+    isFetching = false, 
+    meta   
+}) {
+     const table = useReactTable({
         data,
         columns,
+        state: { columnFilters },
+        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        // getPaginationRowModel: getPaginationRowModel(),
-        state: {
-            columnFilters
-        },
-        onColumnFiltersChange: setColumnFilters,
-        // initialState: {
-        //     pagination: {
-        //         pageSize: 5,
-        //     },
-        // },
+        manualFiltering: true,
+        meta: {
+            ...meta,
+            updatePage: (newPage) => setPage(newPage)
+        }
     })
 
     return (
@@ -69,7 +71,7 @@ const [columnFilters, setColumnFilters] = useState([])
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                Loading users...
+                                Loading drivers...
                             </TableCell>
                         </TableRow>
                     ) : table.getRowModel().rows.length ? (
@@ -77,10 +79,7 @@ const [columnFilters, setColumnFilters] = useState([])
                             <TableRow
                                 key={row.id}
                                 className="hover:bg-muted cursor-pointer"
-                                // onClick={() => {
-                                //     setSelectedUser(row.original);
-                                //     setOpen(true);
-                                // }}
+                               
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
@@ -98,7 +97,7 @@ const [columnFilters, setColumnFilters] = useState([])
                                 colSpan={columns.length}
                                 className="text-center py-6 text-gray-500"
                             >
-                                No users found
+                                No drivers found
                             </TableCell>
                         </TableRow>
                     )}
@@ -112,15 +111,15 @@ const [columnFilters, setColumnFilters] = useState([])
                 <div className="flex gap-2">
                     <Button
                         onClick={onPrevious}
-                        disabled={page <= 1}
+                        disabled={page <= 1 || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Previous
                     </Button>
-
+                    
                     <Button
                         onClick={onNext}
-                        disabled={page >= totalPages}
+                        disabled={page >= totalPages || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Next
@@ -128,8 +127,6 @@ const [columnFilters, setColumnFilters] = useState([])
                 </div>
             </div>
 
-
-            {/* <EditUserDrawer open={open} setOpen={setOpen} selectedUser={selectedUser}/> */}
         </div>
     )
 }

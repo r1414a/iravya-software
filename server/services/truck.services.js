@@ -25,13 +25,13 @@ const uploadFile = async (file, folder) => {
 }
 
 
-const document_stattus = async(expiry_date)=>{
+const document_stattus = async (expiry_date) => {
     const today = new Date()
     const expiry = new Date(expiry_date)
 
     // Remove time for accurate day comparison
-    today.setHours(0,0,0,0)
-    expiry.setHours(0,0,0,0)
+    today.setHours(0, 0, 0, 0)
+    expiry.setHours(0, 0, 0, 0)
 
     const diffTime = expiry - today
     const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -61,7 +61,7 @@ const addTruckservice = async (data) => {
         insurance_expiry,
         puc_expiry
     } = data;
-    
+
     const [truck] = await sql`
         INSERT INTO "Trucks"
         (
@@ -165,69 +165,66 @@ const getTruckDataService = async (id) => {
     return truck
 }
 const updateTruckDataService = async (id, data) => {
-
     const {
-    registration_no,
-    model,
-    type,
-    capacity,
-    truck_status,
-    registration_cert = null,
-    insurance_doc = null,
-    PUC_cert = null,
-    rc_expiry = null,
-    insurance_expiry = null,
-    puc_expiry = null
-  } = data;
+        registration_no,
+        model,
+        type,
+        capacity,
+        truck_status,
+        registration_cert,   // can be undefined
+        insurance_doc,
+        PUC_cert,
+        rc_expiry,
+        insurance_expiry,
+        puc_expiry
+    } = data;
 
-  // Update Truck
+    // ✅ Update Truck
     const [truck] = await sql`
         UPDATE "Trucks"
         SET
-        registration_no = ${registration_no},
-        model = ${model},
-        type = ${type},
-        capacity = ${capacity},
-        status = ${truck_status}
+            registration_no = ${registration_no},
+            model = ${model},
+            type = ${type},
+            capacity = ${capacity},
+            status = ${truck_status}
         WHERE id = ${id}
         RETURNING *
     `;
 
-    // Update Registration Certificate
-    await sql`
-        UPDATE "truck_documents"
-        SET
-        file_url = ${registration_cert},
-        expiry_date = ${rc_expiry},
-        document_status = ${await document_stattus(rc_expiry)}
-        WHERE truck_id = ${id}
-        AND doc_type = 'registration_cert'
-    `;
+    // 🔥 Helper to update docs safely
+    const updateDoc = async (docType, file, expiry) => {
+        if (file !== undefined) {
+            // ✅ Replace file + update expiry
+            await sql`
+                UPDATE "truck_documents"
+                SET
+                    file_url = ${file},
+                    expiry_date = ${expiry},
+                    document_status = ${await document_stattus(expiry)}
+                WHERE truck_id = ${id}
+                AND doc_type = ${docType}
+            `;
+        } else {
+            // ✅ Keep existing file, only update expiry + status
+            await sql`
+                UPDATE "truck_documents"
+                SET
+                    expiry_date = ${expiry},
+                    document_status = ${await document_stattus(expiry)}
+                WHERE truck_id = ${id}
+                AND doc_type = ${docType}
+            `;
+        }
+    };
 
-    // Update Insurance
-    await sql`
-        UPDATE "truck_documents"
-        SET
-        file_url = ${insurance_doc},
-        expiry_date = ${insurance_expiry},
-        document_status = ${await document_stattus(insurance_expiry)}
-        WHERE truck_id = ${id}
-        AND doc_type = 'insurance_doc'
-    `;
-
-    // Update PUC
-    await sql`
-        UPDATE "truck_documents"
-        SET
-        file_url = ${PUC_cert},
-        expiry_date = ${puc_expiry},
-        document_status = ${await document_stattus(puc_expiry)}
-        WHERE truck_id = ${id}
-        AND doc_type = 'PUC_cert'
-    `;
+    // ✅ Apply updates
+    await updateDoc("registration_cert", registration_cert, rc_expiry);
+    await updateDoc("insurance_doc", insurance_doc, insurance_expiry);
+    await updateDoc("PUC_cert", PUC_cert, puc_expiry);
 
     return truck;
-}
+};
 
 const deleteTruckService = async (id) => {
     const [truck] = await sql`
@@ -278,66 +275,102 @@ const getRecentTripDetailsService = async (trip_id) => {
     return trip
 }
 
-const getTripHistoryService = async (id) => {
+const getTripHistoryService = async (truck_id) => {
     const trips = await sql`
         SELECT 
-            t.id,
-            t.trip_code,
-            t.status,
-            t.started_at,
-            t.completed_at,
+    t.id,
+    t.tracking_code,
+    t.status,
+    t.scheduled_at,
+    t.departed_at,
+    t.completed_at,
 
-            source_dc.name as source,
+    -- Source DC
+    dc.name AS source_dc,
 
-            STRING_AGG(
-                st.stop_name, 
-                ' → ' 
-                ORDER BY st.sequence_no
-            ) as stops,
+    -- Stops as structured JSON (best for frontend)
+    COALESCE(
+        json_agg(
+            json_build_object(
+                'store_id', s.id,
+                'store_name', s.name,
+                'status', ts.status,
+                'eta', ts.eta,
+                'arrived_at', ts.arrived_at
+            )
+            ORDER BY ts.created_at
+        ) FILTER (WHERE ts.id IS NOT NULL),
+        '[]'
+    ) AS stops,
 
-            destination_dc.name as destination
+    -- Trip duration in minutes
+    CASE 
+        WHEN t.departed_at IS NOT NULL AND t.completed_at IS NOT NULL THEN
+            ROUND(EXTRACT(EPOCH FROM (t.completed_at - t.departed_at)) / 60)
+        ELSE NULL
+    END AS duration_minutes
 
-        FROM "Trips" t
+FROM "Trips" t
 
-        LEFT JOIN "Distribution_Centers" source_dc
-            ON t.source_dc_id = source_dc.id
+JOIN "Distribution_center" dc
+    ON t.source_dc_id = dc.id
 
-        LEFT JOIN "Distribution_Centers" destination_dc
-            ON t.destination_dc_id = destination_dc.id
+LEFT JOIN "Trip_stops" ts
+    ON ts.trip_id = t.id
 
-        LEFT JOIN "Trip_Stops" st
-            ON st.trip_id = t.id
+LEFT JOIN "Stores" s
+    ON ts.store_id = s.id
 
-        WHERE t.truck_id = ${truck_id}
+WHERE t.truck_id = ${truck_id}
 
-        GROUP BY 
-            t.id,
-            source_dc.name,
-            destination_dc.name
+GROUP BY 
+    t.id,
+    t.tracking_code,
+    t.status,
+    t.scheduled_at,
+    t.departed_at,
+    t.completed_at,
+    dc.name
 
-        ORDER BY t.started_at DESC
+ORDER BY 
+    COALESCE(t.departed_at, t.scheduled_at, t.created_at) DESC;
     `
 
     return trips
 }
 
-const getAllTruckDataService = async ({ type, truck_status, search, page, limit, user_id}) => {
+const getAllTruckDataService = async ({ type, truck_status, search, page, limit }) => {
     const offset = (page - 1) * limit
 
-    console.log(user_id)
-    const [dc] = await sql`
-        SELECT "id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
-    `
-    const dcId = dc?.id || null
-    console.log("dcId:", dcId)
     const trucks = await sql`
         SELECT 
-            tr.id, tr.registration_no, tr.type, tr.capacity, tr.model, tr.status,
-            COUNT(t.id) AS total_trips,
-            MAX(t.departed_at) AS last_trip
+            tr.id,
+            tr.registration_no,
+            tr.type,
+            tr.capacity,
+            tr.model,
+            tr.status,
+
+            COUNT(DISTINCT t.id) AS total_trips,
+            MAX(t.departed_at) AS last_trip,
+
+            COALESCE(
+                JSON_AGG(
+                    DISTINCT JSONB_BUILD_OBJECT(
+                        'id', td.id,
+                        'doc_type', td.doc_type,
+                        'file_url', td.file_url,
+                        'expiry_date', td.expiry_date,
+                        'document_status', td.document_status
+                    )
+                ) FILTER (WHERE td.id IS NOT NULL),
+                '[]'
+            ) AS documents
+
         FROM "Trucks" tr
         LEFT JOIN "Trips" t ON t.truck_id = tr.id
-        
+        LEFT JOIN "truck_documents" td ON td.truck_id = tr.id
+
         WHERE 1=1
             AND (${type}::text IS NULL OR tr.type = ${type})
             AND (${truck_status}::text IS NULL OR tr.status = ${truck_status})
@@ -346,10 +379,8 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit,
                 OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
-            
-            
-          
-        GROUP BY tr.id, tr.registration_no, tr.type, tr.model, tr.status
+
+        GROUP BY tr.id
         ORDER BY last_trip DESC NULLS LAST
         LIMIT ${limit} OFFSET ${offset}
     `
@@ -364,14 +395,13 @@ const getAllTruckDataService = async ({ type, truck_status, search, page, limit,
                 OR tr.registration_no ILIKE ${'%' + (search || '') + '%'}
                 OR tr.search_vector @@ plainto_tsquery('simple', ${search || ''})
             )
-            
     `
 
     const total = Number(countRow.count)
 
     return {
         data: trucks,
-        pagination: {       // FIX 2: was missing opening brace here
+        pagination: {
             total,
             page,
             limit,

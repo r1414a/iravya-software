@@ -12,7 +12,8 @@ import {
     Clock,
     CheckCircle2,
 } from "lucide-react"
-import { useState } from "react"
+import { useGetTruckTripHistoryQuery } from "@/lib/features/trucks/truckApi"
+import { format, parseISO } from "date-fns"
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const statusStyles = {
@@ -43,7 +44,12 @@ const mockDocs = {
 
 // ── Main drawer ───────────────────────────────────────────────────────────────
 export default function TruckDetailDrawer({ truck, open, onClose }) {
-    const [editingDriver, setEditingDriver] = useState(false)
+    const { data, isLoading } = useGetTruckTripHistoryQuery(truck?.id, {
+        skip: !truck?.id
+    })
+
+    const truckTripHistory = data?.data || [];
+
 
     if (!truck) return null
 
@@ -60,10 +66,10 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
 
                         <div>
                             <SheetTitle className="text-lg sm:text-xl font-mono font-bold break-words">
-                                {truck.regNo}
+                                {truck.registration_no}
                             </SheetTitle>
                             <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                                {truck.make} · {truck.capacity}
+                                {truck.model} · {truck.capacity}T
                             </p>
                         </div>
 
@@ -82,52 +88,78 @@ export default function TruckDetailDrawer({ truck, open, onClose }) {
                     </p>
 
                     <div className="flex flex-col gap-2 sm:gap-3">
-                        {mockTripHistory.map((trip) => (
-                            <div
-                                key={trip.id}
-                                className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
-                            >
 
-                                {/* Icon */}
-                                <div className={`mt-0.5 rounded-full p-1 ${trip.status === "in_transit" ? "bg-blue-100" : "bg-green-100"
-                                    }`}>
-                                    {trip.status === "in_transit"
-                                        ? <Truck size={12} className="text-blue-600" />
-                                        : <CheckCircle2 size={12} className="text-green-600" />
-                                    }
-                                </div>
+                        {
+                            isLoading ? (
+                                <p className="ps-4 text-sm text-gray-400">Loading deliveries...</p>
+                            ) : !truckTripHistory.length ? (
+                                <p className="ps-4 text-sm text-gray-400">No deliveries found</p>
+                            ) : (
+                                truckTripHistory.map((trip) => (
+                                    <div
+                                        key={trip.id}
+                                        className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                                    >
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
+                                        {/* Icon */}
+                                        <div className={`mt-0.5 rounded-full p-1 ${trip.status === "in_transit" ? "bg-blue-100" : "bg-green-100"
+                                            }`}>
+                                            {
+                                                trip.status === "in_transit" ? (
+                                                    <Truck size={12} className="text-blue-600" />
+                                                ) : trip.status === "completed" ? (
+                                                    <CheckCircle2 size={12} className="text-green-600" />
+                                                ) : (
+                                                    <Clock size={12} className="text-gray-500" />
+                                                )
+                                            }
+                                        </div>
 
-                                    {/* Top row */}
-                                    <div className="flex flex-wrap items-center justify-between gap-1">
-                                        <p className="text-[10px] sm:text-xs font-mono text-gray-500">
-                                            {trip.id}
-                                        </p>
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0">
 
-                                        <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1">
-                                            <Clock size={10} />
-                                            {trip.duration}
-                                        </p>
+                                            {/* Top row */}
+                                            <div className="flex flex-wrap items-center justify-between gap-1">
+                                                <p className="text-[10px] sm:text-xs font-mono text-gray-500">
+                                                    {trip.tracking_code}
+                                                </p>
+                                                <p className="text-[10px] sm:text-xs font-mono text-gray-500">From: {trip.source_dc}</p>
+
+                                                <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1">
+                                                    <Clock size={10} />
+                                                    {trip.duration_minutes
+                                                        ? `${Math.floor(trip.duration_minutes / 60)}h ${trip.duration_minutes % 60}m`
+                                                        : trip.status === "in_transit"
+                                                            ? "In progress"
+                                                            : "—"}
+                                                </p>
+                                            </div>
+
+                                            {/* Stops */}
+                                            <p className="text-xs sm:text-sm font-medium flex items-start gap-1 mt-0.5">
+                                                <MapPin size={11} className="text-gray-400 shrink-0 mt-[2px]" />
+                                                <span className="break-words">
+                                                    {trip.stops?.length
+                                                        ? trip.stops.map(s => s.store_name).join(" → ")
+                                                        : "No delivery stops"}
+                                                </span>
+                                            </p>
+
+                                            {/* Date */}
+                                            <p className="text-[10px] sm:text-xs text-gray-400">
+                                                {trip.completed_at
+                                                    ? format(parseISO(trip.completed_at), "MMM d, hh:mm a")
+                                                    : trip.departed_at
+                                                        ? format(parseISO(trip.departed_at), "MMM d, hh:mm a")
+                                                        : trip.scheduled_at
+                                                            ? format(parseISO(trip.scheduled_at), "MMM d, hh:mm a")
+                                                            : "—"}
+                                            </p>
+
+                                        </div>
                                     </div>
-
-                                    {/* Stores */}
-                                    <p className="text-xs sm:text-sm font-medium flex items-start gap-1 mt-0.5">
-                                        <MapPin size={11} className="text-gray-400 shrink-0 mt-[2px]" />
-                                        <span className="break-words">
-                                            {trip.stores}
-                                        </span>
-                                    </p>
-
-                                    {/* Date */}
-                                    <p className="text-[10px] sm:text-xs text-gray-400">
-                                        {trip.date}
-                                    </p>
-
-                                </div>
-                            </div>
-                        ))}
+                                ))
+                            )}
                     </div>
                 </div>
 

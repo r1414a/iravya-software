@@ -18,34 +18,31 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 // import EditUserDrawer from "./EditUserDrawer"
 
-export function DataTable({ data,columns,setPage, columnFilters, 
-    setColumnFilters ,
+export function DataTable({ 
+    columns, 
+    data,
+    setPage, 
+    columnFilters, 
+    setColumnFilters,
     totalPages = 1,
     page = 1,
     onPrevious,
     onNext,
-    isFetching = false }) {
-//     const [open, setOpen] = useState(false)
-// const [columnFilters, setColumnFilters] = useState([])
-    const table = useReactTable({
+    isFetching = false, 
+    meta  
+}) {
+   const table = useReactTable({
         data,
         columns,
+        state: { columnFilters },
+        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        // getPaginationRowModel: getPaginationRowModel(),
-        state: {
-            columnFilters
-        },
-        onColumnFiltersChange: setColumnFilters,
         manualFiltering: true,
         meta: {
-            updatePage: (page) => setPage(page)
+            ...meta,
+            updatePage: (newPage) => setPage(newPage)
         }
-        // initialState: {
-        //     pagination: {
-        //         pageSize: 5,
-        //     },
-        // },
     })
 
     return (
@@ -81,10 +78,7 @@ export function DataTable({ data,columns,setPage, columnFilters,
                             <TableRow
                                 key={row.id}
                                 className="hover:bg-muted cursor-pointer"
-                                // onClick={() => {
-                                //     setSelectedUser(row.original);
-                                //     setOpen(true);
-                                // }}
+                                
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
@@ -116,24 +110,21 @@ export function DataTable({ data,columns,setPage, columnFilters,
                 <div className="flex gap-2">
                     <Button
                         onClick={onPrevious}
-                        disabled={page <= 1}
+                        disabled={page <= 1 || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Previous
                     </Button>
-
+                    
                     <Button
                         onClick={onNext}
-                        disabled={page >= totalPages}
+                        disabled={page >= totalPages || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Next
                     </Button>
                 </div>
             </div>
-
-
-            {/* <EditUserDrawer open={open} setOpen={setOpen} selectedUser={selectedUser}/> */}
         </div>
     )
 }

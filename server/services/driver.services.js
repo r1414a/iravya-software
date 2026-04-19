@@ -5,60 +5,65 @@ import ApiError from "../utils/ApiError.js"
 
 const addDriverService = async (data) => {
     const {
-        first_name,
-        last_name,
-        phone_number,
-        licence_no,
-        licence_class,
-        licence_expiry,
-        status = "available"
+       full_name = "",
+        phone = null,
+        licence_no = null,
+        licence_class = null,
+        licence_expiry = null
     } = data;
 
+    const nameParts = full_name.trim().split(/\s+/);
+    const first_name = nameParts[0] || "Unknown";
+    const last_name = nameParts.slice(1).join(" ") || ""; 
     const [newUser] = await sql`
         INSERT INTO "User"
-        (
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number",
-            "role",
-            "user_status"
-        )
-        VALUES
-        (
-            ${first_name},
-            ${last_name},
-            NULL,
-            ${phone_number},
-            'driver',
-            'active'
-        )
-        RETURNING id
-    `;
+    (
+       
+        "first_name",
+        "last_name",
+        "email",
+        "phone_number",
+        "role",
+        "status"
+    )
+    VALUES
+    (
+       
+        ${first_name},
+        ${last_name},
+        NULL,
+        ${phone},
+        'driver',
+        true
+    )
+    RETURNING
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "role",
+        "status"
+`;
 
-    const [driver] = await sql`
+    const driver = await sql`
         INSERT INTO "Drivers" (
-            "licence_no",
-            "licence_class",
-            "licence_expiry",
-            "user_id",
-            "status"
+        "licence_no",
+        "licence_class",
+        "licence_expiry",
+        "user_id"
         )
         VALUES (
-            ${licence_no},
-            ${licence_class},
-            ${licence_expiry},
-            ${newUser.id},
-            ${status}
+        ${licence_no},
+        ${licence_class},
+        ${licence_expiry},
+        ${newUser.id}
         )
         RETURNING *
     `;
 
     return driver;
 };
-
-
-const driverExistBylicenceno = async (licence_no) => {
+const driverExistBylicenceno = async(licence_no)=>{
 
     const driver = await sql`
         SELECT * FROM "Drivers"
@@ -77,8 +82,7 @@ const getDriverbyidService = async (id) => {
 
 const updateDriverService = async (id, data) => {
     const {
-        first_name,
-        last_name,
+        full_name,
         phone_number,
         licence_no,
         licence_class,
@@ -86,16 +90,7 @@ const updateDriverService = async (id, data) => {
         status
     } = data;
 
-    const current = await sql`
-    SELECT status FROM "Drivers" WHERE id = ${id}
-`;
-
-    if (current[0]?.status === "on_trip" && status !== "on_trip") {
-        throw new ApiError(400, "Cannot change status while driver is on trip");
-    }
-
-    // ✅ Update driver table
-    const [driver] = await sql`
+    const driver = await sql`
         UPDATE "Drivers"
         SET 
             "licence_no" = ${licence_no},
@@ -104,26 +99,24 @@ const updateDriverService = async (id, data) => {
             "status" = ${status}
         WHERE "id" = ${id}
         RETURNING *
-    `;
-
-    // ✅ Update user table
+    `
+    const name_ = full_name.split(" ")
     await sql`
-        UPDATE "User"
-        SET
-            "first_name" = COALESCE(${first_name}, "first_name"),
-            "last_name" = COALESCE(${last_name}, "last_name"),
-            "phone_number" = COALESCE(${phone_number}, "phone_number")
-        WHERE "id" = (
-            SELECT "user_id"
-            FROM "Drivers"
-            WHERE "id" = ${id}
-        )
+      UPDATE "User"
+      SET
+        "first_name" = COALESCE(${name_[0]}, "first_name"),
+        "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+        "phone_number" = COALESCE(${phone_number}, "phone_number")
+      WHERE "id" = (
+        SELECT "user_id"
+        FROM "Drivers"
+        WHERE "id" = ${id}
+      )
     `;
+    return driver
+}
 
-    return driver;
-};
-
-const deleteDriverService = async (id) => {
+const deleteDriverService = async(id)=>{
     const driver = await sql`
         DELETE FROM "Drivers"
         WHERE "id" = ${id}
@@ -133,83 +126,64 @@ const deleteDriverService = async (id) => {
 }
 
 const getDriverCurrentTrip = async (driverId) => {
-    const trip = await sql`
+  const trip = await sql`
     SELECT 
-    t.id AS trip_id,
-    t.status,
-    t.scheduled_at,
-    t.departed_at,
-    t.completed_at,
-    t.completed_deliveries,
-    t.tracking_code,
+        t.id AS trip_id,
+        t.status,
+        t.scheduled_at,
+        t.departed_at,
+        t.completed_at,
+        t.completed_deliveries,
+        t.tracking_code,
+        u.first_name,
+        u.last_name,
+        CONCAT(u.first_name, ' ', u.last_name)  AS driver_name,
+        u.phone_number AS driver_phone,
 
-    -- Driver details from User table
-    (u.first_name || ' ' || u.last_name) AS driver_name,
-    u.phone_number,
+        tr.registration_no,
+        tr.model,
+        tr.capacity,
 
-    tr.registration_no,
-    tr.model,
-    tr.capacity,
+        dc.name AS source_dc_name,
+        dc.city,
+        dc.state
 
-    dc.name AS source_dc_name,
-    dc.city,
-    dc.state,
+    FROM "Trips" t
 
-    stops_data.stops
+    LEFT JOIN "Drivers" d 
+        ON t.driver_id = d.id
 
-FROM "Trips" t
+    LEFT JOIN "Trucks" tr 
+        ON t.truck_id = tr.id
 
-JOIN "Drivers" d 
-    ON t.driver_id = d.id
+    LEFT JOIN "Distribution_center" dc 
+        ON t.source_dc_id = dc.id
 
-JOIN "User" u 
-    ON d.user_id = u.id
+    LEFT JOIN "User" u
+        ON u.id = t.user_id
 
-JOIN "Trucks" tr 
-    ON t.truck_id = tr.id
+    WHERE 
+        t.driver_id = ${driverId}
+        AND t.status != 'cancelled'
 
-JOIN "Distribution_center" dc 
-    ON t.source_dc_id = dc.id
+    ORDER BY 
+        CASE 
+            WHEN t.status = 'in_transit' THEN 1
+            WHEN t.scheduled_at >= CURRENT_DATE 
+            AND t.scheduled_at < CURRENT_DATE + INTERVAL '1 day' THEN 2
+            WHEN t.scheduled_at > CURRENT_DATE THEN 3
+            ELSE 4
+        END,
+        t.scheduled_at ASC
 
-LEFT JOIN LATERAL (
-    SELECT json_agg(
-        json_build_object(
-            'store_name', s.name,
-            'status', ts.status,
-            'eta', ts.eta,
-            'arrived_at', ts.arrived_at
-        )
-        ORDER BY ts.created_at
-    ) AS stops
-    FROM "Trip_stops" ts
-    JOIN "Stores" s ON ts.store_id = s.id
-    WHERE ts.trip_id = t.id
-) stops_data ON true
-
-WHERE 
-    t.driver_id = ${driverId}
-    AND t.status IN ('scheduled', 'in_transit')
-
-ORDER BY 
-    CASE 
-        WHEN t.status = 'in_transit' THEN 1
-        WHEN t.status = 'scheduled' 
-             AND t.scheduled_at >= NOW() 
-             AND t.scheduled_at < NOW() + INTERVAL '1 day' THEN 2
-        WHEN t.status = 'scheduled' 
-             AND t.scheduled_at > NOW() THEN 3
-        ELSE 4
-    END,
-    COALESCE(t.scheduled_at, t.departed_at, t.created_at)
-
-LIMIT 1;
+    LIMIT 1
   `;
 
-    return trip;
+  return trip;
 };
 
 const getDriverTripHistoryService = async (driverId) => {
-    const trips = await sql`
+  const trips = await sql`
     SELECT 
         t.id,
         t.status,
@@ -245,17 +219,17 @@ const getDriverTripHistoryService = async (driverId) => {
     LIMIT 20
   `;
 
-    return trips;
+  return trips;
 };
 
 const getDriversListService = async (page = 1, limit = 10, user_id) => {
-    const offset = (page - 1) * limit;
+  const offset = (page - 1) * limit;
 
-    const [dc] = await sql`
+  const [dc] = await sql`
         SELECT "brand_id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
     `
     const brandId = dc?.brand_id || null
-    const drivers = await sql`
+  const drivers = await sql`
     SELECT 
         d.id,
         CONCAT(u.first_name, ' ', u.last_name) AS full_name,
@@ -312,135 +286,94 @@ const getDriversListService = async (page = 1, limit = 10, user_id) => {
     LIMIT ${limit}
     OFFSET ${offset}
   `;
-    //   console.log(drivers)
+//   console.log(drivers)
 
-    return {
-        data: drivers,
-        total: Number(drivers[0]?.total_count || 0),
-        page,
-        limit,
-        totalPages: Math.ceil((drivers[0]?.total_count || 0) / limit)
-    };
+  return {
+    data: drivers,
+    total: Number(drivers[0]?.total_count || 0),
+    page,
+    limit,
+    totalPages: Math.ceil((drivers[0]?.total_count || 0) / limit)
+  };
 };
 
-const getDriversListeBySearchService = async (
-    page = 1,
-    limit = 10,
-    search = "",
-    user_id,
-    role,
-    status,
-    licence_class
-) => {
+const getDriversListeBySearchService = async (page = 1, limit = 10, search = "", user_id) => {
     const offset = (page - 1) * limit;
     const searchPattern = `%${search}%`;
 
-    let dcId = null;
-
-    // ✅ Only for DC Manager
-    if (role !== "super_admin") {
-        const [dc] = await sql`
-      SELECT "id" FROM "Distribution_center"
-      WHERE "dc_manager" = ${user_id}
-    `;
-        dcId = dc?.id;
-
-        if (!dcId) {
-            throw new Error("No DC assigned to this manager");
-        }
-    }
-
+    const [dc] = await sql`
+            SELECT "brand_id" FROM "Distribution_center" WHERE "dc_manager" = ${user_id}
+        `
+    const brandId = dc?.brand_id || null
     const drivers = await sql`
-    SELECT 
-      d.id,
-      u.first_name,
-      u.last_name,
-      CONCAT(u.first_name, ' ', u.last_name) AS full_name,
-      u.phone_number,
-      d.licence_no,
-      d.licence_class,
-      d.licence_expiry,
-      d.created_at AS since,
+        SELECT 
+            d.id,
+            -- Concatenate names from the Users table
+            u.first_name,
+            u.last_name,
+            CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+            u.phone_number,
+            d.licence_no,
+            d.licence_class,
+            d.licence_expiry,
+            d.created_at AS since,
 
-      -- ✅ Current active trip (no duplicates)
-      t.id AS current_trip_id,
-      t.status AS trip_status,
-      t.tracking_code AS current_trip_tracking_code,
+            t.id AS current_trip_id,
+            t.status AS trip_status,
 
-      -- ✅ Total trips (global)
-      (SELECT COUNT(*) 
-       FROM "Trips" 
-       WHERE driver_id = d.id
-      ) AS total_trips,
+            -- Using subqueries for counts is cleaner than multiple JOINs in complex setups
+            (SELECT COUNT(*) FROM "Trips" WHERE driver_id = d.id) AS total_trips,
+            (SELECT COUNT(*) FROM "Trips" 
+            WHERE driver_id = d.id 
+            AND d.brand_id=${brandId}
+            AND DATE_TRUNC('month', scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
+            ) AS trips_this_month,
 
-      -- ✅ Trips this month (role-based)
-      (SELECT COUNT(*) 
-       FROM "Trips"
-       WHERE driver_id = d.id
-       ${role !== "super_admin" ? sql`AND source_dc_id = ${dcId}` : sql``}
-       AND DATE_TRUNC('month', scheduled_at) = DATE_TRUNC('month', CURRENT_DATE)
-      ) AS trips_this_month,
+            -- Determine UI status based on trip presence
+            CASE 
+                WHEN d.status = 'on_trip' THEN 'On trip'
+                WHEN d.status = 'inactive' THEN 'Inactive'
+                ELSE 'Available'
+            END AS driver_status,
 
-      CASE 
-        WHEN t.id IS NOT NULL THEN 'On trip'
-        WHEN d.status = 'inactive' THEN 'Inactive'
-        ELSE 'Available'
-      END AS driver_status,
+            COUNT(*) OVER() AS total_count
 
-      COUNT(*) OVER() AS total_count
+        FROM "Drivers" d
+        -- Join Users to get Name and Phone
+        INNER JOIN "User" u ON d.user_id = u.id
+        -- Left Join Trips to find if they are currently on a trip
+        LEFT JOIN "Trips" t ON t.driver_id = d.id AND t.status = 'in_transit'
 
-    FROM "Drivers" d
-    INNER JOIN "User" u ON d.user_id = u.id
+        WHERE 
+            ${search} = '' 
+            OR u.first_name ILIKE ${searchPattern}
+            OR u.last_name ILIKE ${searchPattern}
+            OR u.phone_number ILIKE ${searchPattern}
+            OR d.licence_no ILIKE ${searchPattern}
+            
 
-    -- ✅ Prevent duplicate rows
-    LEFT JOIN LATERAL (
-      SELECT id, status, tracking_code
-      FROM "Trips"
-      WHERE driver_id = d.id AND status = 'in_transit'
-      LIMIT 1
-    ) t ON TRUE
+        GROUP BY 
+            d.id, u.first_name, u.last_name, u.phone_number, t.id, t.status
 
-    WHERE 
-      (${search} = '' OR (
-        u.first_name ILIKE ${searchPattern} OR 
-        u.last_name ILIKE ${searchPattern} OR 
-        u.phone_number ILIKE ${searchPattern} OR 
-        d.licence_no ILIKE ${searchPattern}
-      ))
-
-      -- ✅ KEY FIX: DC manager restriction via trips
-      ${role !== "super_admin" ? sql`
-        AND EXISTS (
-          SELECT 1 FROM "Trips" t2
-          WHERE t2.driver_id = d.id
-          AND t2.source_dc_id = ${dcId}
-        )
-      ` : sql``}
-
-      AND (${status ? sql`d.status = ${status}` : sql`TRUE`})
-      AND (${licence_class ? sql`d.licence_class = ${licence_class}` : sql`TRUE`})
-
-    ORDER BY d.created_at DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `;
+        ORDER BY d.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+    `;
 
     const total = parseInt(drivers[0]?.total_count || 0);
 
     return {
         data: drivers,
         pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
         }
     };
 };
 
-
-
-export {
+export{
     addDriverService,
     driverExistBylicenceno,
     getDriverbyidService,

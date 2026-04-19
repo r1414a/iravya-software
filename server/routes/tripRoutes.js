@@ -13,7 +13,7 @@ import { getData,
 const router = express.Router()
 
 
-router.get("/data", protect, authorize("super_admin", "dc_manager"), getData)
+router.post("/data", protect, authorize("super_admin", "dc_manager"), getData)
 router.post("/trip", protect, authorize("super_admin", "dc_manager"), addTripValidator, validate, addTrip)
 router.get("/trips", protect, authorize("super_admin", "dc_manager"),allTrips)
 router.put("/cancel/:id", protect, authorize("super_admin", "dc_manager"), cancelTrip)

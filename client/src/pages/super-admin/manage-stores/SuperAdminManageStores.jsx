@@ -1,73 +1,101 @@
+// SuperAdminManageStores.jsx (Optimized)
+import { useEffect, useState, useMemo } from "react"
 import AdminSubHeader from "@/components/AdminSubHeader"
+import StoreDetailDrawer from "@/components/manage-store/StoreDetailsDrawer"
 import StoreForm from "@/components/manage-store/StoreForm"
 import StoresFilter from "@/components/manage-store/StoresFilter"
 import StoresTable from "@/components/manage-store/StoresTable"
 import { useGetAllBrandsQuery } from "@/lib/features/brands/brandApi"
 import { useGetAllStoresQuery } from "@/lib/features/stores/storeApi"
 import { useGetAvailableManagersQuery } from "@/lib/features/users/userApi"
-import { useEffect, useState } from "react"
 
-const limit = 10;
+const LIMIT = 10
 
 export default function SuperAdminManageStores() {
-    const [page, setPage] = useState(1);
+    // State
+    const [page, setPage] = useState(1)
     const [searchInput, setSearchInput] = useState("")
-    const [debouncedSearch, setDebouncedSearch] = useState("");
-    const [columnFilters, setColumnFilters] = useState([]);
-    const [managerSearch, setManagerSearch] = useState("");
-    const [debouncedManagerSearch, setDebouncedManagerSearch] = useState("");
-    const [editStore, setEditStore] = useState(null);
-    const [editOpen, setEditOpen] = useState(false);
-
-    const statusFilter = columnFilters.find(f => f.id === "status")?.value || "";
-    const cityFilter = columnFilters.find(f => f.id === "city")?.value || "";
-    const brandFilter = columnFilters.find(f => f.id === "brand_name")?.value || "";
-
-    // Handle debouncing manually
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(searchInput);
-            setPage(1); // Reset to page 1 whenever the search term actually changes
-        }, 500);
-
-        return () => clearTimeout(handler); // Cleanup on every keystroke
-    }, [searchInput]);
-
-     useEffect(() => {
-            const t = setTimeout(() => {
-                setDebouncedManagerSearch(managerSearch);
-            }, 500);
+    const [debouncedSearch, setDebouncedSearch] = useState("")
+    const [columnFilters, setColumnFilters] = useState([])
+    const [managerSearch, setManagerSearch] = useState("")
+    const [debouncedManagerSearch, setDebouncedManagerSearch] = useState("")
     
-            return () => clearTimeout(t);
-        }, [managerSearch]);
+    // Modal states
+    const [editStore, setEditStore] = useState(null)
+    const [editOpen, setEditOpen] = useState(false)
+    const [viewStore, setViewStore] = useState(null)
+    const [viewOpen, setViewOpen] = useState(false)
 
-    const { data, isLoading, isFetching } = useGetAllStoresQuery(
-        { page, limit, search: debouncedSearch, status: statusFilter, city: cityFilter, brand_id: brandFilter }
+    // Extract filters
+    const statusFilter = useMemo(
+        () => columnFilters.find(f => f.id === "status")?.value || "",
+        [columnFilters]
+    )
+    const cityFilter = useMemo(
+        () => columnFilters.find(f => f.id === "city")?.value || "",
+        [columnFilters]
+    )
+    const brandFilter = useMemo(
+        () => columnFilters.find(f => f.id === "brand_name")?.value || "",
+        [columnFilters]
     )
 
+    // Debounce search
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchInput)
+            setPage(1)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [searchInput])
+
+    // Debounce manager search
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedManagerSearch(managerSearch)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [managerSearch])
+
+    // API Queries
+    const { data: storesData, isLoading, isFetching } = useGetAllStoresQuery({
+        page,
+        limit: LIMIT,
+        search: debouncedSearch,
+        status: statusFilter,
+        city: cityFilter,
+        brand_id: brandFilter
+    })
+
     const { data: managersData, isLoading: loadingManagers } = useGetAvailableManagersQuery({
-            page: 1,
-            limit: 10,
-            search: debouncedManagerSearch,
-        });
-        const managers = managersData?.data?.users || [];
+        page: 1,
+        limit: 10,
+        search: debouncedManagerSearch,
+    })
 
-    const { data: brandsData } = useGetAllBrandsQuery();
-    const brands = brandsData?.data || [];
-    
-    const stores = data?.data?.data || [];
-    const totalPages = data?.data?.total_pages || 1;
-    const currentPage = data?.data?.page || 1;
+    const { data: brandsData } = useGetAllBrandsQuery()
 
+    // Extract data
+    const stores = useMemo(() => storesData?.data?.data || [], [storesData])
+    const totalPages = useMemo(() => storesData?.data?.total_pages || 1, [storesData])
+    const currentPage = useMemo(() => storesData?.data?.page || 1, [storesData])
+    const managers = useMemo(() => managersData?.data?.users || [], [managersData])
+    const brands = useMemo(() => brandsData?.data || [], [brandsData])
+
+    // Handlers
     const handleClear = () => {
-        setSearchInput("");
-        setDebouncedSearch("");
-        setPage(1);
-    };
+        setSearchInput("")
+        setDebouncedSearch("")
+        setPage(1)
+    }
+
+    const handlePrevious = () => setPage(prev => Math.max(prev - 1, 1))
+    const handleNext = () => setPage(prev => prev < totalPages ? prev + 1 : prev)
+
     return (
         <section className="mb-10">
             <AdminSubHeader
-                to={'/admin'}
+                to="/admin"
                 heading="Manage Stores"
                 subh="All retail stores across all brands — add, edit, manage geofence and public tracking"
             />
@@ -77,35 +105,40 @@ export default function SuperAdminManageStores() {
                 brands={brands}
                 managers={managers}
                 managerSearch={managerSearch}
-                loadingManagers={loadingManagers} 
+                loadingManagers={loadingManagers}
                 setManagerSearch={setManagerSearch}
                 open={editOpen}
                 onClose={setEditOpen}
             />
 
+            <StoreDetailDrawer
+                store={viewStore}
+                open={viewOpen}
+                onClose={() => setViewOpen(false)}
+            />
 
             <StoresFilter
-            setEditStore={setEditStore}
-                setEditOpen={setEditOpen}
-                // CreateButton={() => <StoreForm mode="add" brands={brands} />}
-                searchInput={searchInput}
-                setSearchInput={(val) => {
-                    setSearchInput(val);
-                    setPage(1); // Reset page when typing
-                }}
-                handleClear={handleClear}
-            />
-            <StoresTable
-                stores={stores}
                 setEditStore={setEditStore}
                 setEditOpen={setEditOpen}
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+            />
+
+            <StoresTable
+                stores={stores}
+                brands={brands}
+                setEditStore={setEditStore}
+                setEditOpen={setEditOpen}
+                setViewStore={setViewStore}
+                setViewOpen={setViewOpen}
                 setPage={setPage}
                 columnFilters={columnFilters}
                 setColumnFilters={setColumnFilters}
                 totalPages={totalPages}
                 page={currentPage}
-                onPrevious={() => setPage((prev) => Math.max(prev - 1, 1))}
-                onNext={() => setPage((prev) => prev < (totalPages || 1) ? prev + 1 : prev)}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
                 isFetching={isFetching || isLoading}
             />
         </section>

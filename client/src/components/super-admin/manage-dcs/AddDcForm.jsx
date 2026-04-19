@@ -42,6 +42,7 @@ import { useEffect, useState } from "react"
 import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/validations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
+import AssignManagerSelect from "./AssignManagerSelect"
 
 
 const dcSchema = z.object({
@@ -229,65 +230,6 @@ export default function AddDCForm({ dc, open, onClose, managers, managerSearch, 
                                         )}
                                     </Field>
 
-
-                                    {/* Contact person */}
-                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <Field>
-                                            <FieldLabel>Operator name <span className="text-red-500">*</span></FieldLabel>
-                                            <Input
-                                                {...register("contact_name")}
-                                                placeholder="e.g. Suresh Pawar"
-                                                className="placeholder:text-sm text-sm sm:text-md"
-                                            />
-                                            {errors.contact_name && (
-                                                <p className="text-red-500 text-xs">
-                                                    {errors.contact_name.message}
-                                                </p>
-                                            )}
-                                        </Field>
-                                        <Field>
-                                            <FieldLabel>Operator phone <span className="text-red-500">*</span></FieldLabel>
-                                            <Input
-                                                {...register("contact_phone", {
-                                                    pattern: {
-                                                        value: /^[0-9+\-\s()]{10,15}$/,
-                                                        message: "Enter a valid phone number",
-                                                    },
-                                                })}
-                                                placeholder="+91 98XXX XXXXX"
-                                                className="placeholder:text-sm text-sm sm:text-md"
-                                            />
-                                            {errors.contact_phone && (
-                                                <p className="text-red-500 text-xs mt-1">
-                                                    {errors.contact_phone.message}
-                                                </p>
-                                            )}
-                                        </Field>
-                                    </div> */}
-
-                                    {/* <Field>
-                                        <FieldLabel>Operator email <span className="text-red-500">*</span></FieldLabel>
-                                        <Input
-                                            {...register("contact_email", {
-                                                pattern: {
-                                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                                    message: "Enter a valid email",
-                                                },
-                                            })}
-                                            type="email"
-                                            placeholder="operator@brand.com"
-                                            className="placeholder:text-sm text-sm sm:text-md"
-                                        />
-                                        <FieldDescription className="text-xs">
-                                            A user account with DC operator role will be created for this email
-                                        </FieldDescription>
-                                        {errors.contact_email && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.contact_email.message}
-                                            </p>
-                                        )}
-                                    </Field> */}
-
                                     {
                                         dc &&
                                         <Field>
@@ -319,77 +261,17 @@ export default function AddDCForm({ dc, open, onClose, managers, managerSearch, 
                                             Assign Manager <span className="text-red-500">*</span>
                                         </FieldLabel>
 
-                                        <Controller
-                                            name="dc_manager"
+                                        <AssignManagerSelect
+                                            name={'dc_manager'} 
+                                            managers={managers} 
                                             control={control}
-                                            rules={{ required: "Manager is required" }}
-                                            render={({ field }) => {
-                                                const [isOpen, setIsOpen] = useState(false);
-
-                                                const selectedManager = managers.find(
-                                                    (m) => String(m.id) === String(field.value)
-                                                );
-
-                                                return (
-                                                    <div className="relative">
-                                                        {/* Input */}
-                                                        <Input
-                                                            placeholder="Search manager..."
-                                                            value={
-                                                                selectedManager
-                                                                    ? `${selectedManager.first_name} ${selectedManager.last_name}`
-                                                                    : managerSearch
-                                                            }
-                                                            onFocus={() => setIsOpen(true)} // ✅ OPEN on focus
-                                                            onChange={(e) => {
-                                                                field.onChange(""); // clear selection
-                                                                setManagerSearch(e.target.value);
-                                                                setIsOpen(true); // keep open while typing
-                                                            }}
-                                                            onBlur={() => {
-                                                                // delay so click event can fire
-                                                                setTimeout(() => setIsOpen(false), 200);
-                                                            }}
-                                                        />
-
-                                                        {/* Dropdown */}
-                                                        {isOpen && (
-                                                            <div className="absolute z-50 w-full bg-white border rounded-md mt-1 max-h-48 overflow-y-auto shadow-md">
-                                                                {loadingManagers ? (
-                                                                    <p className="p-2 text-sm">Loading...</p>
-                                                                ) : managers.length === 0 ? (
-                                                                    <p className="p-2 text-sm">No managers found</p>
-                                                                ) : (
-                                                                    managers.map((item) => (
-                                                                        <div
-                                                                            key={item.id}
-                                                                            className={`p-2 cursor-pointer text-sm ${String(field.value) === String(item.id)
-                                                                                    ? "bg-gray-200"
-                                                                                    : "hover:bg-gray-100"
-                                                                                }`}
-                                                                            onMouseDown={() => {
-                                                                                // ✅ use onMouseDown instead of onClick (important)
-                                                                                field.onChange(item.id);
-                                                                                setManagerSearch("");
-                                                                                setIsOpen(false);
-                                                                            }}
-                                                                        >
-                                                                            {item.first_name} {item.last_name}
-                                                                        </div>
-                                                                    ))
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            }}
+                                            errors={errors}
+                                            setManagerSearch={setManagerSearch}
+                                            managerSearch={managerSearch} 
+                                            loadingManagers={loadingManagers}
                                         />
 
-                                        {errors.dc_manager && (
-                                            <p className="text-red-500 text-xs">
-                                                {errors.dc_manager.message}
-                                            </p>
-                                        )}
+                                      
                                     </Field>
 
 

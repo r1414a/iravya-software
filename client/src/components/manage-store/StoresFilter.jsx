@@ -1,3 +1,6 @@
+
+
+// StoresFilter.jsx (Optimized)
 import {
     InputGroup,
     InputGroupAddon,
@@ -6,19 +9,29 @@ import {
 import { Search, X } from "lucide-react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 
-export default function StoresFilter({setEditStore, setEditOpen, searchInput, setSearchInput, handleClear}) {
-
+export default function StoresFilter({ 
+    setEditStore, 
+    setEditOpen, 
+    searchInput, 
+    setSearchInput, 
+    handleClear 
+}) {
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
                 <div className="w-full sm:max-w-sm order-2 sm:order-1">
                     <InputGroup>
                         <InputGroupInput 
-                        value={searchInput}
-                            onChange={e => setSearchInput(e.target.value)} placeholder="Search store name, city..." className="placeholder:text-xs lg:placeholder:text-sm" />
+                            value={searchInput}
+                            onChange={e => setSearchInput(e.target.value)} 
+                            placeholder="Search store name, city..." 
+                            className="placeholder:text-xs lg:placeholder:text-sm" 
+                        />
+                        
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
+
                         {searchInput && (
                             <button 
                                 onClick={handleClear}
@@ -28,12 +41,16 @@ export default function StoresFilter({setEditStore, setEditOpen, searchInput, se
                             </button>
                         )}
                     </InputGroup>
-
                 </div>
-                    <div className="flex justify-end order-1 sm:order-2">
-                        <CreateFormSheetTrigger text={'Add a Store'} setEditWho={setEditStore} setEditOpen={setEditOpen}/>
-                    </div>
+                
+                <div className="flex justify-end order-1 sm:order-2">
+                    <CreateFormSheetTrigger 
+                        text="Add Store" 
+                        setEditWho={setEditStore} 
+                        setEditOpen={setEditOpen}
+                    />
+                </div>
             </div>
         </section>
     )
-}
+}   

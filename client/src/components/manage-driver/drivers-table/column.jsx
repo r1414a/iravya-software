@@ -1,9 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Pencil, Truck, KeyRound, Ban, Filter, Road, Eye, Trash2 } from "lucide-react"
-import EditDriverSheet from "./EditDriverSheet"
-import TripHistorySheet from "./TripHistorySheet"
-import { useState } from "react"
+import { MoreHorizontal, Pencil,KeyRound,Road } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,15 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FieldLabel } from "@/components/ui/field"
-import TripDetailSheet from "../../manage-trip/TripDetailSheet"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
 import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { format, parseISO } from "date-fns"
 import { useDeleteDriverMutation } from "@/lib/features/drivers/driverApi"
-import { toast } from "sonner"
-import { showErrorToast } from "@/lib/utils/showErrorToast"
-import { showSuccessToast } from "@/lib/utils/showSuccessToast"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -37,40 +30,33 @@ const statusStyles = {
 }
 
 
-function ActionsCell({ row }) {
+function ActionsCell({ row, table }) {
     const driver = row.original
+    console.log("driver",driver);
+    
     const { pathname } = useLocation();
+    const { setEditDriver, setEditOpen, setDriverHistory,
+    setDriverHistoryOpen,setCurrentTrip, setCurrentTripOpen } = table.options.meta || {}
 
-    const [editOpen, setEditOpen] = useState(false)
-    const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
-    const [historyOpen, setHistoryOpen] = useState(false)
+    // const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
 
-      const [deleteDriver, { isLoading: isDeleting }] = useDeleteDriverMutation();
+    const [deleteDriver, { isLoading: isDeleting }] = useDeleteDriverMutation();
 
     const handleDelete = async () => {
         try {
             await deleteDriver(driver.id).unwrap();
-            // showSuccessToast("Driver deleted successfully")
-            // toast.success("Driver deleted successfully");
         } catch (err) {
             console.error("Failed to delete driver", err);
-            
-            // showErrorToast(err)
-            // toast.error(err?.data?.message || "Failed to delete driver");
+
         }
     };
 
 
     return (
         <>
-            <EditDriverSheet
-                driver={driver}
-                open={editOpen}
-                onClose={() => setEditOpen(false)}
-            />
 
             {/* Will need to fetch trip details by trip id by api call */}
-            <TripDetailSheet
+            {/* <TripDetailSheet
                 trip={{
                     id: "TRP-2840",
                     brand: "Zudio",
@@ -89,29 +75,26 @@ function ActionsCell({ row }) {
                 }}
                 open={tripDetailsOpen}
                 onClose={setTripDetailsOpen}
-            />
-
-            <TripHistorySheet
-                driver={driver}
-                open={historyOpen}
-                onClose={() => setHistoryOpen(false)}
-            />
+            /> */}
 
             <div className="flex items-center gap-2 justify-end">
 
-                {
+               
+                    
+                            <Button variant="outline" size="xs"
+                                onClick={() => {
+                                    setEditDriver?.(driver)
+                                    setEditOpen?.(true)
+                                }}
+                                className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+ {
                     pathname.startsWith('/admin') && (
-                        <>
-                            <Button variant="outline" size="xs" onClick={() => setEditOpen(true)} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
-
                             <DeleteModal
                                 who={driver.full_name}
                                 m1active="Driver will not be assignable to any trip"
                                 onConfirm={handleDelete}
                                 isLoading={isDeleting}
                             />
-                            {/* <Button variant="outline" size="xs" className="hover:bg-maroon cursor-pointer text-red-600 hover:text-white"><Trash2 size={16} /></Button> */}
-                        </>
                     )
                 }
 
@@ -123,17 +106,15 @@ function ActionsCell({ row }) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
-                        {/* <DropdownMenuItem
-                        className="gap-2 text-sm cursor-pointer"
-                        onClick={() => setEditOpen(true)}
-                    >
-                        <Pencil size={14} /> Edit driver
-                    </DropdownMenuItem> */}
+
                         {
-                            driver.currentTrip && (
+                            driver.driver_status === "On trip" && (
                                 <DropdownMenuItem
                                     className="gap-2 text-sm cursor-pointer"
-                                    onClick={() => setTripDetailsOpen(true)}
+                                    onClick={() => {
+                                        setCurrentTrip(driver)
+                                        setCurrentTripOpen?.(true)
+                                    }}
                                 >
                                     <Road size={14} /> View trip details
                                 </DropdownMenuItem>
@@ -142,13 +123,13 @@ function ActionsCell({ row }) {
 
                         <DropdownMenuItem
                             className="gap-2 text-sm cursor-pointer"
-                            onClick={() => setHistoryOpen(true)}
+                            onClick={() => {
+                                setDriverHistory?.(driver)
+                                setDriverHistoryOpen?.(true)
+                            }}
                         >
                             <KeyRound size={14} /> View trip history
                         </DropdownMenuItem>
-                        {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer text-red-500">
-                            <Ban size={14} /> Deactivate
-                        </DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -207,16 +188,16 @@ export const columns = [
                                 <DropdownMenuRadioItem value="all" className="text-xs">
                                     All classes
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="lmv" className="text-xs">
+                                <DropdownMenuRadioItem value="LMV" className="text-xs">
                                     LMV
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="hmv" className="text-xs">
+                                <DropdownMenuRadioItem value="HMV" className="text-xs">
                                     HMV
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="hgmv" className="text-xs">
+                                <DropdownMenuRadioItem value="HGMV" className="text-xs">
                                     HGMV
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="htv" className="text-xs">
+                                <DropdownMenuRadioItem value="HTV" className="text-xs">
                                     HTV
                                 </DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
@@ -225,12 +206,15 @@ export const columns = [
                 </div>
             )
         },
-        cell: ({ row }) => (
-            <div className="-space-y-0.5">
-                <p className="text-sm font-mono">{row.original.licence_no}</p>
-                <p className="text-xs text-gray-400">{row.original.licence_class} · Exp {format(parseISO(row.original.licence_expiry), 'MMM yyyy')}</p>
-            </div>
-        ),
+        cell: ({ row }) => {
+            const { licence_class, licence_expiry } = row.original
+            return (
+                <div className="-space-y-0.5">
+                    <p className="text-sm font-mono">{row.original.licence_no}</p>
+                    <p className="text-xs text-gray-400">{licence_class} · Exp {licence_expiry ? format(parseISO(licence_expiry), 'MMM yyyy') : "-"}</p>
+                </div>
+            )
+        },
         filterFn: (row, id, value) => {
             if (!value) return true
             return row.getValue(id)?.toLowerCase() === value.toLowerCase()
@@ -298,12 +282,15 @@ export const columns = [
     {
         accessorKey: "since",
         header: "Since",
-        cell: ({ row }) => <span className="text-sm text-gray-500">{format(parseISO(row.original.licence_expiry), 'MMM yyyy')}</span>,
+        cell: ({ row }) => {
+            const { since } = row.original;
+            return (<span className="text-sm text-gray-500">{since ? format(parseISO(since), 'MMM yyyy') : "-"}</span>)
+        },
     },
     // Status
     {
         accessorKey: "driver_status",
-        header: ({ column }) => {
+        header: ({ column, table }) => {
             const currentValue = column.getFilterValue() || "all"
 
             return (
@@ -314,13 +301,7 @@ export const columns = [
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
                                 {currentValue}
-                                {/* {currentValue === "all"
-                                    ? "All"
-                                    : currentValue === "on_trip"
-                                        ? "On trip"
-                                        : currentValue.charAt(0).toUpperCase() + currentValue.slice(1)} */}
                             </Button>
-                            {/* <Filter size={16} fill="#701a40" stroke=" #701a40" /> */}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-36 bg-white border shadow-md">
                             <DropdownMenuRadioGroup
@@ -329,16 +310,20 @@ export const columns = [
                                     column.setFilterValue(
                                         value === "all" ? undefined : value
                                     )
+                                    table.options.meta?.updatePage?.(1)
                                 }}
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">
                                     All
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Available" className="text-xs">
+                                <DropdownMenuRadioItem value="available" className="text-xs">
                                     Available
                                 </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="On trip" className="text-xs">
+                                <DropdownMenuRadioItem value="on_trip" className="text-xs">
                                     On trip
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="inactive" className="text-xs">
+                                    In active
                                 </DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
@@ -365,6 +350,6 @@ export const columns = [
     // Actions
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
     },
 ]

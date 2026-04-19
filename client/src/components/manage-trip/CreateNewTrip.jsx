@@ -97,13 +97,13 @@ export default function CreateTripModal({ truck, open, onClose }) {
 
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {
+            {/* {
                 truck ?
                     null
                     :
                     <CreateFormSheetTrigger text='Dispatch Trip' />
               
-            }
+            } */}
 
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">

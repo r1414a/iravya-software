@@ -14,12 +14,13 @@ export const driverApi = api.injectEndpoints({
  
         // POST /getAllDriverListBySearch  body: { search }  query: page, limit
         searchDrivers: builder.query({
-            query: ({ page = 1, limit = 10, search = "" } = {}) => ({
-                url: `/api/v1/drivers/getAllDriverListBySearch?page=${page}&limit=${limit}`,
-                method: "POST",
-                body: { search },
-                skipToast: true,
-            }),
+            query: ({ page = 1, limit = 10, search = "", status= "", licence_class= "" } = {}) => {
+                const p = new URLSearchParams({ page, limit })
+                if (search)   p.set("search",   search)
+                if (status)   p.set("status",   status)
+                if (licence_class)     p.set("licence_class",     licence_class)
+                return { url: `/api/v1/drivers/getAllDriverListBySearch?${p}`, skipToast: true }
+            },
             providesTags: ["Drivers"],
         }),
  

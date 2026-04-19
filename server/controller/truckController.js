@@ -73,10 +73,9 @@ const getTrukData = asyncHandler(async (req, res) => {
 })
 
 const updateTruckData = asyncHandler(async (req, res) => {
-    console.log(req.params)
-    const { id } = req.params
-    console.log(id)
-    const isTruckExist = await truckExistByIDService(id)
+    const { id } = req.params;
+
+    const isTruckExist = await truckExistByIDService(id);
 
     if (!isTruckExist) {
         return sendResponse(
@@ -84,34 +83,35 @@ const updateTruckData = asyncHandler(async (req, res) => {
             400,
             { is_exist: isTruckExist },
             "Truck data is not added"
-        )
+        );
     }
+
     const registration_cert = req.files?.registration_cert
         ? await uploadFile(req.files.registration_cert[0], "Truck")
-        : undefined
+        : undefined;
 
     const insurance_doc = req.files?.insurance_doc
         ? await uploadFile(req.files.insurance_doc[0], "Truck")
-        : undefined
+        : undefined;
 
     const PUC_cert = req.files?.PUC_cert
         ? await uploadFile(req.files.PUC_cert[0], "Truck")
-        : undefined
+        : undefined;
 
     const truck = await updateTruckDataService(id, {
         ...req.body,
         registration_cert,
         insurance_doc,
-        PUC_cert
-    })
+        PUC_cert,
+    });
 
     return sendResponse(
         res,
         200,
         truck,
         "Truck updated successfully"
-    )
-})
+    );
+});
 
 const deleteTruck = asyncHandler(async (req, res) => {
     const {id} = req.params
@@ -140,12 +140,11 @@ const getTripHistory = asyncHandler(async(req, res)=>{
     const {id} = req.params
     const trips = await getTripHistoryService(id)
 
-    if(trips){
-        sendResponse(res, 201, trips, "Found Data")
-    }
-    else{
-        throw ApiError(200, "Not Found Data")
-    }
+    if (trips.length > 0) {
+    sendResponse(res, 200, trips, "Found Data")
+} else {
+    throw new ApiError(404, "No trip history found")
+}
 })
 
 const getAllTruckData = asyncHandler(async (req, res) => {

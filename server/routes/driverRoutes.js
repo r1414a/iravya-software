@@ -28,7 +28,7 @@ router.delete("/deleteDriver/:id", protect, authorize('super_admin',"dc_manager"
 router.get("/viewCurrentTripdetails/:id",protect, authorize('super_admin',"dc_manager"), viewCurrentTripdetails)
 router.get("/getDriverTripHistory/:id", protect, authorize('super_admin',"dc_manager"),getDriverTripHistory)
 
-router.get("/getAllDriverList", protect, authorize('super_admin',"dc_manager"), getAllDriverList)
-router.post("/getAllDriverListBySearch", protect, authorize('super_admin',"dc_manager"), getAllDriverListBySearch)
+// router.get("/getAllDriverList", protect, authorize('super_admin',"dc_manager"), getAllDriverList)
+router.get("/getAllDriverListBySearch", protect, authorize('super_admin',"dc_manager"), getAllDriverListBySearch)
 
 export default router

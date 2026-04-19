@@ -85,8 +85,45 @@ const trucks = [
     },
 ]
 
-export default function TrucksTable({ trucks, setPage, columnFilters,
-    setColumnFilters,totalPages, page, onPrevious, onNext, isFetching  }) {
+export default function TrucksTable({ 
+    trucks,
+    setEditTruck,
+    setEditOpen,
+    setTruckHistory,
+    setTruckHistoryOpen,
+    setCurrentTrip,
+    setCurrentTripOpen,
+    setDispatchTruck,
+    setDispatchTruckOpen,
+    setPage,
+    columnFilters,
+    setColumnFilters,
+    totalPages,
+    page,
+    onPrevious,
+    onNext,
+    isFetching
+}) {
+
+    const meta = useMemo(() => ({
+        setEditTruck,
+        setEditOpen,
+        setTruckHistory,
+        setTruckHistoryOpen,
+        setCurrentTrip,
+        setCurrentTripOpen,
+        setDispatchTruck,
+    setDispatchTruckOpen,
+    }), [
+        setEditTruck, 
+        setEditOpen, 
+        setTruckHistory,
+        setTruckHistoryOpen,
+        setCurrentTrip,
+        setCurrentTripOpen,
+        setDispatchTruck,
+    setDispatchTruckOpen,
+    ])
 
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -94,6 +131,7 @@ export default function TrucksTable({ trucks, setPage, columnFilters,
                 <DataTable
                     columns={columns}
                     data={trucks}
+                    meta={meta}
                     setPage={setPage}
                     columnFilters={columnFilters}
                     setColumnFilters={setColumnFilters}

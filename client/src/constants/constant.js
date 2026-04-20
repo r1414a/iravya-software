@@ -40,4 +40,31 @@ export const LICENCE_CLASSES = [
         completed: { label: "Completed", className: "bg-green-100 text-green-700 border-green-200" },
         scheduled: { label: "Scheduled", className: "bg-gray-100 text-gray-600 border-gray-200" },
         cancelled: { label: "Cancelled", className: "bg-red-100 text-red-600 border-red-200" },
-    }
+}
+
+export const SUPER_ADMIN_NOTIFICATIONS = {
+    // device_at_store: true,
+    device_low_batt: true,
+    device_offline: true,
+    geofence: true,
+    long_stop: true,
+    new_user: true,
+    platform_errors: true,
+    route_deviation: true,
+    speeding: true,
+    trip_cancelled: true,
+    trip_completed: true,
+    trip_dispatched: true,
+}
+
+export const SUPER_ADMIN_PLATFORMSETTINGS = {
+    mqtt_host: "mqtt.fleettrack.in",
+    port: "8883",
+    topic_prefix: "trucks",
+    ping_interval: 10,
+    offline_threshold: 2,
+    store_radius: 200,
+    near_arrival: 5,
+    speed_limit: 80,
+    long_stop: 15,
+}

@@ -32,7 +32,7 @@ const getDriver = asyncHandler(async(req, res)=>{
     const {id} = req.params
     const driver = await getDriverbyidService(id)
 
-    if (driver.length) {
+    if (driver) {
         return sendResponse(res, 200, driver, "Driver found");
     }
     throw new ApiError(404, "Driver not found");
@@ -70,7 +70,7 @@ const viewCurrentTripdetails = asyncHandler(async (req, res) => {
 const getDriverTripHistory = asyncHandler(async (req, res) => {
     const {id} = req.params
     const trips = await getDriverTripHistoryService(id)
-    if (trips.length) {
+    if (trips.length > 0) {
         return sendResponse(res, 200, trips, "Trip history found");
     }
     return sendResponse(res, 200, [], "No trip history")

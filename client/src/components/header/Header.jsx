@@ -22,6 +22,8 @@ import { useSignOutMutation } from "@/lib/features/auth/authApi";
 
 export default function Header() {
   const { user } = useSelector(selectUser);
+  console.log("Authenticated user", user);
+  
   const [signOut] = useSignOutMutation();
   const navigate = useNavigate();
   // console.log("header", user, isAuthticated, loading);

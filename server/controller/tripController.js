@@ -10,7 +10,9 @@ import { addTripService,
  } from "../services/trip.services.js";
 
 const getData = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, search = "" } = req.query;
     let gps_devices = null
+    const offset = (page - 1) * limit;
     const {departed_at} = req.body
     if (req.user.role === "dc_manager") {
         gps_devices = await sql`
@@ -31,10 +33,14 @@ const getData = asyncHandler(async (req, res) => {
                 AND tr.departed_at <= ${departed_at}
                 AND tr.end_time >= ${departed_at}
             );
+            LIMIT ${limit}
+            OFFSET ${offset}
         `
     } else {
         gps_devices = await sql`
             SELECT * FROM "GPS_devices"
+            LIMIT ${limit}
+            OFFSET ${offset}
         `
     }
 
@@ -52,6 +58,8 @@ const getData = asyncHandler(async (req, res) => {
             AND tr.departed_at <= ${departed_at}
             AND tr.end_time >= ${departed_at}
         );
+        LIMIT ${limit}
+        OFFSET ${offset}
     `
 
     const drivers = await sql`
@@ -70,10 +78,14 @@ const getData = asyncHandler(async (req, res) => {
             AND tr.departed_at <= ${departed_at}
             AND tr.end_time >= ${departed_at}
         );
+        LIMIT ${limit}
+        OFFSET ${offset}
     `
     const stores = await sql `
         SELECT * FROM "Stores"  
-        WHERE "status" = 'active'  
+        WHERE "status" = 'active'
+        LIMIT ${limit}
+        OFFSET ${offset}  
     `
 
     sendResponse(res, 200, { gps_devices, trucks, drivers, stores }, "Fetched Data")
@@ -114,7 +126,7 @@ const cancelTrip = asyncHandler(async (req, res) => {
 const trackTrip = asyncHandler(async(req, res)=>{
     
     const trip = await trackTripService(req.body)
-    sendResponse(res, 200, trip, "Trip data found")
+    sendResponse(res, 201, trip, "Trip data found")
 
 })
 

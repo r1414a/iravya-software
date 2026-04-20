@@ -1,5 +1,6 @@
 
 import { Server } from "socket.io";
+import { tripTracker } from "../socket/trip_tracker.socket.js";
 
 let io;
 
@@ -13,7 +14,7 @@ const initSocket = (server) => {
     io.on("connection", (socket) => {
         console.log("Connected:", socket.id);
 
-        // require("../sockets/location.socket")(socket, io);
+        tripTracker(socket, io)
         socket.on("disconnect", (reason) => {
             console.log("Disconnected:", reason)
         })

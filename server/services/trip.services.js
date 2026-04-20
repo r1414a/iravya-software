@@ -77,11 +77,12 @@ const addTripService = async(data, dc_manager)=>{
     
     
     const duration = geodata.routes[0].duration
+    const speed = Math.abs((total_distance)/(duration/ 3600))+10
     const endtime = getEndTime(departure, duration)
     const [trip] = await sql`
-        INSERT INTO "Trips" (
+        INSERT INTO "Trips" 
             "source_dc_id", "truck_id", "driver_id", "device_id",
-            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time"
+            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed"
         ) VALUES (
             ${source_dc.id}, ${truck}, ${driver}, ${gps_device},
             ${tracking_code}, 'scheduled', ${dc_manager},
@@ -89,7 +90,8 @@ const addTripService = async(data, dc_manager)=>{
             ${total_distance},
             ${geopath},
             ${departure},
-            ${endtime}
+            ${endtime},
+            ${speed}
         )
         RETURNING *
     `
@@ -110,7 +112,7 @@ const addTripService = async(data, dc_manager)=>{
 
 }
 
-const allTripsService = async({ page, limit, status, search, user_id, role })=>{
+const allTripsService = async({ page, limit, status, city, search, user_id, role })=>{
     const offset = (page - 1) * limit
 
     // DC manager: only see their own DC's trips
@@ -172,7 +174,13 @@ const allTripsService = async({ page, limit, status, search, user_id, role })=>{
         WHERE 1=1
             ${dcId   ? sql`AND t.source_dc_id = ${dcId}` : sql``}
             ${status ? sql`AND t.status = ${status}`     : sql``}
-            ${search ? sql`AND t.tracking_code ILIKE ${'%' + search + '%'}` : sql``}
+            ${city ? sql`AND t.status = ${city}`     : sql``}
+            ${search ? sql`AND (
+                t.tracking_code ILIKE ${'%' + search + '%'}
+                OR tr.registration_no ILIKE ${'%' + search + '%'}
+                OR u.first_name ILIKE ${'%' + search + '%'} 
+                OR u.last_name ILIKE ${'%' + search + '%'} 
+            )`: sql``}
 
         GROUP BY
             t.id,

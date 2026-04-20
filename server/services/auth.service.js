@@ -265,18 +265,6 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
     // `;
 
     const users = await sql`
-<<<<<<< Updated upstream
-    SELECT 
-        u."id",
-        u."email",
-        u."first_name",
-        u."last_name",
-        u."role",
-        u."user_status",
-        u."last_login",
-        u."created_at",
-        u."updated_at",
-=======
         SELECT 
             u.id,
             u.email,
@@ -311,7 +299,6 @@ const getUserbySearchService = async(page = 1, limit = 10, search, role, status)
             ON s.store_manager = u.id
 
         WHERE 1=1
->>>>>>> Stashed changes
 
         -- ✅ Scope logic
         CASE 

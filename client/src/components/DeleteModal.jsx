@@ -11,12 +11,12 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 
-export default function DeleteModal({ m1active, who, onConfirm, isLoading }) {
+export default function DeleteModal({ m1active, who, onConfirm, isLoading, isCancel= false }) {
     // const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false)
     return (
         <Dialog>
             <DialogTrigger className="h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3 border border-gray-200 bg-background aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 hover:bg-maroon cursor-pointer text-red-600 hover:text-white">
-                <Trash2 size={12} />
+               {isCancel ? <Ban size={12}/> :  <Trash2 size={12} />}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -48,43 +48,12 @@ export default function DeleteModal({ m1active, who, onConfirm, isLoading }) {
                                 onClick={onConfirm}
                                 disabled={isLoading}
                             >
-                                {isLoading ? "Deleting..." : "Delete"}
+                                {isLoading 
+                  ? (isCancel ? "Cancelling..." : "Deleting...") 
+                  : (isCancel ? "Cancel" : "Delete")
+                }
                             </Button>
                         </div>
-
-                        {/* Inline confirm — same pattern as EditUserDrawer */}
-                        {/* {showDeactivateConfirm && (
-                                        <div className={`mt-2 px-3 py-2.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                                            isActive ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"
-                                        }`}>
-                                            <p className={`text-xs text-red-700`}>
-                                                {isActive
-                                                    ? m2active
-                                                    : m2inactive
-                                                }
-                                            </p>
-                                            <div className="flex gap-2 shrink-0">
-                                                <Button
-                                                    size="sm"
-                                                    className={`text-white text-xs h-7 ${
-                                                        isActive
-                                                            ? "bg-red-600 hover:bg-red-700"
-                                                            : "bg-green-600 hover:bg-green-700"
-                                                    }`}
-                                                >
-                                                    Confirm
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="text-xs h-7"
-                                                    onClick={() => setShowDeactivateConfirm(false)}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )} */}
                     </div>
                 </DialogHeader>
             </DialogContent>

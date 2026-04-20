@@ -7,13 +7,23 @@ import { getData,
     addTrip,
     allTrips,
     cancelTrip,
-    trackTrip
+    trackTrip,
+    getTrucksController,
+    getDriversController,
+    getGpsDevicesController,
+    getStoresController
  } from "../controller/tripController.js";
 
 const router = express.Router()
 
 
 router.post("/data", protect, authorize("super_admin", "dc_manager"), getData)
+
+router.get("/trucks", protect, getTrucksController);
+router.get("/drivers", protect, getDriversController);
+router.get("/gps-devices", protect, getGpsDevicesController);
+router.get("/stores", protect, getStoresController);
+
 router.post("/trip", protect, authorize("super_admin", "dc_manager"), addTripValidator, validate, addTrip)
 router.get("/trips", protect, authorize("super_admin", "dc_manager"),allTrips)
 router.put("/cancel/:id", protect, authorize("super_admin", "dc_manager"), cancelTrip)

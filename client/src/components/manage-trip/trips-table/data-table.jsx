@@ -17,24 +17,31 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 // import EditUserDrawer from "./EditUserDrawer"
 
-export function DataTable({ columns, data }) {
-//     const [open, setOpen] = useState(false)
-const [columnFilters, setColumnFilters] = useState([])
-    const table = useReactTable({
+export function DataTable({ 
+    columns, 
+    data,
+    setPage, 
+    columnFilters, 
+    setColumnFilters,
+    totalPages = 1,
+    page = 1,
+    onPrevious,
+    onNext,
+    isFetching = false, 
+    meta 
+ }) {
+   const table = useReactTable({
         data,
         columns,
+        state: { columnFilters },
+        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        state: {
-            columnFilters
-        },
-        onColumnFiltersChange: setColumnFilters,
-        initialState: {
-            pagination: {
-                pageSize: 5,
-            },
-        },
+        manualFiltering: true,
+        meta: {
+            ...meta,
+            updatePage: (newPage) => setPage(newPage)
+        }
     })
 
     return (
@@ -55,47 +62,62 @@ const [columnFilters, setColumnFilters] = useState([])
                     ))}
                 </TableHeader>
 
-                <TableBody>
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow 
-                            // onClick={
-                            //     () => {
-                            //         setOpen(true);
-                            //         setSelectedUser(row.original)
-                            //     }
-                            // }
-                            key={row.id} 
-                            className="hover:bg-muted">
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext()
-                                    )}
-                                </TableCell>
-                            ))}
+               <TableBody>
+                    {isFetching ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className="text-center py-6 text-gray-500"
+                            >
+                                Loading trips...
+                            </TableCell>
                         </TableRow>
-                    ))}
+                    ) : table.getRowModel().rows.length ? (
+                        table.getRowModel().rows.map((row) => (
+                            <TableRow
+                                key={row.id}
+                                className="hover:bg-muted cursor-pointer"
+                               
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell key={cell.id}>
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className="text-center py-6 text-gray-500"
+                            >
+                                No trips found
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
             <div className="flex items-center justify-between px-4 py-3">
                 <div className="text-sm text-black font-semibold">
-                    Page {table.getState().pagination.pageIndex + 1} of{" "}
-                    {table.getPageCount()}
+                    Page {page} of {totalPages}
                 </div>
 
                 <div className="flex gap-2">
-                    <Button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                     <Button
+                        onClick={onPrevious}
+                        disabled={page <= 1 || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Previous
                     </Button>
-
+                    
                     <Button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        onClick={onNext}
+                        disabled={page >= totalPages || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Next

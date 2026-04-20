@@ -3,9 +3,48 @@ import { Input } from "@/components/ui/input"
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field"
 import { Camera } from "lucide-react"
 import { useRef } from "react"
+import { useForm } from "react-hook-form"
+import z from "zod"
+import { emailV, firstNameV, lastNameV, phoneV } from "@/validations/validations"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
+
+const profileSchema = z.object({
+    first_name: firstNameV,
+    last_name: lastNameV,
+    email: emailV,
+    phone_number: phoneV
+})
  
 export function ProfileSection() {
-    const fileRef = useRef(null)
+    const {user} = useSelector(selectUser)
+    const {
+            register,
+            handleSubmit,
+            reset,
+            control,
+            setValue,
+            watch,
+            formState: { errors, isSubmitSuccessful },
+        } = useForm({
+            resolver: zodResolver(profileSchema),
+            defaultValues: {
+                first_name: user.first_name || "",
+                last_name: user.last_name || "",
+                email: user.email || "",
+                phone_number: user.phone_number || "",
+            }
+        })
+
+    const onSubmit = async(data) => {
+        try{
+            console.log(data);
+            
+        }catch (err) {
+            console.error(err)
+        }
+    }
  
     return (
         <div>
@@ -28,27 +67,42 @@ export function ProfileSection() {
             </div>
  
             {/* Form — same FieldGroup/FieldSet/Field pattern as AddDCForm */}
+            <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
                 <FieldSet>
                     <FieldGroup>
                         <div className="flex gap-3">
                             <Field>
                                 <FieldLabel>First name</FieldLabel>
-                                <Input defaultValue="Super" placeholder="First name" className="placeholder:text-sm text-sm sm:text-md"/>
+                                <Input 
+                                    {...register("first_name")}
+                                    placeholder="First name" 
+                                    className="placeholder:text-sm text-sm sm:text-md"
+                                />
                             </Field>
                             <Field>
                                 <FieldLabel>Last name</FieldLabel>
-                                <Input defaultValue="Admin" placeholder="Last name" className="placeholder:text-sm text-sm sm:text-md"/>
+                                <Input 
+                                    {...register("last_name")}
+                                    placeholder="Last name" 
+                                    className="placeholder:text-sm text-sm sm:text-md"
+                                />
                             </Field>
                         </div>
                         <Field>
                             <FieldLabel>Email address</FieldLabel>
-                            <Input type="email" defaultValue="admin@fleettrack.in" className="placeholder:text-sm text-sm sm:text-md"/>
+                            <Input 
+                                type="email" 
+                                {...register("email")}
+                                className="placeholder:text-sm text-sm sm:text-md"
+                                />
                             <FieldDescription className="text-xs">Used to log in to the platform</FieldDescription>
                         </Field>
                         <Field>
                             <FieldLabel>Phone number</FieldLabel>
-                            <Input type="tel" defaultValue="+91 98201 00000" placeholder="+91 XXXXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
+                            <Input type="tel" 
+                                {...register("phone_number")} 
+                                placeholder="+91 XXXXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
                         </Field>
                     </FieldGroup>
                 </FieldSet>
@@ -57,6 +111,7 @@ export function ProfileSection() {
             <div className="mt-6">
                 <Button className="w-full sm:w-fit bg-maroon hover:bg-maroon-dark text-white">Save profile</Button>
             </div>
+            </form>
         </div>
     )
 }

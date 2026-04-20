@@ -52,7 +52,9 @@ function getEndTime(dateString, seconds) {
 }
 
 const addTripService = async(data, dc_manager)=>{
-    const {truck, gps_device, driver, delivery_stops, departure} = data
+    const {truck, 
+        // gps_device, 
+        driver, delivery_stops, departure} = data
     // if (truck.status  === "on_trip") throw new ApiError(400, "Truck is already on a trip")
     // if (driver.status === "on_trip") throw new ApiError(400, "Driver is already on a trip")
     // if (gps_device.status === "in_transit") throw new ApiError(400, "GPS device is already in use")
@@ -84,7 +86,7 @@ const addTripService = async(data, dc_manager)=>{
             "source_dc_id", "truck_id", "driver_id", "device_id",
             "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed"
         ) VALUES (
-            ${source_dc.id}, ${truck}, ${driver}, ${gps_device},
+            ${source_dc.id}, ${truck}, ${driver},
             ${tracking_code}, 'scheduled', ${dc_manager},
             ${departure ?? null},
             ${total_distance},
@@ -134,14 +136,15 @@ const allTripsService = async({ page, limit, status, city, search, user_id, role
             t.distance,
             t.created_at,
 
-            dc.name            AS dc_name,
+            dc.name            AS source_dc_name,
             dc.city            AS dc_city,
 
-            tr.registration_no AS truck_reg,
-            tr.model           AS truck_model,
+            tr.registration_no,
+            tr.model,
+            tr.capacity,
 
             CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
-            u.phone_number     AS driver_phone,
+            u.phone_number,
 
             COUNT(ts.id)                                        AS total_stops,
             COUNT(ts.id) FILTER (WHERE ts.status = 'confirmed') AS completed_stops,
@@ -185,7 +188,7 @@ const allTripsService = async({ page, limit, status, city, search, user_id, role
         GROUP BY
             t.id,
             dc.name, dc.city,
-            tr.registration_no, tr.model,
+            tr.registration_no, tr.model, tr.capacity,
             u.first_name, u.last_name, u.phone_number
 
         ORDER BY t.created_at DESC
@@ -281,9 +284,162 @@ const trackTripService = async (data) => {
 }
 
 
+const getTrucksService = async ({ page = 1, limit = 10, search = "", departed_at }) => {
+
+    console.log("departed_at", departed_at);
+    
+  const offset = (page - 1) * limit;
+
+  const trucks = await sql`
+    SELECT 
+      t.id,
+      t.registration_no,
+      t.model,
+      t.capacity,
+      COUNT(*) OVER() AS total_count
+    FROM "Trucks" t
+    WHERE 
+      (
+        t.registration_no ILIKE ${"%" + search + "%"}
+        OR t.model ILIKE ${"%" + search + "%"}
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM "Trips" tr
+        WHERE tr.truck_id = t.id
+        AND tr.departed_at <= ${departed_at}
+        AND tr.end_time >= ${departed_at}
+      )
+    ORDER BY t.registration_no ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  return {
+    trucks,
+    total: trucks[0]?.total_count || 0,
+    page,
+    limit,
+  };
+};
+
+const getDriversService = async ({ page = 1, limit = 10, search = "", departed_at }) => {
+  const offset = (page - 1) * limit;
+
+  const drivers = await sql`
+    SELECT 
+      d.id,
+      CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
+      u.phone_number,
+      d.licence_no,
+      d.licence_class,
+      COUNT(*) OVER() AS total_count
+    FROM "Drivers" d
+    JOIN "User" u ON u.id = d.user_id
+    WHERE 
+      (
+        u.first_name ILIKE ${"%" + search + "%"}
+        OR u.last_name ILIKE ${"%" + search + "%"}
+        OR u.phone_number ILIKE ${"%" + search + "%"}
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM "Trips" tr
+        WHERE tr.driver_id = d.id
+        AND tr.departed_at <= ${departed_at}
+        AND tr.end_time >= ${departed_at}
+      )
+    ORDER BY u.first_name ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  return {
+    drivers,
+    total: drivers[0]?.total_count || 0,
+    page,
+    limit,
+  };
+};
+
+const getGpsDevicesService = async ({ page = 1, limit = 10, search = "", departed_at }, user) => {
+  const offset = (page - 1) * limit;
+
+  const gpsDevices = await sql`
+    SELECT 
+      g.id,
+      g.device_id,
+      g.imei,
+      g.battery,
+      g.status,
+      COUNT(*) OVER() AS total_count
+    FROM "GPS_devices" g
+    WHERE 
+      (
+        g.device_id ILIKE ${"%" + search + "%"}
+        OR g.imei ILIKE ${"%" + search + "%"}
+      )
+      ${
+        user.role === "dc_manager"
+          ? sql`AND g.dc_id = ${user.id}`
+          : sql``
+      }
+      AND NOT EXISTS (
+        SELECT 1 FROM "Trips" tr
+        WHERE tr.device_id = g.id
+        AND tr.departed_at <= ${departed_at}
+        AND tr.end_time >= ${departed_at}
+      )
+    ORDER BY g.device_id ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  return {
+    gpsDevices,
+    total: gpsDevices[0]?.total_count || 0,
+    page,
+    limit,
+  };
+};
+
+
+const getStoresService = async ({ page = 1, limit = 10, search = "" }) => {
+  const offset = (page - 1) * limit;
+
+  const stores = await sql`
+    SELECT 
+      s.id,
+      s.name,
+      s.address,
+      s.city,
+      s.state,
+      COUNT(*) OVER() AS total_count
+    FROM "Stores" s
+    WHERE 
+      s.status = 'active'
+      AND (
+        s.name ILIKE ${"%" + search + "%"}
+        OR s.city ILIKE ${"%" + search + "%"}
+      )
+    ORDER BY s.name ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  return {
+    stores,
+    total: stores[0]?.total_count || 0,
+    page,
+    limit,
+  };
+};
+
 export{
     addTripService,
     allTripsService,
     cancelTripService,
-    trackTripService
+    trackTripService,
+    getTrucksService,
+    getDriversService,
+    getGpsDevicesService,
+    getStoresService
 }

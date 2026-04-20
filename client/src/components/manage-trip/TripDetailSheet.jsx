@@ -19,6 +19,9 @@ const statusStyles = {
 
 
 export default function TripDetailSheet({ entity, type, open, onClose }) {
+  console.log(entity);
+  
+
   const { data: driverTrip, isLoading: driverLoading } =
     useGetDriverCurrentTripQuery(entity?.id, {
       skip: type !== "driver" || !entity?.id
@@ -29,14 +32,22 @@ export default function TripDetailSheet({ entity, type, open, onClose }) {
       skip: type !== "truck" || !entity?.id
     })
 
-  const isLoading = type === "driver" ? driverLoading : truckLoading
+  const isLoading =
+  type === "driver"
+    ? driverLoading
+    : type === "truck"
+    ? truckLoading
+    : false
 
-  const trip =
-    type === "driver"
-      ? driverTrip?.data?.[0]
-      : truckTrip?.data?.[0]
+const trip =
+  type === "driver"
+    ? driverTrip?.data?.[0]
+    : type === "truck"
+    ? truckTrip?.data?.[0]
+    : entity   // ✅ FIX: use passed trip directly
 
 
+  
   if (!entity) return null
 
   return (
@@ -84,7 +95,7 @@ export default function TripDetailSheet({ entity, type, open, onClose }) {
                   <p className="text-xs text-gray-500">Truck</p>
                   <p className="font-medium text-xs sm:text-sm">{trip.registration_no}</p>
                   <p className="text-muted-foreground text-xs">Model: {trip.model}</p>
-                  <p className="text-muted-foreground text-xs">Capacity: {trip.capacity}</p>
+                  <p className="text-muted-foreground text-xs">Capacity: {trip.capacity} T</p>
                 </div>
               </div>
 
@@ -99,16 +110,25 @@ export default function TripDetailSheet({ entity, type, open, onClose }) {
             </div>
 
             {/* Source */}
-            <div>
+            <div className="flex justify-between">
+              <div>
               <p className="text-xs text-gray-500 mb-1">Source DC</p>
               <p className="font-medium text-xs sm:text-sm">{trip.source_dc_name}</p>
+              </div>
+              <div>
+              <p className="text-xs text-gray-500 mb-1">Distance</p>
+              <p className="font-medium text-xs sm:text-sm">{Math.floor(trip?.distance) || 0} km</p>
+              </div>
             </div>
 
             {/* Stops */}
             <div>
               <p className="text-xs text-gray-500 mb-2">Stops</p>
               <div className="flex flex-col gap-2">
-                {trip.stops.map((stop, i) => (
+                {!trip.stops ?
+                  <p className="text-sm text-gray-500">_</p>
+                :
+                trip.stops.map((stop, i) => (
                   <div
                     key={i}
                     className={`flex items-center gap-2 border px-3 py-2 rounded-md ${stop.status === "confirmed"
@@ -120,7 +140,7 @@ export default function TripDetailSheet({ entity, type, open, onClose }) {
                     <MapPin size={14} />
                     <span className="text-xs sm:text-sm">{stop.store_name}</span>
 
-                    {stop.status === "completed" && (
+                    {stop.status === "confirmed" && (
                       <span className="ml-auto text-xs text-green-600">Done</span>
                     )}
                   </div>
@@ -132,14 +152,14 @@ export default function TripDetailSheet({ entity, type, open, onClose }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500">Departed</p>
-                <p className="text-xs sm:text-sm">{format(parseISO(trip.departed_at), "MMM d, hh:mm a")|| "—"}</p>
+                <p className="text-xs sm:text-sm">{trip.departed_at ? format(parseISO(trip?.departed_at), "MMM d, hh:mm a") : "—"}</p>
               </div>
 
               <div>
                 <p className="text-xs text-gray-500">
                   {trip.completedAt ? "Completed" : "ETA"}
                 </p>
-                <p className="text-xs sm:text-sm">{format(parseISO(trip.completed_at), "MMM d, hh:mm a") || trip.eta || "—"}</p>
+                <p className="text-xs sm:text-sm">{trip.completed_at ? format(parseISO(trip?.completed_at), "MMM d, hh:mm a"): "—"}</p>
               </div>
             </div>
           </div>

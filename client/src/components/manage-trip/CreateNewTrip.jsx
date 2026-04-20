@@ -1,3 +1,8 @@
+// CreateTripModal.jsx (Complete & Fixed)
+import { useEffect, useState } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import z from "zod"
 import { Button } from "@/components/ui/button"
 import {
     Sheet,
@@ -7,7 +12,6 @@ import {
     SheetFooter,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
 } from "@/components/ui/sheet"
 import {
     Field,
@@ -17,20 +21,35 @@ import {
     FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Plus, Route, X, GripVertical } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Plus, Route, X, GripVertical, AlertCircle, ChevronLeft } from "lucide-react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
+import SearchDropdown from "./SearchDropdown"
+import { 
+    useAddTripMutation,
+    useLazyGetTrucksQuery,
+    useLazyGetDriversQuery,
+    useLazyGetGpsDevicesQuery,
+    useGetStoresQuery,
+    useGetTrucksQuery,
+    useGetGpsDevicesQuery,
+    useGetDriversQuery,
+} from "@/lib/features/trips/tripApi"
+import { toast } from "sonner"
 
-// Stops are added dynamically and can be reordered
+// ─── Validation Schema ───────────────────────────────────────────────────────
+const TRIP_SCHEMA = z.object({
+    departure_at: z.string().min(1, "Departure time is required"),
+    truck: z.string().min(1, "Please select a truck"),
+    gps_device: z.string().min(1, "Please select a GPS device"),
+    driver: z.string().min(1, "Please select a driver"),
+    delivery_stops: z.array(z.object({
+        store_id: z.string(),
+        longitude: z.number(),
+        latitude: z.number(),
+    })).min(1, "Add at least one delivery stop"),
+})
+
+// ─── Stops List Component ────────────────────────────────────────────────────
 function StopsList({ stops, onRemove }) {
     if (stops.length === 0) return (
         <p className="text-xs text-gray-400 py-2">
@@ -46,7 +65,7 @@ function StopsList({ stops, onRemove }) {
                 >
                     <GripVertical size={14} className="text-gray-400 cursor-grab" />
                     <span className="text-xs font-medium text-gray-500 w-5">{index + 1}.</span>
-                    <span className="text-xs flex-1">{stop}</span>
+                    <span className="text-xs flex-1">{stop.name}</span>
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
@@ -60,369 +79,389 @@ function StopsList({ stops, onRemove }) {
     )
 }
 
-export default function CreateTripModal({ truck, open, onClose }) {
+// ─── Main Component ──────────────────────────────────────────────────────────
+export default function CreateTripModal({ editingTrip = null, open, onClose }) {
+    const isEdit = !!editingTrip
 
-    const [driverAdded, setDriverAdded] = useState(false)
-    const [aadharPreview, setAadharPreview] = useState(null)
-    const [driverData, setDriverData] = useState({
-        name: "",
-        phone: "",
-        aadhar: null,
+    const [step, setStep] = useState(1)
+    const [selectedStops, setSelectedStops] = useState([])
+
+    const [addTrip, { isLoading }] = useAddTripMutation()
+    
+    // Lazy queries - only fetch when needed
+    // const [getTrucks, { data: trucksData, isLoading: loadingTrucks }] = useLazyGetTrucksQuery()
+    // const [getDrivers, { data: driversData, isLoading: loadingDrivers }] = useLazyGetDriversQuery()
+    // const [getGpsDevices, { data: devicesData, isLoading: loadingDevices }] = useLazyGetGpsDevicesQuery()
+    
+    // Stores query - always available
+    // const { data: storesData } = useGetStoresQuery({ page: 1, limit: 100 })
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(TRIP_SCHEMA),
+        defaultValues: {
+            departure_at: "",
+            truck: "",
+            gps_device: "",
+            driver: "",
+            delivery_stops: [],
+        },
     })
-    const [truckNo, setTruckNo] = useState(truck?.regNo ?? "");
-    const [gpsDevice, setGpsDevice] = useState(truck?.gpsDevice ?? "")
-    const [otpSent, setOtpSent] = useState(false)
-    const [otp, setOtp] = useState("")
-    const [stops, setStops] = useState([])
-    const [selectedStore, setSelectedStore] = useState("")
-    const [selectedDriver, setSelectedDriver] = useState("")
-    const [showAddDriver, setShowAddDriver] = useState(false)
 
+    const departureAt = watch("departure_at")
+    const selectedTruck = watch("truck")
+    const selectedDriver = watch("driver")
+    const selectedGpsDevice = watch("gps_device")
+
+    // Pre-fill form when editing
     useEffect(() => {
-        return () => {
-            if (aadharPreview) URL.revokeObjectURL(aadharPreview)
+        if (editingTrip && open) {
+            reset({
+                departure_at: editingTrip.scheduled_at || "",
+                truck: editingTrip.truck_id || "",
+                gps_device: editingTrip.device_id || "",
+                driver: editingTrip.driver_id || "",
+                delivery_stops: editingTrip.stops || [],
+            })
+            setSelectedStops(editingTrip.stops || [])
+            setStep(2)
+        } else {
+            reset({
+                departure_at: "",
+                truck: "",
+                gps_device: "",
+                driver: "",
+                delivery_stops: [],
+            })
+            setSelectedStops([])
+            setStep(1)
         }
-    }, [aadharPreview])
+    }, [editingTrip, open, reset])
 
-    const addStop = () => {
-        if (selectedStore && !stops.includes(selectedStore)) {
-            setStops(prev => [...prev, selectedStore])
-            setSelectedStore("")
+    // Fetch available resources when departure time is set
+    const handleContinue = async () => {
+        let departure = departureAt
+
+        // If empty, use current datetime
+        if (!departure) {
+            departure = new Date().toISOString().slice(0, 16)
+            setValue("departure_at", departure)
+        }
+
+        try {
+            // Fetch all available resources in parallel
+            // await Promise.all([
+            //     getTrucks({ departed_at: departure }),
+            //     getDrivers({ departed_at: departure }),
+            //     getGpsDevices({ departed_at: departure }),
+            // ])
+
+            setStep(2)
+        } catch (err) {
+            toast.error("Failed to load resources", {
+                description: "Please try again",
+            })
+            console.error("Failed to fetch form data", err)
         }
     }
 
-    const removeStop = (index) => {
-        setStops(prev => prev.filter((_, i) => i !== index))
+    const handleAddStop = (store) => {
+        if (store && !selectedStops.find(s => s.store_id === store.id)) {
+            const newStop = {
+                store_id: store.id,
+                name: store.name,
+                longitude: store.longitude,
+                latitude: store.latitude,
+            }
+            setSelectedStops(prev => [...prev, newStop])
+            setValue("delivery_stops", [...selectedStops, newStop])
+        }
     }
+
+    const handleRemoveStop = (index) => {
+        const updated = selectedStops.filter((_, i) => i !== index)
+        setSelectedStops(updated)
+        setValue("delivery_stops", updated)
+    }
+
+    const onSubmit = async (data) => {
+        try {
+            const payload = {
+                truck: data.truck,
+                gps_device: data.gps_device,
+                driver: data.driver,
+                delivery_stops: selectedStops.map(stop => ({
+                    store_id: stop.store_id,
+                    longitude: stop.longitude,
+                    latitude: stop.latitude,
+                    eta: null
+                })),
+                departure: data.departure_at
+            }
+
+            await addTrip(payload).unwrap()
+
+            toast.success("Trip dispatched successfully", {
+                description: `Trip has been ${isEdit ? 'updated' : 'created'}.`,
+            })
+
+            reset()
+            setSelectedStops([])
+            setStep(1)
+            onClose(false)
+        } catch (err) {
+            toast.error("Failed to dispatch trip", {
+                description: err?.data?.message || "Please try again",
+            })
+            console.error(err)
+        }
+    }
+
+    // const trucks = trucksData?.data?.trucks || []
+    // const drivers = driversData?.data?.drivers || []
+    // const devices = devicesData?.data?.gpsDevices || []
+    // const stores = storesData?.data?.stores || []
 
     return (
-        <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {/* {
-                truck ?
-                    null
-                    :
-                    <CreateFormSheetTrigger text='Dispatch Trip' />
-              
-            } */}
-
+        <Sheet open={open} onOpenChange={onClose}>
+            {!isEdit && <CreateFormSheetTrigger text="Dispatch Trip" />}
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
-                <SheetHeader className="border-b border-gray-200">
-                    <SheetTitle>Dispatch new trip</SheetTitle>
-                    <SheetDescription>
-                        Select a truck, add store stops, and schedule departure
-                    </SheetDescription>
-                </SheetHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                    <SheetHeader className="border-b border-gray-200 px-4 sm:px-6 pt-5 pb-4">
+                        <SheetTitle>
+                            {isEdit ? "Edit trip" : "Dispatch new trip"}
+                        </SheetTitle>
+                        <SheetDescription>
+                            {isEdit
+                                ? "Update trip details"
+                                : "Select a truck, add store stops, and schedule departure"}
+                        </SheetDescription>
+                    </SheetHeader>
 
-                <div className="px-3 pb-3 sm:p-4 overflow-y-auto">
-                    <FieldGroup>
-                        <FieldSet>
-                            <FieldGroup>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
-                                    {/* Brand */}
-                                    {/* <Field>
-                                        <FieldLabel>Brand</FieldLabel>
-                                        <Select>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select brand..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Brand</SelectLabel>
-                                                    <SelectItem value="tata_westside">Tata Westside</SelectItem>
-                                                    <SelectItem value="zudio">Zudio</SelectItem>
-                                                    <SelectItem value="tata_cliq">Tata Cliq</SelectItem>
-                                                    <SelectItem value="tanishq">Tanishq</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </Field> */}
-
-                                    {/* Source DC */}
-
-                                    {/* source dc will automatically comes from logged in account */}
-                                    <Field>
-                                        <FieldLabel>Source data center</FieldLabel>
-                                        <p className="font-bold">Pune Warehouse DC</p>
-                                    </Field>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {/* Truck */}
-                                    <Field>
-                                        <FieldLabel>Truck</FieldLabel>
-                                        <Select value={truckNo} onValueChange={setTruckNo}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select idle truck..."/>
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Available trucks</SelectLabel>
-                                                    <SelectItem value="MH04EF3344" className="text-xs">MH04EF3344</SelectItem>
-                                                    <SelectItem value="MH14CD5678" className="text-xs">MH14CD5678</SelectItem>
-                                                    <SelectItem value="MH20GH7788" className="text-xs">MH20GH7788</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                        <FieldDescription className="text-xs">
-                                            Only idle trucks are shown
-                                        </FieldDescription>
-                                    </Field>
-
-                                    <Field>
-                                        <FieldLabel>GPS Device</FieldLabel>
-                                        <Select value={gpsDevice} onValueChange={setGpsDevice}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select gps device..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Available trucks</SelectLabel>
-                                                    <SelectItem value="GPS-001-PUNE">GPS-001-PUNE</SelectItem>
-                                                    <SelectItem value="GPS-002-PUNE">GPS-002-PUNE</SelectItem>
-                                                    <SelectItem value="GPS-003-PUNE">GPS-003-PUNE</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </Field>
-
-                                </div>
-
-                                {/* Driver */}
-                                <Field>
-                                    <div className="flex justify-between items-center">
-                                        <FieldLabel>Driver</FieldLabel>
-                                        {/* Add new driver button */}
-                                        {!driverAdded && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowAddDriver(!showAddDriver)}
-                                                className="text-maroon hover:underline text-xs sm:text-sm"
-                                            >
-                                                {showAddDriver ? '- Select existing' : '+ Add new driver'}
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {driverAdded ? (
-                                        <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
-
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="flex-1 overflow-y-auto px-3 pb-3 sm:px-6 sm:py-4">
+                        <FieldGroup>
+                            <FieldSet>
+                                <FieldGroup>
+                                    {/* Step 1: Departure Time */}
+                                    {step === 1 && (
+                                        <div className="flex flex-col gap-4">
+                                            <Field>
+                                                <FieldLabel>
+                                                    Scheduled departure <span className="text-red-500">*</span>
+                                                </FieldLabel>
                                                 <Input
-                                                    value={driverData.name}
-                                                    onChange={(e) =>
-                                                        setDriverData({ ...driverData, name: e.target.value })
-                                                    }
-                                                    placeholder="Driver name"
+                                                    type="datetime-local"
+                                                    {...register("departure_at")}
                                                     className="text-sm"
                                                 />
-
-                                                <Input
-                                                    value={driverData.phone}
-                                                    onChange={(e) =>
-                                                        setDriverData({ ...driverData, phone: e.target.value })
-                                                    }
-                                                    placeholder="Phone number"
-                                                    className="text-sm"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="text-xs text-gray-500">
-                                                    Aadhar card
-                                                </label>
-                                                <Input type="file" className="mt-1 text-xs" />
-                                                {aadharPreview && (
-                                                    <img
-                                                        src={aadharPreview}
-                                                        alt="Aadhar"
-                                                        className="w-40 h-28 object-cover rounded-md border"
-                                                    />
+                                                <FieldDescription className="text-xs">
+                                                    Leave blank to dispatch immediately
+                                                </FieldDescription>
+                                                {errors.departure_at && (
+                                                    <p className="text-red-500 text-xs mt-1">
+                                                        {errors.departure_at.message}
+                                                    </p>
                                                 )}
+                                            </Field>
+
+                                            <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-md px-3 py-2.5">
+                                                <AlertCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
+                                                <p className="text-xs text-blue-700 leading-relaxed">
+                                                    Available trucks, drivers, and GPS devices will be fetched based on the selected departure time.
+                                                </p>
                                             </div>
-
-                                            <p className="text-xs text-green-600 font-medium">
-                                                ✓ Driver added successfully
-                                            </p>
-                                        </div>
-
-                                    ) : showAddDriver ? (
-
-                                        /* ─────────────── 2. ADD DRIVER FORM ─────────────── */
-                                        <div className="p-3 border rounded-md bg-gray-50 flex flex-col gap-3">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                <Input
-                                                    placeholder="Driver name"
-                                                    className="placeholder:text-sm text-sm"
-                                                    value={driverData.name}
-                                                    onChange={(e) =>
-                                                        setDriverData({ ...driverData, name: e.target.value })
-                                                    }
-                                                />
-
-                                                <Input
-                                                    placeholder="Phone number"
-                                                    className="placeholder:text-sm text-sm"
-                                                    type="tel"
-                                                    value={driverData.phone}
-                                                    onChange={(e) =>
-                                                        setDriverData({ ...driverData, phone: e.target.value })
-                                                    }
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="text-xs text-gray-500">
-                                                    Aadhar card
-                                                </label>
-                                                <Input
-                                                    type="file"
-                                                    className="mt-1 placeholder:text-xs text-xs"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0]
-                                                        if (file) {
-                                                            setDriverData({ ...driverData, aadhar: file })
-                                                            setAadharPreview(URL.createObjectURL(file))
-                                                        }
-                                                    }}
-                                                />
-
-
-                                            </div>
-                                            {aadharPreview && (
-                                                <div className="mt-2">
-                                                    <p className="text-xs text-gray-500 mb-1">Preview</p>
-
-                                                    <img
-                                                        src={aadharPreview}
-                                                        alt="Aadhar Preview"
-                                                        className="w-40 h-28 object-cover rounded-md border"
-                                                    />
-                                                </div>
-                                            )}
 
                                             <Button
                                                 type="button"
+                                                onClick={handleContinue}
                                                 className="bg-maroon hover:bg-maroon-dark text-white"
-                                                onClick={() => {
-                                                    setDriverAdded(true)
-                                                    setShowAddDriver(false)
-                                                }}
                                             >
-                                                Save Driver
+                                                Continue
                                             </Button>
                                         </div>
-
-                                    ) : (
-
-                                        /* ─────────────── 3. SELECT DRIVER ─────────────── */
-                                        <Select
-                                            value={selectedDriver}
-                                            onValueChange={setSelectedDriver}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select driver..." />
-                                            </SelectTrigger>
-
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Drivers</SelectLabel>
-                                                    <SelectItem value="ramesh">Ramesh Kumar</SelectItem>
-                                                    <SelectItem value="suresh">Suresh Patil</SelectItem>
-                                                    <SelectItem value="vijay">Vijay Sharma</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
                                     )}
 
-                                    <FieldDescription className="text-xs">
-                                        Select existing driver or add a new one
-                                    </FieldDescription>
-                                </Field>
+                                    {/* Step 2: Trip Details */}
+                                    {step === 2 && (
+                                        <>
+                                            {/* Back Button */}
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setStep(1)}
+                                                className="w-fit mb-2"
+                                            >
+                                                <ChevronLeft size={14} /> Back to date
+                                            </Button>
 
-                                {/* Stops */}
-                                <Field>
-                                    <FieldLabel>Delivery stops</FieldLabel>
-                                    <div className="flex gap-2">
-                                        <Select
-                                            value={selectedStore}
-                                            onValueChange={setSelectedStore}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select store..." />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white border shadow-md">
-                                                <SelectGroup>
-                                                    <SelectLabel>Stores</SelectLabel>
-                                                    <SelectItem value="Koregaon Park Store">Koregaon Park Store</SelectItem>
-                                                    <SelectItem value="Hinjawadi Store">Hinjawadi Store</SelectItem>
-                                                    <SelectItem value="FC Road Store">FC Road Store</SelectItem>
-                                                    <SelectItem value="Baner Store">Baner Store</SelectItem>
-                                                    <SelectItem value="Kothrud Store">Kothrud Store</SelectItem>
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                        <Button
-                                            type="button"
-                                            onClick={addStop}
-                                            className="bg-maroon hover:bg-maroon-dark text-white shrink-0"
-                                        >
-                                            <Plus size={14} />
-                                        </Button>
-                                    </div>
-                                    <FieldDescription className="text-xs">
-                                        Add stops in order — drag to reorder
-                                    </FieldDescription>
-                                    <StopsList stops={stops} onRemove={removeStop} />
-                                </Field>
+                                            {/* Source DC */}
+                                            <Field>
+                                                <FieldLabel>Source data center</FieldLabel>
+                                                <p className="text-sm font-semibold text-gray-700">
+                                                    Pune Warehouse DC
+                                                </p>
+                                                <FieldDescription className="text-xs">
+                                                    Automatically set from your account
+                                                </FieldDescription>
+                                            </Field>
 
-                                {/* Scheduled departure */}
-                                <Field>
-                                    <FieldLabel>Scheduled departure</FieldLabel>
-                                    <Input type="datetime-local" className="text-sm"/>
-                                    <FieldDescription className="text-xs">
-                                        Leave blank to dispatch immediately
-                                    </FieldDescription>
-                                </Field>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {/* Truck */}
+                                                <Field>
+                                                    <FieldLabel>
+                                                        Truck <span className="text-red-500">*</span>
+                                                    </FieldLabel>
+                                                    <Controller
+                                                        name="truck"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                           <SearchDropdown
+    placeholder="Search truck..."
+    value={field.value}
+    onChange={field.onChange}
+    displayKey="registration_no"
+    fetchHook={useGetTrucksQuery}
+    extraParams={{ departed_at: departureAt }}
+    apiRes="trucks"
+/>
+                                                        )}
+                                                    />
+                                                    <FieldDescription className="text-xs">
+                                                        Only idle trucks are shown
+                                                    </FieldDescription>
+                                                    {errors.truck && (
+                                                        <p className="text-red-500 text-xs mt-1">
+                                                            {errors.truck.message}
+                                                        </p>
+                                                    )}
+                                                </Field>
 
+                                                {/* GPS Device */}
+                                                <Field>
+                                                    <FieldLabel>
+                                                        GPS Device <span className="text-red-500">*</span>
+                                                    </FieldLabel>
+                                                    <Controller
+                                                        name="gps_device"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                           <SearchDropdown
+    placeholder="Search GPS..."
+    value={field.value}
+    onChange={field.onChange}
+    displayKey="device_id"
+    fetchHook={useGetGpsDevicesQuery}
+    extraParams={{ departed_at: departureAt }}
+    apiRes="gpsDevices"
+/>
+                                                        )}
+                                                    />
+                                                    {errors.gps_device && (
+                                                        <p className="text-red-500 text-xs mt-1">
+                                                            {errors.gps_device.message}
+                                                        </p>
+                                                    )}
+                                                </Field>
+                                            </div>
 
-                                {/* OTP Section */}
-                                {!otpSent ? (
-                                    <Button
-                                        type="button"
-                                        className="bg-maroon text-white"
-                                        onClick={() => setOtpSent(true)}
-                                    >
-                                        Send OTP
-                                    </Button>
-                                ) : (
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <Input
-                                            placeholder="Enter OTP"
-                                            value={otp}
-                                            className="w-full placeholder:text-sm text-sm"
-                                            onChange={(e) => setOtp(e.target.value)}
-                                        />
-                                        <Button className="bg-green-600 text-white">
-                                            Verify
-                                        </Button>
-                                    </div>
-                                )}
+                                            {/* Driver */}
+                                            <Field>
+                                                <FieldLabel>
+                                                    Driver <span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <Controller
+                                                    name="driver"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                       <SearchDropdown
+    placeholder="Search driver..."
+    value={field.value}
+    onChange={field.onChange}
+    displayKey="driver_name"
+    secondaryKey="driver_phone"
+    fetchHook={useGetDriversQuery}
+    extraParams={{ departed_at: departureAt }}
+    apiRes="drivers"
+/>
+                                                    )}
+                                                />
+                                                {errors.driver && (
+                                                    <p className="text-red-500 text-xs mt-1">
+                                                        {errors.driver.message}
+                                                    </p>
+                                                )}
+                                            </Field>
 
-                            </FieldGroup>
-                        </FieldSet>
-                    </FieldGroup>
-                </div>
+                                            {/* Delivery Stops */}
+                                            <Field>
+                                                <FieldLabel>
+                                                    Delivery stops <span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <div className="flex gap-2">
+                                                    <SearchDropdown
+    placeholder="Search store..."
+    onChange={handleAddStop}
+    displayKey="name"
+    secondaryKey="city"
+    fetchHook={useGetStoresQuery}
+    apiRes="stores"
+/>
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            // Trigger from dropdown selection
+                                                        }}
+                                                        className="bg-maroon hover:bg-maroon-dark text-white shrink-0"
+                                                        disabled
+                                                    >
+                                                        <Plus size={14} />
+                                                    </Button>
+                                                </div>
+                                                <FieldDescription className="text-xs">
+                                                    Add stops in order — drag to reorder
+                                                </FieldDescription>
+                                                <StopsList stops={selectedStops} onRemove={handleRemoveStop} />
+                                                {errors.delivery_stops && (
+                                                    <p className="text-red-500 text-xs mt-1">
+                                                        {errors.delivery_stops.message}
+                                                    </p>
+                                                )}
+                                            </Field>
+                                        </>
+                                    )}
+                                </FieldGroup>
+                            </FieldSet>
+                        </FieldGroup>
+                    </div>
 
+                    {step === 2 && (
+                        <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200 px-4 sm:px-6 py-4">
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark"
+                            >
+                                {isLoading ? "Dispatching..." : "Dispatch Trip"}
+                                <Route className="ml-2" />
+                            </Button>
 
-                <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200">
-                    <Button className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>Dispatch Trip <Route /></Button>
-                    <SheetClose className='basis-1/2' asChild>
-                        <Button className="w-full" variant="outline">Cancel</Button>
-                    </SheetClose>
-                </SheetFooter>
+                            <SheetClose className="w-full sm:w-1/2" asChild>
+                                <Button variant="outline" className="w-full">
+                                    Cancel
+                                </Button>
+                            </SheetClose>
+                        </SheetFooter>
+                    )}
+                </form>
             </SheetContent>
         </Sheet>
     )

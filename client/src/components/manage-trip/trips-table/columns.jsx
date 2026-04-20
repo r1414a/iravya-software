@@ -12,13 +12,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { MoreHorizontal, Eye, MapPin, XCircle } from "lucide-react"
+import { MoreHorizontal, Eye, MapPin, Pencil } from "lucide-react"
 // import TripDetailSheet from "../TripDetailSheet"
 import { useState } from "react"
 import TripMapModal from "../TripMapModal"
 import TripDetailSheet from "../TripDetailSheet"
+import { useCancelTripMutation } from "@/lib/features/trips/tripApi"
+import DeleteModal from "@/components/DeleteModal"
+import { format, parseISO } from "date-fns"
+import { useLocation } from "react-router-dom"
 
 
+const DCS = ["Pune", "Mumbai", "Nashik", "Nagpur", "Kolhapur", "Amravati"]
 const BRANDS = ["Tata Westside", "Zudio", "Tata Cliq", "Tanishq"]
 
 // Status badge — matches your existing style pattern
@@ -42,10 +47,14 @@ function StopsPills({ stops }) {
     const visible = stops.slice(0, 2)
     const extra = stops.length - 2
 
+    if (!stops.length) {
+        return <p className="text-sm text-gray-500">—</p>
+    }
+
     return (
         <div className="flex flex-wrap gap-1">
             {visible.map((s, i) => {
-                const name = typeof s === "string" ? s : s?.name || "—"
+                const name = typeof s === "string" ? s : s?.store_name || "—"
 
                 return (
                     <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
@@ -61,136 +70,199 @@ function StopsPills({ stops }) {
 }
 
 // Actions cell — uses a controlled Sheet so it opens from the row
-function ActionsCell({ row }) {
+function ActionsCell({ row, table }) {
     const [detailOpen, setDetailOpen] = useState(false)
     const [mapOpen, setMapOpen] = useState(false)
     const trip = row.original
-  
+    console.log("column", trip);
+
+
+    const {
+        setEditTrip,
+        setEditOpen,
+        // setDriverHistory,
+        // setDriverHistoryOpen,
+        setTripDetail,
+        setTripDetailOpen,
+    } = table.options.meta || {}
+
+    const [cancelTrip, { isLoading: isCancelling }] = useCancelTripMutation();
+
+    const handleCancel = async () => {
+        try {
+            await cancelTrip(trip.id).unwrap();
+        } catch (err) {
+            console.error("Failed to cancel trip", err);
+
+        }
+    };
+
     return (
         <>
-            <TripDetailSheet
-                trip={trip}
-                open={detailOpen}
-                onClose={setDetailOpen}
-            />
 
             <TripMapModal
                 trip={trip}
                 open={mapOpen}
                 onClose={setMapOpen}
             />
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal size={14} />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white border shadow-md w-36">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setDetailOpen(true)}>
-                        <Eye size={13} className="mr-2" /> View details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setMapOpen(true)}>
-                        <MapPin size={13} className="mr-2" /> View on map
-                    </DropdownMenuItem>
-                    {trip.status === "in_transit" && (
+
+            <div className="flex items-center gap-2 justify-end">
+              
+                {
+                    trip.status === "scheduled" && (
+                        <Button variant="outline" size="xs"
+                            onClick={() => {
+                                setEditTrip?.(trip)
+                                setEditOpen?.(true)
+                            }}
+                            className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                    )
+                }
+
+                {(trip.status === "in_transit" || trip.status === "scheduled") && (
+                    <DeleteModal
+                        who={trip.tracking_code}
+                        m1active="Trip will no longer be tracked"
+                        onConfirm={handleCancel}
+                        isLoading={isCancelling}
+                        isCancel
+                    />
+                )}
+
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal size={14} />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border shadow-md w-36">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setTripDetail?.(trip)
+                                setTripDetailOpen?.(true)
+                            }}
+                        >
+                            <Eye size={13} className="mr-2" /> View details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setMapOpen(true)}>
+                            <MapPin size={13} className="mr-2" /> View on map
+                        </DropdownMenuItem>
+                        {/* {(trip.status === "in_transit" || trip.status === "scheduled") && (
                         <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={handleCancelTrip}
+                            >
                                 <XCircle size={13} className="mr-2" /> Cancel trip
                             </DropdownMenuItem>
                         </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    )} */}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+            </div>
         </>
     )
 }
 
 export const columns = [
     {
-        accessorKey: "id",
+        accessorKey: "tracking_code",
         header: "Trip ID",
         cell: ({ row }) => (
             <span className="font-mono text-sm font-medium text-maroon">
-                {row.getValue("id")}
+                {row.getValue("tracking_code")}
             </span>
         ),
     },
-    //  {
-    //         accessorKey: "brand",
-    //         header: ({ column }) => {
-    //             const current = column.getFilterValue() || "all"
-    //             return (
-    //                 <div className="flex items-center gap-2">
-    //                     <span>Brand</span>
-    //                     <DropdownMenu>
-    //                         <DropdownMenuTrigger asChild>
-    //                             <Button variant="outline" size="sm" className="h-6 min-w-18 text-[10px]">
-    //                                 {current === "all" ? "All" : current.split(" ")[1] ?? current}
-    //                             </Button>
-    //                         </DropdownMenuTrigger>
-    //                         <DropdownMenuContent className="w-40 bg-white border shadow-md">
-    //                             <DropdownMenuRadioGroup
-    //                                 value={current}
-    //                                 onValueChange={(val) =>
-    //                                     column.setFilterValue(val === "all" ? undefined : val)
-    //                                 }
-    //                             >
-    //                                 <DropdownMenuRadioItem value="all" className="text-xs">All brands</DropdownMenuRadioItem>
-    //                                 {BRANDS.map((b) => (
-    //                                     <DropdownMenuRadioItem key={b} value={b} className="text-xs">{b}</DropdownMenuRadioItem>
-    //                                 ))}
-    //                             </DropdownMenuRadioGroup>
-    //                         </DropdownMenuContent>
-    //                     </DropdownMenu>
-    //                 </div>
-    //             )
-    //         },
-    //         cell: ({ row }) => (
-    //             <span className="text-sm text-gray-700">{row.getValue("brand")}</span>
-    //         ),
-    //         filterFn: (row, id, value) => !value || row.getValue(id) === value,
-    //     },
-    // {
-    //     accessorKey: "brand",
-    //     header: "Brand",
-    //     cell: ({ row }) => (
-    //         <span className="text-sm">{row.getValue("brand")}</span>
-    //     ),
-    // },
     {
         accessorKey: "truck",
         header: "Truck",
-        cell: ({ row }) => (
-            <div>
-                <p className="font-mono text-sm">{row.getValue("truck")}</p>
-                <p className="text-xs text-gray-500">{row.original.driver}</p>
-                <p className="text-xs text-gray-500">{row.original.phone}</p>
-            </div>
-        ),
-    },
-    {
-  accessorKey: "gpsDevice",
-  header: "GPS Device",
-  cell: ({ row }) => {
-    const device = row.getValue("gpsDevice")
+        cell: ({ row }) => {
+            const { registration_no, driver_name, phone_number } = row.original;
+            // console.log("truck", row.original);
 
-    return (
-      <div className="flex flex-col">
-        <span className="font-mono text-sm text-gray-800">
-          {device || "—"}
-        </span>
-      </div>
-    )
-  },
-},
+            return (
+                <div>
+                    <p className="font-mono text-sm">{registration_no}</p>
+                    <p className="text-xs text-gray-500">{driver_name}</p>
+                    <p className="text-xs text-gray-500">{phone_number && `+91 ${phone_number}`}</p>
+                </div>
+            )
+        }
+    },
+    //     {
+    //   accessorKey: "gpsDevice",
+    //   header: "GPS Device",
+    //   cell: ({ row }) => {
+    //     const device = row.getValue("gpsDevice")
+
+    //     return (
+    //       <div className="flex flex-col">
+    //         <span className="font-mono text-sm text-gray-800">
+    //           {device || "—"}
+    //         </span>
+    //       </div>
+    //     )
+    //   },
+    // },
     {
-        accessorKey: "sourceDC",
-        header: "Source DC",
+        accessorKey: "source_dc_name",
+        header: ({ column, table }) => {
+            const currentValue = column.getFilterValue() || "all"
+            const { pathname } = useLocation()
+            return (
+                <div className="flex items-center gap-2">
+                    <span>Source DC</span>
+                    {
+                        pathname.startsWith('/admin') && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-6 min-w-20 text-[10px]">
+                                        {currentValue === "all" ? "All" : currentValue}
+                                    </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent className="w-40 bg-white border shadow-md">
+                                    <DropdownMenuRadioGroup
+                                        value={currentValue}
+                                        onValueChange={(value) => {
+                                            column.setFilterValue(
+                                                value === "all" ? undefined : value
+                                            )
+                                            table.options.meta?.updatePage?.(1)
+                                        }}
+                                    >
+                                        <DropdownMenuRadioItem value="all" className="text-xs">
+                                            All
+                                        </DropdownMenuRadioItem>
+
+                                        {DCS.map((dc) => (
+                                            <DropdownMenuRadioItem
+                                                key={dc}
+                                                value={dc}
+                                                className="text-xs"
+                                            >
+                                                {dc}
+                                            </DropdownMenuRadioItem>
+                                        ))}
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )
+                    }
+
+                </div>
+            )
+        },
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">{row.getValue("sourceDC")}</span>
+            <span className="text-sm text-gray-600">
+                {row.getValue("source_dc_name")}
+            </span>
         ),
     },
     {
@@ -202,7 +274,7 @@ export const columns = [
     },
     {
         accessorKey: "status",
-        header: ({column}) => {
+        header: ({ column, table }) => {
             const currentValue = column.getFilterValue() || "all"
             return (
                 <div className="flex items-center gap-2">
@@ -226,6 +298,7 @@ export const columns = [
                                     column.setFilterValue(
                                         value === "all" ? undefined : value
                                     )
+                                    table.options.meta?.updatePage?.(1)
                                 }}
                             >
                                 <DropdownMenuRadioItem value="all" className="text-xs">
@@ -254,21 +327,27 @@ export const columns = [
         ),
     },
     {
-        accessorKey: "departedAt",
+        accessorKey: "departed_at",
         header: "Departed",
-        cell: ({ row }) => (
-            <span className="text-sm text-gray-500">
-                {row.getValue("departedAt") || "—"}
-            </span>
-        ),
+        cell: ({ row }) => {
+            const departed_at = row.getValue("departed_at")
+            if (!departed_at) {
+                return <p className="text-sm text-gray-500">—</p>
+            }
+            return (
+                <span className="text-sm text-gray-500">
+                    {format(parseISO(departed_at), "MMM d, hh:mm a") || "—"}
+                </span>
+            )
+        }
     },
     {
         accessorKey: "eta",
         header: "ETA / Completed",
         cell: ({ row }) => {
             const trip = row.original
-            if (trip.completedAt) return (
-                <span className="text-sm text-green-600 font-medium">{trip.completedAt}</span>
+            if (trip.completed_at) return (
+                <span className="text-sm text-green-600 font-medium">{format(parseISO(trip.completed_at), "MMM d, hh:mm a")}</span>
             )
             if (trip.eta) return (
                 <span className="text-sm text-blue-600">{trip.eta}</span>
@@ -278,6 +357,6 @@ export const columns = [
     },
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
     },
 ]

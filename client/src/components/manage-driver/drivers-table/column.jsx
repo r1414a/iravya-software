@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Pencil,KeyRound,Road } from "lucide-react"
+import { MoreHorizontal, Pencil, KeyRound, Road } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,11 +32,11 @@ const statusStyles = {
 
 function ActionsCell({ row, table }) {
     const driver = row.original
-    console.log("driver",driver);
-    
+    console.log("driver", driver);
+
     const { pathname } = useLocation();
     const { setEditDriver, setEditOpen, setDriverHistory,
-    setDriverHistoryOpen,setCurrentTrip, setCurrentTripOpen } = table.options.meta || {}
+        setDriverHistoryOpen, setCurrentTrip, setCurrentTripOpen } = table.options.meta || {}
 
     // const [tripDetailsOpen, setTripDetailsOpen] = useState(false)
 
@@ -79,22 +79,22 @@ function ActionsCell({ row, table }) {
 
             <div className="flex items-center gap-2 justify-end">
 
-               
-                    
-                            <Button variant="outline" size="xs"
-                                onClick={() => {
-                                    setEditDriver?.(driver)
-                                    setEditOpen?.(true)
-                                }}
-                                className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
- {
+
+
+                <Button variant="outline" size="xs"
+                    onClick={() => {
+                        setEditDriver?.(driver)
+                        setEditOpen?.(true)
+                    }}
+                    className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+                {
                     pathname.startsWith('/admin') && (
-                            <DeleteModal
-                                who={driver.full_name}
-                                m1active="Driver will not be assignable to any trip"
-                                onConfirm={handleDelete}
-                                isLoading={isDeleting}
-                            />
+                        <DeleteModal
+                            who={driver.full_name}
+                            m1active="Driver will not be assignable to any trip"
+                            onConfirm={handleDelete}
+                            isLoading={isDeleting}
+                        />
                     )
                 }
 

@@ -6,7 +6,11 @@ import sql from "../db/database.js"
 import { addTripService,
     allTripsService,
     cancelTripService,
-    trackTripService
+    trackTripService,
+    getTrucksService,
+    getDriversService,
+    getGpsDevicesService,
+    getStoresService
  } from "../services/trip.services.js";
 
 const getData = asyncHandler(async (req, res) => {
@@ -92,6 +96,30 @@ const getData = asyncHandler(async (req, res) => {
 })
 
 
+
+const getTrucksController = asyncHandler(async (req, res) => {
+  const result = await getTrucksService(req.query);
+  sendResponse(res, 200, result, "Trucks fetched");
+});
+
+
+const getDriversController = asyncHandler(async (req, res) => {
+  const result = await getDriversService(req.query);
+  sendResponse(res, 200, result, "Trucks fetched");
+});
+
+
+const getGpsDevicesController = asyncHandler(async (req, res) => {
+  const result = await getGpsDevicesService(req.query, req.user);
+  sendResponse(res, 200, result, "Trucks fetched");
+});
+
+const getStoresController = asyncHandler(async (req, res) => {
+  const result = await getStoresService(req.query);
+  sendResponse(res, 200, result, "Trucks fetched");
+});
+
+
 const addTrip = asyncHandler(async(req, res)=>{
     const trip = await addTripService(req.body,req.user.id)
     // console.log(trip)
@@ -135,5 +163,9 @@ export{
     addTrip,
     allTrips,
     cancelTrip,
-    trackTrip
+    trackTrip,
+    getTrucksController,
+    getDriversController,
+    getGpsDevicesController,
+    getStoresController
 }

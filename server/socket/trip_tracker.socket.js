@@ -67,6 +67,11 @@ const getLocation = async (lng, lat) => {
     return address
 };
 
+const checkDistance = (store_location, truckLocation)=>{
+    const distance = turf.distance(store_location, truckLocation, { units: "meters" });
+    return distance
+}
+
 const tripTracker = (socket, io) =>{
     socket.on("join-delivery", ({ deliveryId }) => {
         console.log(`join ${deliveryId}`);
@@ -124,8 +129,18 @@ const tripTracker = (socket, io) =>{
             WHERE id = ${deliveryId}
         `
         const trip_stops = await sql `
-            SELECT * FROM "Trip_stops" 
-            WHERE "trip_id" = ${deliveryId}
+            SELECT 
+                tst.*,
+                s.id as store_id,
+                s.name,
+                s.latitude,
+                s.longitude,
+                s.geofence_radius
+                s.arrived_at
+            FROM "Trip_stops" tst
+            LEFT JOIN "Store" s
+            ON s.id = tst.store_id
+            WHERE tst.trip_id = ${deliveryId};
         `
 
         const truckLocation = turf.point([lng, lat]);
@@ -134,6 +149,117 @@ const tripTracker = (socket, io) =>{
         const geopath = await getCleanedPath(trip.geopath)
         const {deviated, distance} = checkDeviation(truckLocation, geopath)
         const location_name = await getLocation(lng, lat)
+        
+        await sql`
+            UPDATE "Trips"
+            SET
+                current_location = ${location_name},
+                current_lat = ${lat},
+                current_lng = ${lng}
+            WHERE id = ${deliveryId}
+        `
+
+        for (let st of trip_stops) {
+
+            const store_location = turf.point([
+                Number(st.longitude),
+                Number(st.latitude)
+            ]);
+
+            const distance_dif = checkDistance(store_location, truckLocation);
+            const displacement = distance_dif - Number(st.geofence_radius);
+            // 🚧 Inside geofence
+            if (displacement <= 0) {
+                const alert = await sql `
+                        INSERT INTO "Alerts" (
+                            dc_id,
+                            trip_id,
+                            truck_id,
+                            device_id,
+                            type,
+                            severity,
+                            description,
+                            lat,
+                            lng,
+                            is_read,
+                            is_dismissed,
+                            triggered_at,
+                            created_at
+                        )
+                        VALUES (
+                            ${trip.source_dc_id},
+                            ${trip.id},
+                            ${trip.truck_id},
+                            ${trip.device_id? trip.device_id: null},
+                            ${'geofence_enter'},
+                            ${'medium'},
+                            ${`Reached store location ${st.name}`},
+                            ${lat},
+                            ${lng},
+                            false,
+                            false,
+                            NOW(),
+                            NOW()
+                        )
+                        `;
+
+                io.to(deliveryId).emit("Alert", {
+                    message: `Under geofence radius of store ${st.name}`,
+                    deliveryId,
+                    store_name: st.name,
+                    tracking_code: trip.tracking_code
+                });
+
+                
+                if (!st.arrived_at && distance_dif <= 100) {
+                    const alert = await sql `
+                        INSERT INTO "Alerts" (
+                            dc_id,
+                            trip_id,
+                            truck_id,
+                            device_id,
+                            type,
+                            severity,
+                            description,
+                            lat,
+                            lng,
+                            is_read,
+                            is_dismissed,
+                            triggered_at,
+                            created_at
+                        )
+                        VALUES (
+                            ${trip.source_dc_id},
+                            ${trip.id},
+                            ${trip.truck_id},
+                            ${trip.device_id? trip.device_id: null},
+                            ${'geofence_enter'},
+                            ${'high'},
+                            ${`Reached store location ${st.name}`},
+                            ${lat},
+                            ${lng},
+                            false,
+                            false,
+                            NOW(),
+                            NOW()
+                        )
+                        `;
+                    io.to(deliveryId).emit("Alert", {
+                        message: `Reached store location ${st.name}`,
+                        deliveryId,
+                        store_name: st.name,
+                        tracking_code: trip.tracking_code
+                    });
+
+                    await sql`
+                        UPDATE "Trip_stops"
+                        SET "arrived_at" = NOW()
+                        WHERE "trip_id" = ${deliveryId}
+                        AND "store_id" = ${st.store_id}
+                    `;
+                }
+            }
+        }
         if(deviated){
             console.log(trip.id, trip.source_dc_id)
             const alert = await sql `
@@ -174,13 +300,21 @@ const tripTracker = (socket, io) =>{
                 tracking_code: trip.tracking_code
             });
 
-            io.to(deliveryId).emit("location-update", {
+            io.to(deliveryId).emit("Alert", {
                 lat,
                 lng,
                 message: `Route deviation by ${distance}m at ${location_name}`,
                 deliveryId: deliveryId,
                 tracking_code: trip.tracking_code
             });
+
+            // io.to(deliveryId).emit("location-update", {
+            //     lat,
+            //     lng,
+            //     message: `Route deviation by ${distance}m at ${location_name}`,
+            //     deliveryId: deliveryId,
+            //     tracking_code: trip.tracking_code
+            // });
             
         }
 
@@ -224,13 +358,21 @@ const tripTracker = (socket, io) =>{
                 tracking_code: trip.tracking_code
             });
 
-            io.to(deliveryId).emit("location-update", {
+            io.to(deliveryId).emit("Alert", {
                 lat,
                 lng,
                 message: `speeding by ${speed_exceded_by} at ${location_name}`,
                 deliveryId: deliveryId,
                 tracking_code: trip.tracking_code
             });
+
+            // io.to(deliveryId).emit("location-update", {
+            //     lat,
+            //     lng,
+            //     message: `speeding by ${speed_exceded_by} at ${location_name}`,
+            //     deliveryId: deliveryId,
+            //     tracking_code: trip.tracking_code
+            // });
         }
         io.to(deliveryId).emit("location-update", {
             lat,

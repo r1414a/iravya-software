@@ -10,6 +10,7 @@ import axios from "axios";
 // const matchingService = mbxMatching(baseClient);
 
 async function getCleanedPath(coordinates) {
+    
     // const response = await matchingService.getMatching({
     //     points: coordinates.map(c => ({ coordinates: c })),
     //     profile: 'driving',
@@ -17,7 +18,18 @@ async function getCleanedPath(coordinates) {
     // }).send();
 
     // return response.body.matchings[0].geometry; // Returns a cleaned LineString
-    const coordsString = coordinates
+    let coordsArray;
+    // if (typeof coordinates === 'string') {
+    //     const raw = coordinates.split(',');
+    //     coordsArray = [];
+    //     for (let i = 0; i < raw.length; i += 2) {
+    //         coordsArray.push([parseFloat(raw[i]), parseFloat(raw[i+1])]);
+    //     }
+    // } else {
+    //     coordsArray = coordinates;
+    // }
+    coordsArray = JSON.parse(coordinates);
+    const coordsString = coordsArray
         .map(c => `${c[0]},${c[1]}`)
         .join(";");
     const response = await fetch(
@@ -29,7 +41,8 @@ async function getCleanedPath(coordinates) {
 
 function checkDeviation(truckPos, route, threshold = 50) {
     // Find the point on the route closest to the truck
-    const snapped = turf.pointOnLine(route, truckPos);
+    console.log(truckPos)
+    const snapped = turf.nearestPointOnLine(route, truckPos);
     // Calculate distance between truck and the snapped point
     const distance = turf.distance(truckPos, snapped, { units: 'meters' });
     if (distance > threshold) {
@@ -49,7 +62,7 @@ const getLocation = async (lng, lat) => {
     const data = await res.json();
     const address = data.features[0].place_name;
     console.log("Address:", address);
-
+    return address
 };
 
 const tripTracker = (socket, io) =>{
@@ -71,13 +84,13 @@ const tripTracker = (socket, io) =>{
             UPDATE "Trips"
             SET status = 'in_transit',
                 end_time = NOW()
-            WHERE id = ${deliveryId};
-            RETURNING *
+            WHERE id = ${deliveryId}
+            RETURNING *;
         `;
 
         await sql`
             UPDATE "Trucks" t
-            SET status = 'on_trip'
+            SET status = 'in_transit'
             FROM "Trips" tr
             WHERE tr.truck_id = t.id
             AND tr.id = ${deliveryId};
@@ -85,7 +98,7 @@ const tripTracker = (socket, io) =>{
 
         await sql`
             UPDATE "Drivers" d
-            SET status = 'available'
+            SET status = 'on_trip'
             FROM "Trips" tr
             WHERE tr.driver_id = d.id
             AND tr.id = ${deliveryId};
@@ -95,6 +108,8 @@ const tripTracker = (socket, io) =>{
             lat,
             lng
         });
+        console.log("send");
+        
     })
 
     socket.on("get-updated-location", async(data)=>{
@@ -102,19 +117,26 @@ const tripTracker = (socket, io) =>{
         
         console.log(lng, lat, deliveryId);
 
-        const trip = await sql`
+        const [trip] = await sql`
             SELECT * FROM "Trips"
             WHERE id = ${deliveryId}
         `
+        const trip_stops = await sql `
+            SELECT * FROM "Trip_stops" 
+            WHERE "trip_id" = ${deliveryId}
+        `
 
         const truckLocation = turf.point([lng, lat]);
+        // console.log(trip, trip[0].geopath);
+        
         const geopath = await getCleanedPath(trip.geopath)
         const {deviated, distance} = checkDeviation(truckLocation, geopath)
-        const location_name = getLocation(lng, lat)
+        const location_name = await getLocation(lng, lat)
         if(deviated){
+            console.log(trip.id, trip.source_dc_id)
             const alert = await sql `
             INSERT INTO "Alerts" (
-                brand_id,
+                dc_id,
                 trip_id,
                 truck_id,
                 device_id,
@@ -129,12 +151,12 @@ const tripTracker = (socket, io) =>{
                 created_at
             )
             VALUES (
-                ${trip.brand_id},
-                ${trip.trip_id},
+                ${trip.source_dc_id},
+                ${trip.id},
                 ${trip.truck_id},
-                ${trip.device_id},
-                ${"route_deviation"},
-                ${"high"},
+                ${trip.device_id? trip.device_id: null},
+                ${'route_deviation'},
+                ${'high'},
                 ${`Route deviation by ${distance}m at ${location_name}`},
                 ${lat},
                 ${lng},
@@ -160,10 +182,11 @@ const tripTracker = (socket, io) =>{
             
         }
 
-        if(speed > trip.speed){
+        if(speed > trip.speed_threshold){
+            const speed_exceded_by = Math.abs(Number(speed) - Number(trip.speed_threshold))
             const alert = await sql `
             INSERT INTO "Alerts" (
-                brand_id,
+                dc_id,
                 trip_id,
                 truck_id,
                 device_id,
@@ -178,13 +201,13 @@ const tripTracker = (socket, io) =>{
                 created_at
             )
             VALUES (
-                ${trip.brand_id},
-                ${trip.trip_id},
+                ${trip.source_dc_id},
+                ${trip.id},
                 ${trip.truck_id},
-                ${trip.device_id},
+                ${trip.device_id?trip.device_id:null},
                 ${"speeding"},
                 ${"high"},
-                ${`speeding by ${Math.abs(speed-trip.speed)} at ${location_name}`},
+                ${`speeding by ${Math.abs(speed - trip.speed_threshold)} at ${location_name}`},
                 ${lat},
                 ${lng},
                 false,
@@ -194,7 +217,7 @@ const tripTracker = (socket, io) =>{
             )
             `;
             socket.emit("Alert", {
-                message: `speeding by ${Math.abs(speed-trip.speed)} at ${location_name}`,
+                message: `speeding by ${speed_exceded_by} at ${location_name}`,
                 deliveryId: deliveryId,
                 tracking_code: trip.tracking_code
             });
@@ -202,7 +225,7 @@ const tripTracker = (socket, io) =>{
             io.to(deliveryId).emit("location-update", {
                 lat,
                 lng,
-                message: `speeding by ${Math.abs(speed-trip.speed)} at ${location_name}`,
+                message: `speeding by ${speed_exceded_by} at ${location_name}`,
                 deliveryId: deliveryId,
                 tracking_code: trip.tracking_code
             });
@@ -211,6 +234,11 @@ const tripTracker = (socket, io) =>{
             lat,
             lng
         });
+        socket.emit("location-update",{
+            lat,
+            lng,
+            location_name
+        })
     })
 
 }

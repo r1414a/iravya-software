@@ -5,7 +5,7 @@ import sendResponse from "../utils/sendResponse.js";
 import { addDriverService, 
     driverExistBylicenceno, 
     getDriverbyidService,
-    updateDriverService,
+    updateDriverService, 
     deleteDriverService ,
     getDriverCurrentTrip,
     getDriverTripHistoryService,

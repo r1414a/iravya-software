@@ -21,6 +21,8 @@ import { useCancelTripMutation } from "@/lib/features/trips/tripApi"
 import DeleteModal from "@/components/DeleteModal"
 import { format, parseISO } from "date-fns"
 import { useLocation } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
 
 
 const DCS = ["Pune", "Mumbai", "Nashik", "Nagpur", "Kolhapur", "Amravati"]
@@ -71,7 +73,8 @@ function StopsPills({ stops }) {
 
 // Actions cell — uses a controlled Sheet so it opens from the row
 function ActionsCell({ row, table }) {
-    const [detailOpen, setDetailOpen] = useState(false)
+    const {user} = useSelector(selectUser)
+     const isdc = user.role === 'dc_manager'
     const [mapOpen, setMapOpen] = useState(false)
     const trip = row.original
     console.log("column", trip);
@@ -109,7 +112,7 @@ function ActionsCell({ row, table }) {
             <div className="flex items-center gap-2 justify-end">
               
                 {
-                    trip.status === "scheduled" && (
+                    trip.status === "scheduled" && isdc && (
                         <Button variant="outline" size="xs"
                             onClick={() => {
                                 setEditTrip?.(trip)
@@ -119,7 +122,7 @@ function ActionsCell({ row, table }) {
                     )
                 }
 
-                {(trip.status === "in_transit" || trip.status === "scheduled") && (
+                {(trip.status === "in_transit" || trip.status === "scheduled") && isdc && (
                     <DeleteModal
                         who={trip.tracking_code}
                         m1active="Trip will no longer be tracked"

@@ -65,7 +65,10 @@ const getUserSchema = (isEdit) =>
 //     status: z.enum(["active", "inactive"]).default("active"),
 // })
 
-export default function CreateUserModal({ users = null, open, onClose }) {
+export default function CreateUserModal({ user, open, onClose }) {
+
+    console.log(user);
+    
     const [showResetConfirm, setShowResetConfirm] = useState(false)
 
     // const [selectedRole, setSelectedRole] = useState("dc_manager");
@@ -81,19 +84,41 @@ export default function CreateUserModal({ users = null, open, onClose }) {
         watch,
         formState: { errors, isSubmitSuccessful },
     } = useForm({
-        resolver: zodResolver(getUserSchema(!!users)),
+        resolver: zodResolver(getUserSchema(!!user)),
         defaultValues: {
-            first_name: users?.first_name || "",
-            last_name: users?.last_name || "",
-            email: users?.email || "",
+            first_name: "",
+            last_name: "",
+            email: "",
             password: "",
-            role: users?.role || "",
-            status: users?.user_status || "active",
+            role: "",
+            status: "active",
         },
     });
 
     const selectedStatus = watch('status')
     const passwordValue = watch("password");
+
+    useEffect(() => {
+        if (user) {
+            reset({
+                first_name: user.first_name || "",
+                last_name: user.last_name || "",
+                email: user.email || "",
+                password: "",
+                role: user.role || "",
+                status: user.user_status || "active",
+            });
+        } else {
+            reset({
+                first_name: "",
+                last_name: "",
+                email: "",
+                password: "",
+                role: "",
+                status: "active",
+            });
+        }
+    }, [user, reset]);
 
     useEffect(() => {
         if (isSubmitSuccessful) {
@@ -107,14 +132,14 @@ export default function CreateUserModal({ users = null, open, onClose }) {
 
         console.log(data);
         try {
-            if (users) {
+            if (user) {
                 const { password, ...rest } = data;
-                await updateUser({ id: users.id, formData: rest }).unwrap();
+                await updateUser({ id: user.id, formData: rest }).unwrap();
             } else {
                 await createUser(data).unwrap();
             }
             // console.log(newUser);
-
+            onClose(false)
         } catch (err) {
             console.error("Error while creating new user", err);
 
@@ -128,17 +153,17 @@ export default function CreateUserModal({ users = null, open, onClose }) {
     };
     return (
         <Sheet direction="right" open={open} onOpenChange={onClose}>
-            {
-                users ?
+            {/* {
+                user ?
                     null :
                     <CreateFormSheetTrigger text={'Create User'} />
-            }
+            } */}
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(handleCreateUser, onError)} className="h-full flex flex-col">
                     <SheetHeader className="border-b border-gray-200">
-                        <SheetTitle>{users ? "Edit user" : "Create new user"}</SheetTitle>
-                        <SheetDescription>{users ? "Update user details" : "Set role and password for created user"}</SheetDescription>
+                        <SheetTitle>{user ? "Edit user" : "Create new user"}</SheetTitle>
+                        <SheetDescription>{user ? "Update user details" : "Set role and password for created user"}</SheetDescription>
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                         <FieldGroup>
@@ -224,7 +249,7 @@ export default function CreateUserModal({ users = null, open, onClose }) {
                                     </Field>
 
                                     {
-                                        !users && (
+                                        !user && (
                                             <UserPassword
                                                 register={register}
                                                 errors={errors}
@@ -285,8 +310,8 @@ export default function CreateUserModal({ users = null, open, onClose }) {
                                     }
 
 
-                                     {
-                                        users && (
+                                    {
+                                        user && (
                                             <Field>
                                                 <FieldLabel>Status</FieldLabel>
                                                 <Select value={selectedStatus}
@@ -308,7 +333,7 @@ export default function CreateUserModal({ users = null, open, onClose }) {
                                             </Field>
                                         )
                                     }
-{/*
+                                    {/*
                                     {
                                         users && (
                                             <div className="pt-2">
@@ -398,9 +423,9 @@ export default function CreateUserModal({ users = null, open, onClose }) {
 
 
                     <SheetFooter className="flex flex-col sm:flex-row gap-2 items-center w-full border-t border-gray-200 p-4">
-                        <Button type="submit" className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>
+                        <Button type="submit" disabled={isLoading} className='w-full sm:w-1/2 bg-maroon hover:bg-maroon-dark'>
                             {
-                                users
+                                user
                                     ? (isUpdating ? "Updating..." : "Update User")
                                     : (isLoading ? "Adding..." : "Create User")
                             }

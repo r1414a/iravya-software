@@ -82,7 +82,7 @@ const addTripService = async(data, dc_manager)=>{
     const speed = Math.abs((total_distance)/(duration/ 3600))+10
     const endtime = getEndTime(departure, duration)
     const [trip] = await sql`
-        INSERT INTO "Trips" 
+        INSERT INTO "Trips" (
             "source_dc_id", "truck_id", "driver_id", "device_id",
             "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed"
         ) VALUES (

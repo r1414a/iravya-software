@@ -36,6 +36,8 @@ async function getCleanedPath(coordinates) {
         `https://api.mapbox.com/matching/v5/mapbox/driving/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
     );
     const data = await response.json();
+    console.log("line 39", data);
+    
     return data.matchings[0].geometry;
 }
 

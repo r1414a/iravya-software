@@ -17,27 +17,39 @@ const addDriverService = async (data) => {
     // const nameParts = full_name.trim().split(/\s+/);
     // const first_name = nameParts[0] || "Unknown";
     // const last_name = nameParts.slice(1).join(" ") || ""; 
-    const [newUser] = await sql`
-        INSERT INTO "User"
-     (
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number",
-            "role",
-            "user_status"
-        )
-        VALUES
-        (
-            ${first_name},
-            ${last_name},
-            NULL,
-            ${phone_number},
-            'driver',
-            'active'
-        )
-        RETURNING id
+    let id = null;
+
+    const existing = await sql`
+        SELECT id FROM "User" WHERE "phone_number" = ${phone_number}
     `;
+
+    if (existing.length === 0) {
+        const [newUser] = await sql`
+            INSERT INTO "User"
+            (
+                "first_name",
+                "last_name",
+                "email",
+                "phone_number",
+                "role",
+                "user_status"
+            )
+            VALUES
+            (
+                ${first_name},
+                ${last_name},
+                NULL,
+                ${phone_number},
+                'driver',
+                'active'
+            )
+            RETURNING id
+        `;
+        id = newUser.id;
+    } else {
+        id = existing[0].id; // ✅ fix here
+    }
+    
 
     const [driver] = await sql`
         INSERT INTO "Drivers" (
@@ -51,7 +63,7 @@ const addDriverService = async (data) => {
           ${licence_no},
             ${licence_class},
             ${licence_expiry},
-            ${newUser.id},
+            ${id},
             ${status}
         )
         RETURNING *

@@ -71,8 +71,9 @@ const addTripService = async(data, dc_manager)=>{
     // }
     console.log(source_dc)
     let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
+    console.log("1 : ",gps_points)
     gps_points.unshift([source_dc.longitude, source_dc.latitude])
-    
+    console.log("2 : ",gps_points)
     const geodata = await calculateGeodistance(gps_points)
     const total_distance = geodata.routes[0].distance / 1000
     const geopath = geodata.routes[0].geometry.coordinates
@@ -83,14 +84,14 @@ const addTripService = async(data, dc_manager)=>{
     const endtime = getEndTime(departure, duration)
     const [trip] = await sql`
         INSERT INTO "Trips" (
-            "source_dc_id", "truck_id", "driver_id", "device_id",
-            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed"
+            "source_dc_id", "truck_id", "driver_id",
+            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed_threshold"
         ) VALUES (
             ${source_dc.id}, ${truck}, ${driver},
             ${tracking_code}, 'scheduled', ${dc_manager},
             ${departure ?? null},
             ${total_distance},
-            ${geopath},
+            ${JSON.stringify(geopath)},
             ${departure},
             ${endtime},
             ${speed}

@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input"
 import { Plus, Route, X, GripVertical, AlertCircle, ChevronLeft } from "lucide-react"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
 import SearchDropdown from "./SearchDropdown"
-import { 
+import {
     useAddTripMutation,
     useLazyGetTrucksQuery,
     useLazyGetDriversQuery,
@@ -40,7 +40,7 @@ import { toast } from "sonner"
 const TRIP_SCHEMA = z.object({
     departure_at: z.string().min(1, "Departure time is required"),
     truck: z.string().min(1, "Please select a truck"),
-    gps_device: z.string().min(1, "Please select a GPS device"),
+    // gps_device: z.string().min(1, "Please select a GPS device"),
     driver: z.string().min(1, "Please select a driver"),
     delivery_stops: z.array(z.object({
         store_id: z.string(),
@@ -87,12 +87,12 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
     const [selectedStops, setSelectedStops] = useState([])
 
     const [addTrip, { isLoading }] = useAddTripMutation()
-    
+
     // Lazy queries - only fetch when needed
     // const [getTrucks, { data: trucksData, isLoading: loadingTrucks }] = useLazyGetTrucksQuery()
     // const [getDrivers, { data: driversData, isLoading: loadingDrivers }] = useLazyGetDriversQuery()
     // const [getGpsDevices, { data: devicesData, isLoading: loadingDevices }] = useLazyGetGpsDevicesQuery()
-    
+
     // Stores query - always available
     // const { data: storesData } = useGetStoresQuery({ page: 1, limit: 100 })
 
@@ -109,7 +109,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
         defaultValues: {
             departure_at: "",
             truck: "",
-            gps_device: "",
+            // gps_device: "",
             driver: "",
             delivery_stops: [],
         },
@@ -118,7 +118,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
     const departureAt = watch("departure_at")
     const selectedTruck = watch("truck")
     const selectedDriver = watch("driver")
-    const selectedGpsDevice = watch("gps_device")
+    // const selectedGpsDevice = watch("gps_device")
 
     // Pre-fill form when editing
     useEffect(() => {
@@ -126,7 +126,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
             reset({
                 departure_at: editingTrip.scheduled_at || "",
                 truck: editingTrip.truck_id || "",
-                gps_device: editingTrip.device_id || "",
+                // gps_device: editingTrip.device_id || "",
                 driver: editingTrip.driver_id || "",
                 delivery_stops: editingTrip.stops || [],
             })
@@ -136,7 +136,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
             reset({
                 departure_at: "",
                 truck: "",
-                gps_device: "",
+                // gps_device: "",
                 driver: "",
                 delivery_stops: [],
             })
@@ -195,7 +195,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
         try {
             const payload = {
                 truck: data.truck,
-                gps_device: data.gps_device,
+                // gps_device: data.gps_device,
                 driver: data.driver,
                 delivery_stops: selectedStops.map(stop => ({
                     store_id: stop.store_id,
@@ -231,7 +231,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
 
     return (
         <Sheet open={open} onOpenChange={onClose}>
-            {!isEdit && <CreateFormSheetTrigger text="Dispatch Trip" />}
+            {/* {!isEdit && <CreateFormSheetTrigger text="Dispatch Trip" />} */}
 
             <SheetContent className="w-full sm:max-w-md lg:max-w-lg bg-white p-0 flex flex-col">
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
@@ -324,15 +324,15 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                         name="truck"
                                                         control={control}
                                                         render={({ field }) => (
-                                                           <SearchDropdown
-    placeholder="Search truck..."
-    value={field.value}
-    onChange={field.onChange}
-    displayKey="registration_no"
-    fetchHook={useGetTrucksQuery}
-    extraParams={{ departed_at: departureAt }}
-    apiRes="trucks"
-/>
+                                                            <SearchDropdown
+                                                                placeholder="Search truck..."
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                displayKey="registration_no"
+                                                                fetchHook={useGetTrucksQuery}
+                                                                extraParams={{ departed_at: departureAt }}
+                                                                apiRes="trucks"
+                                                            />
                                                         )}
                                                     />
                                                     <FieldDescription className="text-xs">
@@ -346,7 +346,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                 </Field>
 
                                                 {/* GPS Device */}
-                                                <Field>
+                                                {/* <Field>
                                                     <FieldLabel>
                                                         GPS Device <span className="text-red-500">*</span>
                                                     </FieldLabel>
@@ -354,15 +354,15 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                         name="gps_device"
                                                         control={control}
                                                         render={({ field }) => (
-                                                           <SearchDropdown
-    placeholder="Search GPS..."
-    value={field.value}
-    onChange={field.onChange}
-    displayKey="device_id"
-    fetchHook={useGetGpsDevicesQuery}
-    extraParams={{ departed_at: departureAt }}
-    apiRes="gpsDevices"
-/>
+                                                            <SearchDropdown
+                                                                placeholder="Search GPS..."
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                displayKey="device_id"
+                                                                fetchHook={useGetGpsDevicesQuery}
+                                                                extraParams={{ departed_at: departureAt }}
+                                                                apiRes="gpsDevices"
+                                                            />
                                                         )}
                                                     />
                                                     {errors.gps_device && (
@@ -370,7 +370,7 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                             {errors.gps_device.message}
                                                         </p>
                                                     )}
-                                                </Field>
+                                                </Field> */}
                                             </div>
 
                                             {/* Driver */}
@@ -382,16 +382,16 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                     name="driver"
                                                     control={control}
                                                     render={({ field }) => (
-                                                       <SearchDropdown
-    placeholder="Search driver..."
-    value={field.value}
-    onChange={field.onChange}
-    displayKey="driver_name"
-    secondaryKey="driver_phone"
-    fetchHook={useGetDriversQuery}
-    extraParams={{ departed_at: departureAt }}
-    apiRes="drivers"
-/>
+                                                        <SearchDropdown
+                                                            placeholder="Search driver..."
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            displayKey="driver_name"
+                                                            secondaryKey="driver_phone"
+                                                            fetchHook={useGetDriversQuery}
+                                                            extraParams={{ departed_at: departureAt }}
+                                                            apiRes="drivers"
+                                                        />
                                                     )}
                                                 />
                                                 {errors.driver && (
@@ -408,13 +408,13 @@ export default function CreateTripModal({ editingTrip = null, open, onClose }) {
                                                 </FieldLabel>
                                                 <div className="flex gap-2">
                                                     <SearchDropdown
-    placeholder="Search store..."
-    onChange={handleAddStop}
-    displayKey="name"
-    secondaryKey="city"
-    fetchHook={useGetStoresQuery}
-    apiRes="stores"
-/>
+                                                        placeholder="Search store..."
+                                                        onChange={handleAddStop}
+                                                        displayKey="name"
+                                                        secondaryKey="city"
+                                                        fetchHook={useGetStoresQuery}
+                                                        apiRes="stores"
+                                                    />
                                                     <Button
                                                         type="button"
                                                         onClick={() => {

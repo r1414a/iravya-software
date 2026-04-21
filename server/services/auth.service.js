@@ -231,132 +231,68 @@ const getAllUserService = async(page = 1, limit = 10)=>{
 
 const getUserbySearchService = async(page = 1, limit = 10, search, role, status) =>{
     const offset = (page - 1) * limit
+const users = await sql`
+    SELECT 
+        u.id,
+        u.email,
+        u.first_name,
+        u.last_name,
+        u.role,
+        u.user_status,
+        u.last_login,
+        u.created_at,
+        u.updated_at,
 
-    // const users = await sql`
-    //     SELECT 
-    //         "id",
-    //         "email",
-    //         "first_name",
-    //         "last_name",
-    //         "role",
-    //         "status",
-    //         "last_login",
-    //         "created_at",
-    //         "updated_at",
-    //         COUNT(*) OVER() AS total_count
-    //     FROM "User"
-    //     WHERE 1=1
-
-    //     ${search ? sql`
-    //     AND (
-    //         "first_name" ILIKE ${'%' + search + '%'}
-    //         OR "last_name" ILIKE ${'%' + search + '%'}
-    //         OR "email" ILIKE ${'%' + search + '%'}
-    //     )
-    //     ` : sql``}
-
-    //     ${role ? sql`AND "role" = ${role}` : sql``}
-
-    //     ${status ? sql`AND "status" = ${status}` : sql``}
-
-    //     ORDER BY "created_at" DESC
-    //     LIMIT ${limit}
-    //     OFFSET ${offset};
-    // `;
-
-    const users = await sql`
-        SELECT 
-            u.id,
-            u.email,
-            u.first_name,
-            u.last_name,
-            u.role,
-            u.user_status,
-            u.last_login,
-            u.created_at,
-            u.updated_at,
-
-            CASE 
-                WHEN u.role = 'dc_manager' THEN dc.name
-                WHEN u.role = 'store_manager' THEN s.name
-                ELSE NULL
-            END AS scope,
-
-            CASE 
-                WHEN u.role = 'dc_manager' THEN dc.city
-                WHEN u.role = 'store_manager' THEN s.city
-                ELSE NULL
-            END AS scope_city,
-
-            COUNT(*) OVER() AS total_count
-
-        FROM "User" u
-
-        LEFT JOIN "Distribution_center" dc 
-            ON dc.dc_manager = u.id
-
-        LEFT JOIN "Stores" s 
-            ON s.store_manager = u.id
-
-        WHERE 1=1
-
-        -- ✅ Scope logic
+        -- ✅ scope name
         CASE 
-            WHEN u."role" = 'dc_manager' THEN d."name"
-            WHEN u."role" = 'store_manager' THEN s."name"
+            WHEN u.role = 'dc_manager' THEN d.name
+            WHEN u.role = 'store_manager' THEN s.name
             ELSE NULL
         END AS scope,
+
+        -- ✅ scope city
+        CASE 
+            WHEN u.role = 'dc_manager' THEN d.city
+            WHEN u.role = 'store_manager' THEN s.city
+            ELSE NULL
+        END AS scope_city,
 
         COUNT(*) OVER() AS total_count
 
     FROM "User" u
 
-    -- ✅ Join DC table
     LEFT JOIN "Distribution_center" d 
-        ON u."id" = d."dc_manager"
+        ON u.id = d.dc_manager
 
-    -- ✅ Join Store table
     LEFT JOIN "Stores" s 
-        ON u."id" = s."store_manager"
+        ON u.id = s.store_manager
 
     WHERE 1=1
 
     ${search ? sql`
-    AND (
-        u."first_name" ILIKE ${'%' + search + '%'}
-        OR u."last_name" ILIKE ${'%' + search + '%'}
-        OR u."email" ILIKE ${'%' + search + '%'}
-    )
+        AND (
+            u.first_name ILIKE ${'%' + search + '%'}
+            OR u.last_name ILIKE ${'%' + search + '%'}
+            OR u.email ILIKE ${'%' + search + '%'}
+        )
     ` : sql``}
 
-    ${role ? sql`AND u."role" = ${role}` : sql``}
+    ${role ? sql`AND u.role = ${role}` : sql``}
 
-    ${status ? sql`AND u."user_status" = ${status}` : sql``}
+    ${status ? sql`AND u.user_status = ${status}` : sql``}
 
-    ORDER BY u."created_at" DESC
+    ORDER BY u.created_at DESC
     LIMIT ${limit}
     OFFSET ${offset};
 `;
 
-   const [{ count }] = await sql`
-    SELECT COUNT(*) FROM "User" u
-    WHERE 1=1
-    ${search ? sql`
-        AND (
-            u."first_name" ILIKE ${'%' + search + '%'}
-            OR u."last_name" ILIKE ${'%' + search + '%'}
-            OR u."email" ILIKE ${'%' + search + '%'}
-        )
-    ` : sql``}
-    ${role ? sql`AND u."role" = ${role}` : sql``}
-    ${status ? sql`AND u."user_status" = ${status}` : sql``}
-`;
+const total = users[0]?.total_count || 0
     return {
         users,
         page,
         limit,
-        total: Number(count),
-        totalPages: Math.ceil(count / limit)
+        total,
+        totalPages: Math.ceil(total / limit)
     }
 }
 

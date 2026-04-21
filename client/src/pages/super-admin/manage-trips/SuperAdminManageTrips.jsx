@@ -3,12 +3,16 @@ import CreateTripModal from "@/components/manage-trip/CreateNewTrip";
 import TripDetailSheet from "@/components/manage-trip/TripDetailSheet";
 import TripsFilter from "@/components/manage-trip/TripsFilter"
 import TripsTable from "@/components/manage-trip/TripsTable"
+import { selectUser } from "@/lib/features/auth/authSlice";
 import { useGetAllTripsQuery } from "@/lib/features/trips/tripApi";
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 const LIMIT = 10;
 
 export default function SuperAdminManageTrips() {
+    const {user} = useSelector(selectUser)
+    const isadmin = user.role === 'super_admin'
     const [page, setPage] = useState(1);
     const [searchInput, setSearchInput] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -62,9 +66,9 @@ export default function SuperAdminManageTrips() {
         <section className="mb-10">
 
             <AdminSubHeader
-                to="/admin"
+                to={isadmin ? "/admin": "/dc"}
                 heading="Manage Trips"
-                subh="Plan, track, and dispatch deliveries across all stores"
+                subh={isadmin ? "View and track deliveries across all stores" : "Plan, track, and dispatch deliveries across all stores — select trucks, and schedule departures."}
             />
 
             <CreateTripModal

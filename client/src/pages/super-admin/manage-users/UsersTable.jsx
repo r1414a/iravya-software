@@ -16,9 +16,23 @@ const users = [
     // { id:8,initials: 'MA', color: 'ua-coral', name: 'Meera Agarwal', email: 'meera.a@westside.com', role: 'Store manager', roleClass: 'rb-store', brand: 'Tata Westside', scope: 'FC Road Store', lastLogin: 'Never', loginDate: '—', since: 'Mar 2026', status: 'pending' },
 ];
 
-export default function UsersTable({ users, setPage, columnFilters,
-    setColumnFilters, totalPages, page, onPrevious, onNext, isFetching }) {
-
+export default function UsersTable({
+    users,
+    setEditUser,
+    setEditOpen,
+    setPage,
+    columnFilters,
+    setColumnFilters,
+    totalPages,
+    page,
+    onPrevious,
+    onNext,
+    isFetching
+}) {
+    const meta = useMemo(() => ({
+        setEditUser,
+        setEditOpen,
+    }), [setEditUser, setEditOpen])
     return (
 
         <section className="mt-6 px-4 lg:px-10">
@@ -26,6 +40,7 @@ export default function UsersTable({ users, setPage, columnFilters,
                 <DataTable
                     columns={columns}
                     data={users}
+                    meta={meta}
                     setPage={setPage}
                     columnFilters={columnFilters}
                     setColumnFilters={setColumnFilters}

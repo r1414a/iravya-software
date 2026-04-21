@@ -15,30 +15,30 @@ import { KeyRound, Pencil } from "lucide-react"
 import DeleteModal from "@/components/DeleteModal"
 import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { ROLES, STATUS } from "@/constants/constant"
-import {formatDistanceToNow, parseISO} from "date-fns"
+import { formatDistanceToNow, parseISO } from "date-fns"
 import CreateUserModal from "../CreateUserModal"
 import { useDeleteUserMutation } from "@/lib/features/users/userApi"
 import EditPasswordModal from "../EditPasswordModal"
 
-function ActionsCell({ row }) {
+function ActionsCell({ row, table }) {
   const user = row.original;
-  const [editUser, setEditUser] = useState(false);
+  
+  // const [editUser, setEditUser] = useState(false);
   const [password, setPassword] = useState(false);
+
+  const { setEditUser, setEditOpen } = table.options.meta || {}
+
   const [deleteStore, { isLoading: isDeleting }] = useDeleteUserMutation()
   const handleDelete = async () => {
-        try {
-            await deleteStore(user.id).unwrap();
-        } catch (err) {
-            console.error("Failed to delete user", err);
-        }
-    };
+    try {
+      await deleteStore(user.id).unwrap();
+    } catch (err) {
+      console.error("Failed to delete user", err);
+    }
+  };
   return (
     <>
-      <CreateUserModal
-        users={user}
-        open={editUser} 
-        onClose={() => setEditUser(false)}
-      />
+
 
       <EditPasswordModal
         user={user}
@@ -48,13 +48,20 @@ function ActionsCell({ row }) {
 
       <div className="flex items-center gap-2 justify-end">
 
-{
-        user.role !== 'driver' && (
-          <Button variant="outline" size="xs" onClick={() => setPassword(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><KeyRound size={16} /></Button>
-        )
-      }
+        {
+          user.role !== 'driver' && (
+            <Button variant="outline" size="xs" onClick={() => setPassword(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><KeyRound size={16} /></Button>
+          )
+        }
 
-        <Button variant="outline" size="xs" onClick={() => setEditUser(true)} className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Pencil size={16} /></Button>
+        <Button
+          variant="outline"
+          size="xs"
+          onClick={() => {
+            setEditUser?.(user)
+            setEditOpen?.(true)
+          }}
+          className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"><Pencil size={16} /></Button>
 
         <DeleteModal
           who={`${user.first_name} ${user.last_name}`}
@@ -63,7 +70,7 @@ function ActionsCell({ row }) {
           isLoading={isDeleting}
         />
 
-        
+
 
       </div>
     </>
@@ -94,7 +101,7 @@ export const columns = [
   },
   {
     accessorKey: "role",
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       const current = column.getFilterValue() || "all";
       return (
         <div className="flex items-center gap-2">
@@ -112,8 +119,11 @@ export const columns = [
             <DropdownMenuContent className="w-40 bg-white border shadow-md">
               <DropdownMenuRadioGroup
                 value={current}
-                onValueChange={(val) =>
+                onValueChange={(val) => {
                   column.setFilterValue(val === "all" ? undefined : val)
+                  table.options.meta?.updatePage?.(1)
+
+                }
                 }
               >
                 <DropdownMenuRadioItem value="all" className="text-xs">
@@ -145,11 +155,11 @@ export const columns = [
   {
     accessorKey: "scope",
     header: "SCOPE",
-    cell: ({row}) => {
-        const scope = row.getValue("scope");
-        if(!scope) return <span className="text-gray-400">-</span>
+    cell: ({ row }) => {
+      const scope = row.getValue("scope");
+      if (!scope) return <span className="text-gray-400">-</span>
 
-        return(
+      return (
         <p className="text-gray-600 capitalize">{scope}</p>
       )
     }
@@ -157,28 +167,28 @@ export const columns = [
   {
     accessorKey: "last_login",
     header: "LAST LOGIN",
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const lastLogin = row.getValue("last_login");
       // console.log(lastLogin);
 
-      if(!lastLogin) return <span className="text-gray-400 text-center">-</span>
+      if (!lastLogin) return <span className="text-gray-400 text-center">-</span>
 
       const relativeTime = formatDistanceToNow(parseISO(lastLogin), {
         addSuffix: true
       })
 
-      return(
+      return (
         <p className="text-gray-600 capitalize">{relativeTime.replace('about', '')}</p>
       )
     }
   },
   {
     accessorKey: "user_status",
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       const currentValue = column.getFilterValue() || "all";
 
       // console.log("user_status",currentValue);
-      
+
 
       return (
         <div className="flex items-center gap-2">
@@ -202,6 +212,7 @@ export const columns = [
                   column.setFilterValue(
                     value === "all" ? undefined : value
                   )
+                  table.options.meta?.updatePage?.(1)
                 }}
               >
                 <DropdownMenuRadioItem value="all" className="text-xs">
@@ -235,6 +246,6 @@ export const columns = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <ActionsCell row={row} />,
+    cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
   },
 ]

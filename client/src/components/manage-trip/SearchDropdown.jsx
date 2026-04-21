@@ -29,7 +29,7 @@ export default function SearchDropdown({
     const selectedItem = items.find(item => item[valueKey] === value)
 
     return (
-        <div className="relative">
+        <div className="relative w-full">
             <Input
                 placeholder={placeholder}
                 value={search}

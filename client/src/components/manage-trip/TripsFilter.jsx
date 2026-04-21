@@ -16,6 +16,8 @@ import {
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import CreateFormSheetTrigger from "../CreateFormSheetTrigger"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
 
 export default function TripsFilter({
     setEditTrip,
@@ -24,6 +26,8 @@ export default function TripsFilter({
     setSearchInput,
     handleClear
 }) {
+    const {user} = useSelector(selectUser)
+     const isadmin = user.role === 'super_admin'
     const [activeStatus, setActiveStatus] = useState("All")
     const location = useLocation()
 
@@ -76,13 +80,18 @@ export default function TripsFilter({
 
                 </div>
 
-                <div className="flex justify-end order-1 sm:order-2">
+            {
+                !isadmin && (
+                    <div className="flex justify-end order-1 sm:order-2">
                     <CreateFormSheetTrigger
                         text="Dispatch Trip"
                         setEditWho={setEditTrip}
                         setEditOpen={setEditOpen}
                     />
                 </div>
+                )
+            }
+                
 
 
             </div>

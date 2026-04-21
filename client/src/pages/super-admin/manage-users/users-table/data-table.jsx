@@ -17,28 +17,32 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 export function DataTable({
-    columns, data,setPage, columnFilters, 
-        setColumnFilters ,
-        totalPages = 1,
-        page = 1,
-        onPrevious,
-        onNext,
-        isFetching = false,
+    columns, 
+    data,
+    setPage, 
+    columnFilters, 
+    setColumnFilters,
+    totalPages = 1,
+    page = 1,
+    onPrevious,
+    onNext,
+    isFetching = false, 
+    meta 
 }) {
 
     const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        state: { columnFilters },
-        onColumnFiltersChange: setColumnFilters,
-         manualFiltering: true,
+            data,
+            columns,
+            state: { columnFilters },
+            onColumnFiltersChange: setColumnFilters,
+            getCoreRowModel: getCoreRowModel(),
+            getFilteredRowModel: getFilteredRowModel(),
+            manualFiltering: true,
             meta: {
-                // ...meta,
-                updatePage: (page) => setPage(page)
+                ...meta,
+                updatePage: (newPage) => setPage(newPage)
             }
-    })
+        })
 
     return (
         <div className="border rounded-lg">
@@ -105,15 +109,15 @@ export function DataTable({
                 <div className="flex gap-2">
                     <Button
                         onClick={onPrevious}
-                        disabled={page <= 1}
+                        disabled={page <= 1 || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Previous
                     </Button>
-
+                    
                     <Button
                         onClick={onNext}
-                        disabled={page >= totalPages}
+                        disabled={page >= totalPages || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Next

@@ -9,20 +9,14 @@ const setNotificationPreferencesService = async (id, data) => {
         trip_dispatched,
         trip_completed,
         trip_cancelled,
-        alert_speeding,
-        alert_long_stop,
-        alert_route_deviation,
-        alert_geofence,
-        device_offline,
-        device_at_store,
-        device_low_batt,
+        speeding,
+        long_stop,
+        route_deviation,
+        geofence,
         new_user,
         platform_errors,
-        via_email,
-        via_sms,
-        via_push,
     } = data;
-
+    let updated;
     
     const result = await sql`
       SELECT * FROM "Notification_preferences" WHERE "user_id" = ${id}
@@ -30,43 +24,38 @@ const setNotificationPreferencesService = async (id, data) => {
 
     if (result.length > 0) {
       // If preferences exist, update them
-      await sql`
+      updated = await sql`
         UPDATE "Notification_preferences"
         SET 
           "trip_dispatched" = ${trip_dispatched}, 
           "trip_completed" = ${trip_completed}, 
           "trip_cancelled" = ${trip_cancelled},
-          "alert_speeding" = ${alert_speeding},
-          "alert_long_stop" = ${alert_long_stop},
-          "alert_route_deviation" = ${alert_route_deviation},
-          "alert_geofence" = ${alert_geofence},
-          "device_offline" = ${device_offline},
-          "device_at_store" = ${device_at_store},
-          "device_low_batt" = ${device_low_batt},
+          "alert_speeding" = ${speeding},
+          "alert_long_stop" = ${long_stop},
+          "alert_route_deviation" = ${route_deviation},
+          "alert_geofence" = ${geofence},
           "new_user" = ${new_user},
-          "platform_errors" = ${platform_errors},
-          "via_email" = ${via_email},
-          "via_sms" = ${via_sms},
-          "via_push" = ${via_push}
+          "platform_errors" = ${platform_errors}
         WHERE "user_id" = ${id}
+        RETURNING *
       `;
-      return { message: 'Notification preferences updated successfully' };
     } else {
       // If no preferences exist, create new preferences for the user
-      await sql`
+      updated = await sql`
         INSERT INTO "Notification_preferences" 
         ("user_id", "trip_dispatched", "trip_completed", "trip_cancelled", 
-         "alert_speeding", "alert_long_stop", "alert_route_deviation", "alert_geofence",
-         "device_offline", "device_at_store", "device_low_batt", "new_user", "platform_errors", 
-         "via_email", "via_sms", "via_push")
+         "alert_speeding", 
+         "alert_long_stop", 
+         "alert_route_deviation", 
+         "alert_geofence","new_user", "platform_errors"
+         )
         VALUES
         (${id}, ${trip_dispatched}, ${trip_completed}, ${trip_cancelled}, 
-         ${alert_speeding}, ${alert_long_stop}, ${alert_route_deviation}, ${alert_geofence},
-         ${device_offline}, ${device_at_store}, ${device_low_batt}, ${new_user}, ${platform_errors}, 
-         ${via_email}, ${via_sms}, ${via_push})
+         ${speeding}, ${long_stop}, ${route_deviation}, ${geofence}, ${new_user}, ${platform_errors})
+         RETURNING *
       `;
-      return { message: 'Notification preferences created successfully' };
     }
+    return updated[0]
 }
 
 export{

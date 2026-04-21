@@ -79,6 +79,9 @@ export function ProfileSection() {
                                     placeholder="First name" 
                                     className="placeholder:text-sm text-sm sm:text-md"
                                 />
+                                {errors.first_name && (
+                                                <p className="text-red-500 text-[10px] ml-1">{errors.first_name.message}</p>
+                                            )}
                             </Field>
                             <Field>
                                 <FieldLabel>Last name</FieldLabel>
@@ -87,6 +90,9 @@ export function ProfileSection() {
                                     placeholder="Last name" 
                                     className="placeholder:text-sm text-sm sm:text-md"
                                 />
+                                {errors.last_name && (
+                                                <p className="text-red-500 text-[10px] ml-1">{errors.last_name.message}</p>
+                                            )}
                             </Field>
                         </div>
                         <Field>
@@ -96,6 +102,9 @@ export function ProfileSection() {
                                 {...register("email")}
                                 className="placeholder:text-sm text-sm sm:text-md"
                                 />
+                                 {errors.email && (
+                                                <p className="text-red-500 text-[10px] ml-1">{errors.email.message}</p>
+                                            )}
                             <FieldDescription className="text-xs">Used to log in to the platform</FieldDescription>
                         </Field>
                         <Field>
@@ -103,13 +112,16 @@ export function ProfileSection() {
                             <Input type="tel" 
                                 {...register("phone_number")} 
                                 placeholder="+91 XXXXX XXXXX" className="placeholder:text-sm text-sm sm:text-md"/>
+                                 {errors.phone_number && (
+                                                <p className="text-red-500 text-[10px] ml-1">{errors.phone_number.message}</p>
+                                            )}
                         </Field>
                     </FieldGroup>
                 </FieldSet>
             </FieldGroup>
  
             <div className="mt-6">
-                <Button className="w-full sm:w-fit bg-maroon hover:bg-maroon-dark text-white">Save profile</Button>
+                <Button type="submit" className="w-full sm:w-fit bg-maroon hover:bg-maroon-dark text-white">Save profile</Button>
             </div>
             </form>
         </div>

@@ -6,6 +6,11 @@ import {
     SelectItem, SelectLabel, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Radio, Cpu, ShieldCheck, Siren } from "lucide-react"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
+import { z } from "zod";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 function SectionBlock({ icon: Icon, title, children }) {
     return (
@@ -19,7 +24,62 @@ function SectionBlock({ icon: Icon, title, children }) {
     )
 }
 
+
+
+export const platformSchema = z.object({
+  store_radius: z
+    .number({ invalid_type_error: "Must be a number" })
+    .min(50, "Min 50m")
+    .max(1000, "Max 1000m"),
+
+  near_arrival: z
+    .number()
+    .min(1, "Min 1 km")
+    .max(20, "Max 20 km"),
+
+  speed_limit: z
+    .number()
+    .min(20, "Too low")
+    .max(150, "Too high"),
+
+  long_stop: z
+    .number()
+    .min(5, "Min 5 min")
+    .max(120, "Max 120 min"),
+});
+
 export function PlatformSection() {
+    const {platformSettings} = useSelector(selectUser)
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        setValue,
+        watch,
+        formState: { errors, isSubmitSuccessful },
+    } = useForm({
+        resolver: zodResolver(platformSchema),
+        defaultValues: {
+            store_radius: platformSettings?.store_radius ?? 200,
+            near_arrival: platformSettings?.near_arrival ?? 5,
+            speed_limit: platformSettings?.speed_limit ?? 80,
+            long_stop: platformSettings?.long_stop ?? 15,
+        }
+    })
+
+     const onSubmit = async (data) => {
+        try {
+            console.log(data);
+
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const onError = (errors) => {
+        console.log("FORM ERRORS:", errors);
+    };
     return (
         <div>
             <div className="mb-6">
@@ -28,12 +88,12 @@ export function PlatformSection() {
             </div>
 
             {/* MQTT */}
-            <SectionBlock icon={Radio} title="MQTT broker">
+            {/* <SectionBlock icon={Radio} title="MQTT broker">
                 <FieldGroup><FieldSet><FieldGroup>
                     <div className="flex gap-3">
                         <Field>
                             <FieldLabel>Broker host</FieldLabel>
-                            <Input defaultValue="mqtt.fleettrack.in" className="font-mono placeholder:text-sm text-sm sm:text-md" placeholder="mqtt.yourdomain.com"/>
+                            <Input defaultValue="mqtt.fleettrack.in" className="font-mono placeholder:text-sm text-sm sm:text-md" placeholder="mqtt.yourdomain.com" />
                         </Field>
                         <Field>
                             <FieldLabel>Port</FieldLabel>
@@ -48,10 +108,10 @@ export function PlatformSection() {
                         </FieldDescription>
                     </Field>
                 </FieldGroup></FieldSet></FieldGroup>
-            </SectionBlock>
+            </SectionBlock> */}
 
             {/* GPS */}
-            <SectionBlock icon={Cpu} title="GPS tracking">
+            {/* <SectionBlock icon={Cpu} title="GPS tracking">
                 <FieldGroup><FieldSet><FieldGroup>
                     <div className="flex gap-3">
                         <Field>
@@ -82,7 +142,9 @@ export function PlatformSection() {
                         <FieldDescription className="text-xs">Raw GPS points older than this are compressed and archived automatically</FieldDescription>
                     </Field>
                 </FieldGroup></FieldSet></FieldGroup>
-            </SectionBlock>
+            </SectionBlock> */}
+
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
 
             {/* Geofence defaults */}
             <SectionBlock icon={ShieldCheck} title="Geofence defaults">
@@ -90,19 +152,34 @@ export function PlatformSection() {
                     <div className="flex gap-3">
                         <Field>
                             <FieldLabel>Default store radius (m)</FieldLabel>
-                            <Input type="number" defaultValue="200" className="mt-4 sm:mt-0 placeholder:text-sm text-sm sm:text-md"/>
+                            <Input 
+                                type="number" 
+                                {...register("store_radius")} 
+                                className="mt-4 sm:mt-0 placeholder:text-sm text-sm sm:text-md" 
+                            />
+
+                            {errors.store_radius && (
+        <p className="text-xs text-red-500">{errors.store_radius.message}</p>
+      )}
                         </Field>
                         <Field>
-                        <FieldLabel>Near-arrival notification (km before store)</FieldLabel>
-                        <Input type="number" defaultValue="5" min="1" max="20" />
-                        <FieldDescription className="text-xs">Store manager gets a push notification when truck is within this distance</FieldDescription>
-                    </Field>
+                            <FieldLabel>Near-arrival notification (km before store)</FieldLabel>
+                            <Input 
+                                type="number" 
+                               {...register("near_arrival")} 
+                                min="1" max="20" 
+                            />
+                            {errors.near_arrival && (
+        <p className="text-xs text-red-500">{errors.near_arrival.message}</p>
+      )}
+                            <FieldDescription className="text-xs">Store manager gets a push notification when truck is within this distance</FieldDescription>
+                        </Field>
                         {/* <Field>
                             <FieldLabel>Default DC radius (m)</FieldLabel>
                             <Input type="number" defaultValue="300" />
                         </Field> */}
                     </div>
-                    
+
                 </FieldGroup></FieldSet></FieldGroup>
             </SectionBlock>
 
@@ -112,26 +189,34 @@ export function PlatformSection() {
                     <div className="flex gap-3">
                         <Field>
                             <FieldLabel>Speeding threshold (km/h)</FieldLabel>
-                            <Input type="number" defaultValue="80" className="placeholder:text-sm text-sm sm:text-md"/>
+                            <Input type="number" {...register("speed_limit")}  className="placeholder:text-sm text-sm sm:text-md" />
+                            {errors.speed_limit && (
+        <p className="text-xs text-red-500">{errors.speed_limit.message}</p>
+      )}
                             <FieldDescription className="text-xs">Alert fires when truck exceeds this speed</FieldDescription>
                         </Field>
                         <Field>
                             <FieldLabel>Long stop threshold (minutes)</FieldLabel>
-                            <Input type="number" defaultValue="15" className="placeholder:text-sm text-sm sm:text-md"/>
+                            <Input type="number" {...register("long_stop")}  className="placeholder:text-sm text-sm sm:text-md" />
+                            {errors.long_stop && (
+        <p className="text-xs text-red-500">{errors.long_stop.message}</p>
+      )}
                             <FieldDescription className="text-xs">Alert fires when truck is idle this long on a trip</FieldDescription>
                         </Field>
                     </div>
-                    <Field>
+                    {/* <Field>
                         <FieldLabel>Device at store — pickup reminder (hours)</FieldLabel>
-                        <Input type="number" defaultValue="24" className="placeholder:text-sm text-sm sm:text-md"/>
+                        <Input type="number" defaultValue="24" className="placeholder:text-sm text-sm sm:text-md" />
                         <FieldDescription className="text-xs">Notify DC operator if a device sits at a store uncollected beyond this duration</FieldDescription>
-                    </Field>
+                    </Field> */}
                 </FieldGroup></FieldSet></FieldGroup>
             </SectionBlock>
 
             <div className="mt-6">
-                <Button className="bg-maroon hover:bg-maroon-dark text-white">Save platform settings</Button>
+                <Button type="submit" className="bg-maroon hover:bg-maroon-dark text-white">Save platform settings</Button>
             </div>
+
+            </form>
         </div>
     )
 }

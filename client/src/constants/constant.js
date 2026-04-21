@@ -43,9 +43,6 @@ export const LICENCE_CLASSES = [
 }
 
 export const SUPER_ADMIN_NOTIFICATIONS = {
-    // device_at_store: true,
-    device_low_batt: true,
-    device_offline: true,
     geofence: true,
     long_stop: true,
     new_user: true,

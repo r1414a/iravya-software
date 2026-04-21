@@ -33,7 +33,15 @@ export const authApi = api.injectEndpoints({
                     console.error("Logout failed:", error);
                 }
             },
-            
+
+        }),
+
+        setNotificationPreferences: builder.mutation({
+            query: (data) => ({
+                url: "/api/v1/settings/notifications",
+                method: "POST",
+                body: data,
+            }),
         }),
 
         //login,getMe,logout
@@ -43,5 +51,6 @@ export const authApi = api.injectEndpoints({
 export const {
     useSignInMutation,
     useGetMeQuery,
-    useSignOutMutation
+    useSignOutMutation,
+    useSetNotificationPreferencesMutation
 } = authApi

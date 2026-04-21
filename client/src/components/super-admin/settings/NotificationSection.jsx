@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { selectUser } from "@/lib/features/auth/authSlice"
+import { useSetNotificationPreferencesMutation } from "@/lib/features/auth/authApi"
+import { selectUser, setNotificationPreferences } from "@/lib/features/auth/authSlice"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import z from "zod"
 
 const NOTIFICATION_GROUPS = [
@@ -73,8 +74,9 @@ const notificationSchema = z.object({
 
 export function NotificationsSection() {
     const init = NOTIFICATION_GROUPS.flatMap(g => g.items).reduce((a, i) => ({ ...a, [i.key]: true }), {})
-    console.log("settings", init);
 
+    const [updateNotifications, { isLoading }] = useSetNotificationPreferencesMutation();
+    const dispatch = useDispatch()
 
     const { notifications } = useSelector(selectUser)
     const {
@@ -88,26 +90,55 @@ export function NotificationsSection() {
     } = useForm({
         resolver: zodResolver(notificationSchema),
         defaultValues: {
-            geofence: notifications.geofence || true,
-            long_stop: notifications.long_stop || true,
-            new_user: notifications.new_user || true,
-            platform_errors: notifications.platform_errors || true,
-            route_deviation: notifications.route_deviation || true,
-            speeding: notifications.speeding || true,
-            trip_cancelled: notifications.trip_cancelled || true,
-            trip_completed: notifications.trip_completed || true,
-            trip_dispatched: notifications.trip_dispatched || true,
+            geofence: true,
+            long_stop: true,
+            new_user: true,
+            platform_errors: true,
+            route_deviation: true,
+            speeding: true,
+            trip_cancelled: true,
+            trip_completed: true,
+            trip_dispatched: true,
         }
     })
 
+     useEffect(() => {
+            if (isSubmitSuccessful) {
+                reset();
+            }
+        }, [isSubmitSuccessful, reset]);
 
-    const [prefs, setPrefs] = useState(init)
-    const toggle = (key, val) => setPrefs(p => ({ ...p, [key]: val }))
+    useEffect(() => {
+        reset({
+            geofence: notifications.geofence ?? true,
+            long_stop: notifications.long_stop ?? true,
+            new_user: notifications.new_user ?? true,
+            platform_errors: notifications.platform_errors ?? true,
+            route_deviation: notifications.route_deviation ?? true,
+            speeding: notifications.speeding ?? true,
+            trip_cancelled: notifications.trip_cancelled ?? true,
+            trip_completed: notifications.trip_completed ?? true,
+            trip_dispatched: notifications.trip_dispatched ?? true,
+        })
+    }, [notifications, reset])
 
     const onSubmit = async (data) => {
         try {
             console.log(data);
+            const res = await updateNotifications(data).unwrap();
+            const prefs = res.data || res;
 
+            dispatch(setNotificationPreferences({
+                trip_dispatched: prefs.trip_dispatched,
+                trip_completed: prefs.trip_completed,
+                trip_cancelled: prefs.trip_cancelled,
+                speeding: prefs.alert_speeding,
+                long_stop: prefs.alert_long_stop,
+                route_deviation: prefs.alert_route_deviation,
+                geofence: prefs.alert_geofence,
+                new_user: prefs.new_user,
+                platform_errors: prefs.platform_errors,
+            }));
         } catch (err) {
             console.error(err)
         }
@@ -147,7 +178,9 @@ export function NotificationsSection() {
                 </div>
 
                 <div className="mt-6">
-                    <Button type="submit" className="bg-maroon hover:bg-maroon-dark text-white">Save preferences</Button>
+                    <Button type="submit" disabled={isLoading} className="bg-maroon hover:bg-maroon-dark text-white">
+                        {isLoading ? "Saving..." : "Save preferences"}
+                    </Button>
                 </div>
             </form>
         </div>

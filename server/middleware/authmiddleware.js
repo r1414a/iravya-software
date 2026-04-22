@@ -1,5 +1,5 @@
 // const jwt = require('jsonwebtoken');
-import jwt from "jsonwebtoken"
+import jwt, { decode } from "jsonwebtoken"
 // const asyncHandler = require('express-async-handler');
 import asyncHandler from "../utils/asyncHandler.js"
 import sql from "../db/database.js"// your postgres connection
@@ -15,6 +15,9 @@ const protect = asyncHandler(async (req, res, next) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+  // console.log("decoded", decoded);
+  
+  
   // PostgreSQL Query instead of User.findById
   const users = await sql`
         SELECT "id", "first_name", "last_name", "last_login", "user_status",  "email", "created_at", "role","updated_at" 
@@ -28,6 +31,10 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.user = users[0];
+
+  if (users[0].user_status !== "active") {
+    throw new ApiError(403, "Account is inactive");
+  }
 
   next();
 

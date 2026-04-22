@@ -142,9 +142,11 @@ const allTripsService = async({ page, limit, status, city, search, user_id, role
             tr.registration_no,
             tr.model,
             tr.capacity,
+            tr.id AS truck_id,
 
             CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
             u.phone_number,
+            d.id AS driver_id,
 
             COUNT(ts.id)                                        AS total_stops,
             COUNT(ts.id) FILTER (WHERE ts.status = 'confirmed') AS completed_stops,
@@ -155,6 +157,9 @@ const allTripsService = async({ page, limit, status, city, search, user_id, role
                         'stop_id', ts.id,
                         'store_id', s.id,
                         'store_name', s.name,
+                        'store_address',s.address, 
+                        'latitude', s.latitude,
+                        'longitude', s.longitude,
                         'eta', ts.eta,
                         'arrived_at', ts.arrived_at,
                         'status', ts.status
@@ -188,7 +193,8 @@ const allTripsService = async({ page, limit, status, city, search, user_id, role
         GROUP BY
             t.id,
             dc.name, dc.city,
-            tr.registration_no, tr.model, tr.capacity,
+            tr.registration_no, tr.model, tr.capacity, tr.id,
+            d.id,
             u.first_name, u.last_name, u.phone_number
 
         ORDER BY t.created_at DESC
@@ -412,6 +418,8 @@ const getStoresService = async ({ page = 1, limit = 10, search = "" }) => {
       s.address,
       s.city,
       s.state,
+      s.latitude,
+      s.longitude,
       COUNT(*) OVER() AS total_count
     FROM "Stores" s
     WHERE 

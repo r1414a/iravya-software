@@ -94,6 +94,7 @@ const getAllStores = asyncHandler(async (req, res) => {
 
     // Defaults
     const user_id = req.user.id
+    const user_role = req.user.role
     console.log(user_id)
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
@@ -111,7 +112,8 @@ const getAllStores = asyncHandler(async (req, res) => {
       brand_id,
       status,
       city,
-      user_id
+      user_id,
+      user_role
     });
 
     sendResponse(res, 201, stores, "Data Found")

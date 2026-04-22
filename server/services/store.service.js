@@ -237,7 +237,8 @@ const getAllStoreService = async (filters) => {
         search,
         page = 1,
         limit = 10,
-        user_id
+        user_id,
+        user_role
     } = filters;
 
     const offset = (page - 1) * limit;
@@ -285,7 +286,14 @@ const getAllStoreService = async (filters) => {
 
     WHERE 1=1
     
+    ${user_role === "dc_manager" ? sql`
+    AND s.dc_id IN (
+        SELECT id FROM "Distribution_center"
+        WHERE dc_manager = ${user_id}
+    )
+` : sql``}
 
+    
     ${brand_id ? sql`
     AND s.brand_id = ${brand_id}
     ` : sql``}

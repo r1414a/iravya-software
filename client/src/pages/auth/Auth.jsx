@@ -8,7 +8,7 @@ import z  from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod"
 import {useSignInMutation} from "@/lib/features/auth/authApi"
 import { useDispatch } from 'react-redux';
-import { setUser } from '@/lib/features/auth/authSlice';
+import { setNotificationPreferences, setUser, updatePlatformSettings } from '@/lib/features/auth/authSlice';
 import { CREDENTIALS } from '@/constants/constant';
 
 
@@ -54,8 +54,10 @@ export default function Auth() {
     async function onSubmit(data) {
         try{
             const userData = await login(data).unwrap();
-            // console.log("userData",userData);
+            console.log("userData",userData);
             dispatch(setUser(userData.data))
+            dispatch(setNotificationPreferences(userData.data.notifications))
+            dispatch(updatePlatformSettings(userData.data.platformSettings))
 
             if(userData?.data?.role === 'super_admin'){
                 navigate('/admin', { replace: true })

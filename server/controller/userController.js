@@ -14,13 +14,15 @@ import {
     getAllUserService,
     updateUserService,
     getUserbySearchService,
-    setUserPasswordService
+    setUserPasswordService,
+    buildUserResponse
 } from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 import sendResponse from "../utils/sendResponse.js";
 
 const getMe = asyncHandler(async (req, res) => {
-    sendResponse(res, 200, req.user, "")
+    const responseData = await buildUserResponse(req.user)
+    sendResponse(res, 200, responseData, "")
 })
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -52,48 +54,27 @@ const loginUser = asyncHandler(async (req, res) => {
     const userExists = await userExistbyemailService(email)
     if (!userExists.length) {
         throw new ApiError(401, "We couldn't find that account.")
-        // res.status(200)
-        // .json(
-        //     new ApiResponse(
-        //         200, 
-        //         {
-        //             user: userExists[0],
-        //         },
-        //         "We couldn't find that account."
-        //     )
-        // )
     }
-    else {
 
-        const user = await loginUserService(email, password)
+    const user = await loginUserService(email, password)
 
-        const token = generateToken(user.id)
+    let responseData = await buildUserResponse(user)
 
-        const options = {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            path: "/",
-            maxAge: 24 * 60 * 60 * 1000
-        }
+    const token = generateToken(user.id)
 
-        res.cookie("token", token, options)
-
-
-        sendResponse(res, 200, user, `Welcome back, ${user.first_name} - (${user.role === 'super_admin' ? 'Super admin' : 'DC manager'})`)
-        // res
-        // .status(200)
-        // .cookie("token", token, options)
-        // .json(
-        //     new ApiResponse(
-        //         200, 
-        //         {
-        //             user: user,
-        //         },
-        //         "User loged in successfully"
-        //     )
-        // )
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        path: "/",
+        maxAge: 24 * 60 * 60 * 1000
     }
+
+    res.cookie("token", token, options)
+
+    // console.log("responseData",responseData);
+    
+    sendResponse(res, 200, responseData, `Welcome back, ${responseData.first_name} - (${responseData.role === 'super_admin' ? 'Super admin' : 'DC manager'})`)
 
 })
 

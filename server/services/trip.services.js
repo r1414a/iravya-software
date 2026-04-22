@@ -78,7 +78,6 @@ const addTripService = async(data, dc_manager)=>{
     const total_distance = geodata.routes[0].distance / 1000
     const geopath = geodata.routes[0].geometry.coordinates
     
-    
     const duration = geodata.routes[0].duration
     const speed = Math.abs((total_distance)/(duration/ 3600))+10
     const endtime = getEndTime(departure, duration)

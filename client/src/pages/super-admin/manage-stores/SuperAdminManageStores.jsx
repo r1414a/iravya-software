@@ -8,10 +8,15 @@ import StoresTable from "@/components/manage-store/StoresTable"
 import { useGetAllBrandsQuery } from "@/lib/features/brands/brandApi"
 import { useGetAllStoresQuery } from "@/lib/features/stores/storeApi"
 import { useGetAvailableManagersQuery } from "@/lib/features/users/userApi"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/lib/features/auth/authSlice"
 
 const LIMIT = 10
 
 export default function SuperAdminManageStores() {
+
+    const {user} = useSelector(selectUser);
+    const isadmin = user.role === 'super_admin'
     // State
     const [page, setPage] = useState(1)
     const [searchInput, setSearchInput] = useState("")
@@ -95,9 +100,9 @@ export default function SuperAdminManageStores() {
     return (
         <section className="mb-10">
             <AdminSubHeader
-                to="/admin"
+                to={isadmin ? "/admin": "/dc"}
                 heading="Manage Stores"
-                subh="All retail stores across all brands — add, edit, manage geofence and public tracking"
+                subh={isadmin ? "All retail stores across all brands — add, edit, manage geofence and public tracking" : "Stores this DC delivers to — track incoming deliveries, devices held and manager contacts"}
             />
 
             <StoreForm

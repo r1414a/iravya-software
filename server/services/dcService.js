@@ -124,8 +124,8 @@ const updateDcService = async(id, data) =>{
                 "name" = ${name},
                 "address" = ${address},
                 "city" = ${city},
-                "status" = ${status}
-                "dc_manager" = ${dc_manager}
+                "status" = ${status},
+                "dc_manager" = ${dc_manager} 
             WHERE "id" = ${id}
             RETURNING *
         `)
@@ -144,6 +144,7 @@ const updateDcService = async(id, data) =>{
         //         WHERE "id" = ${id}
         //     )
         //     `;
+console.log("updatedc", dc);
 
         return dc
 }

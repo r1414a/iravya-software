@@ -6,10 +6,10 @@ const addTripValidator = [
         .notEmpty().withMessage("Truck is required")
         .isUUID().withMessage("Truck must be valid UUID"),
 
-    body("gps_device")
-        .trim()
-        .notEmpty().withMessage("GPS device is required")
-        .isUUID().withMessage("GPS device must be valid UUID"),
+    // body("gps_device")
+    //     .trim()
+    //     .notEmpty().withMessage("GPS device is required")
+    //     .isUUID().withMessage("GPS device must be valid UUID"),
 
     body("driver")
         .trim()

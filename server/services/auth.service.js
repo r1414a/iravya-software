@@ -3,6 +3,43 @@ import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
 
+const buildUserResponse = async (user) => {
+    console.log("user",user);
+    
+    let responseData = { ...user };
+
+    // ✅ DC MANAGER
+    if (user.role === "dc_manager") {
+        const dc = await sql`
+            SELECT "name"
+            FROM "Distribution_center"
+            WHERE "dc_manager" = ${user.id}
+        `;
+
+        responseData.source_dc_name = dc[0]?.name || null;
+    }
+
+    // ✅ SUPER ADMIN
+    if (user.role === "super_admin") {
+        const notifications = await sql`
+            SELECT *
+            FROM "Notification_preferences"
+            WHERE "user_id" = ${user.id}
+        `;
+
+        const platformSettings = await sql`
+            SELECT *
+            FROM "Platform_settings"
+            WHERE "user_id" = ${user.id}
+        `;
+
+        responseData.notifications = notifications[0] || {};
+        responseData.platformSettings = platformSettings[0] || {};
+    }
+
+    return responseData;
+};
+
 const registerUserService = async (userData) => {
     const { first_name, last_name, email, password, role, status } = userData
     console.log(first_name, last_name, email, password, role, status)
@@ -39,7 +76,9 @@ const registerUserService = async (userData) => {
 
 const loginUserService = async (email, password) => {
     const users = await sql`
-        SELECT * FROM "User" WHERE "email" = ${email}
+        SELECT 
+            *
+        FROM "User" WHERE "email" = ${email}
     `
     const user = users[0]
 
@@ -49,13 +88,22 @@ const loginUserService = async (email, password) => {
         throw new ApiError(401,"Invalid credentials")
     }
 
-    await sql`
+    const [userData] = await sql`
         UPDATE "User"
         SET "last_login" = NOW()
         WHERE "id" = ${user.id}
+        RETURNING  "id", 
+            "first_name", 
+            "last_name", 
+            "email", 
+            "role", 
+            "user_status",
+            "phone_number",
+            "last_login",
+            "created_at"
     `
 
-    return user
+    return userData
 }
 
 const deleteUserService= async(user_id) =>{  
@@ -315,6 +363,7 @@ const updateUserService = async(id, data)=>{
 }
 
 export {
+    buildUserResponse,
     registerUserService,
     loginUserService, 
     deleteUserService,

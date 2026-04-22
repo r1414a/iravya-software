@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux"
 import { useEffect } from "react"
-import { selectUser, setUser } from "./lib/features/auth/authSlice"
+import { selectUser, setNotificationPreferences, setUser, updatePlatformSettings } from "./lib/features/auth/authSlice"
 import { useGetMeQuery } from "./lib/features/auth/authApi"
 import { useNavigate } from "react-router-dom"
 import LoadingSpinner from "./components/LoadingSpinner"
@@ -23,6 +23,8 @@ export default function AuthLoader({ children }) {
         if (data?.data) {
 
             dispatch(setUser(data.data))
+            dispatch(setNotificationPreferences(data.data.notifications))
+            dispatch(updatePlatformSettings(data.data.platformSettings))
 
             if (data.data.role === "super_admin") {
                 navigate("/admin", { replace: true })

@@ -4,13 +4,15 @@ import express from "express";
 import validate from "../middleware/validate.js";
 
 import { getDriverTrips,
-    getCurrentTrip
+    getCurrentTrip,
+    confirmStopDelivery
  } from "../controller/driverAPPContoller.js";
 
 const router = express.Router()
 
 router.get("/trips/:id", getDriverTrips)
 router.get("/trip/:id", getCurrentTrip)
+router.post("/confirmdelivery/:stop_id/:trip_id", confirmStopDelivery)
 
 
 

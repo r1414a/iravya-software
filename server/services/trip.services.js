@@ -110,6 +110,8 @@ const addTripService = async(data, dc_manager)=>{
 
     
 
+    
+
     return trip
 
 }

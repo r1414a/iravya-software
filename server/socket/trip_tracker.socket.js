@@ -170,6 +170,13 @@ const tripTracker = (socket, io) =>{
             const displacement = distance_dif - Number(st.geofence_radius);
             // 🚧 Inside geofence
             if (displacement <= 0) {
+
+                await sql`
+                    UPDATE "Trip_stops"
+                    SET "status" = 'arrived'
+                    WHERE "trip_id" = ${deliveryId}
+                    AND "store_id" = ${st.store_id}
+                `
                 const alert = await sql `
                         INSERT INTO "Alerts" (
                             dc_id,

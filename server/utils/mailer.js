@@ -12,7 +12,7 @@ export const sendEmail = async ({ to, subject, html }) => {
     try {
         const info = await transporter.sendMail({
             from: `"Iravya App" <${process.env.EMAIL_USER}>`,
-            to,
+            to,   // Nodemailer accepts array directly
             subject,
             html
         })

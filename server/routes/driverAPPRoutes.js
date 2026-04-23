@@ -6,7 +6,8 @@ import validate from "../middleware/validate.js";
 import { getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
-    acceptTrip
+    acceptTrip,
+    reportIssue
  } from "../controller/driverAPPContoller.js";
 
 
@@ -17,6 +18,7 @@ router.get("/trips/:id", getDriverTrips)
 router.get("/trip/:id", getCurrentTrip)
 router.post("/confirmdelivery/:stop_id/:trip_id", confirmStopDelivery)
 router.post("/accept/:trip_id",acceptTrip)
+router.post("/report/:trip_id",reportIssue)
 
 
 

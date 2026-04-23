@@ -443,6 +443,115 @@ const getStoresService = async ({ page = 1, limit = 10, search = "" }) => {
   };
 };
 
+const reportIssueService = async (trip_id, issue_type, issue ) => {
+    const issue_data = await sql`
+        INSERT INTO "Report Issue" (
+            trip,
+            issue_type,
+            complaint
+            
+        )
+        SELECT
+            ${trip_id},
+            unnest(${sql.array(issue_type)}::trip_issue[]),  -- ✅ FIX
+            ${issue}
+        RETURNING *;
+    `;
+    return issue_data;
+}
+
+const updateTripService = async (trip_id, data, dc_manager) => {
+  const {truck, driver, delivery_stops, departure} = data
+  const [existingTrip] = await sql`
+        SELECT * FROM "Trips" WHERE id = ${trip_id}
+    `;
+  if (!existingTrip) throw new ApiError(404, "Trip not found");
+
+  const [source_dc] = await sql`
+        SELECT id, longitude, latitude FROM "Distribution_center"
+        WHERE dc_manager = ${dc_manager}
+    `;
+  if (!source_dc) throw new ApiError(404, "Source distribution center not found");
+
+  const trip_stops = await sql`
+    SELECT 
+      id AS store_id,
+      longitude,
+      latitude
+    
+    FROM "Trip_stops" 
+    WHERE  "trip_id" = ${trip_id}
+  `
+  const stopsAreSame = (stops1, stops2) => {
+    if (stops1.length !== stops2.length) return false;
+    for (let i = 0; i < stops1.length; i++) {
+        if (stops1[i].store_id !== stops2[i].store_id) return false;
+        if (stops1[i].longitude !== stops2[i].longitude) return false;
+        if (stops1[i].latitude !== stops2[i].latitude) return false;
+    }
+  
+    return true;
+  };
+
+  const sameStops = stopsAreSame(deliveryStopsCleaned, trip_stops);
+
+  let updatedTrip;
+  
+
+  const endtime = (departure && new Date(departure).getTime() !== new Date(existingTrip.departed_at).getTime())
+    ? new Date(new Date(departure).getTime() + (new Date(existingTrip.end_time) - new Date(existingTrip.departed_at)))
+    : existingTrip.end_time;
+
+  if (sameStops) {
+    [updatedTrip] = await sql`
+      UPDATE "Trips"
+      SET 
+        truck_id = ${truck ?? existingTrip.truck_id},
+        driver_id = ${driver ?? existingTrip.driver_id},
+        departure_at = ${departure ?? existingTrip.departed_at},
+        "end_time" = ${endtime}
+      WHERE id  = ${trip_id}
+    `
+  }else{
+    let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
+    console.log("1 : ",gps_points)
+    gps_points.unshift([source_dc.longitude, source_dc.latitude])
+    console.log("2 : ",gps_points)
+    const geodata = await calculateGeodistance(gps_points)
+    const total_distance = geodata.routes[0].distance / 1000
+    const geopath = geodata.routes[0].geometry.coordinates
+    
+    const duration = geodata.routes[0].duration
+    const speed = Math.abs((total_distance)/(duration/ 3600))+10
+    const endTime = getEndTime(departure, duration)
+
+    [updatedTrip] = await sql`
+        UPDATE "Trips"
+        SET
+            truck_id = ${truck ?? existingTrip.truck_id},
+            driver_id = ${driver ?? existingTrip.driver_id},
+            departure_at = ${departure ?? existingTrip.departed_at},
+            distance = ${total_distance},
+            geopath = ${JSON.stringify(geopath)},
+            end_time = ${endTime},
+            speed_threshold = ${speed}
+        WHERE id = ${trip_id}
+        RETURNING *
+    `;
+
+    // Update delivery stops
+    await sql`DELETE FROM "Trip_stops" WHERE trip_id = ${trip_id}`;
+    for (let stop of delivery_stops) {
+        const { store_id, eta } = stop;
+        await sql`
+            INSERT INTO "Trip_stops" (trip_id, store_id, eta, status)
+            VALUES (${trip_id}, ${store_id}, ${eta ?? null}, 'pending')
+        `;
+    }
+  }
+
+}
+
 export{
     addTripService,
     allTripsService,
@@ -451,5 +560,6 @@ export{
     getTrucksService,
     getDriversService,
     getGpsDevicesService,
-    getStoresService
+    getStoresService,
+    reportIssueService
 }

@@ -7,7 +7,8 @@ import sendResponse from "../utils/sendResponse.js";
 import { getDriverTripsService,
     getCurrentTripService,
     confirmStopDeliveryService,
-    acceptTripService
+    acceptTripService,
+    reportIssueService
  } from "../services/driverAPP.service.js";
 
 
@@ -59,12 +60,26 @@ const confirmStopDelivery = asyncHandler(async (req, res) => {
    }
 })
 
+const reportIssue = asyncHandler(async (req, res) => {
+    const {trip_id} = req.params
+    const {issue_type, issue} = req.body
+
+    const issue_data = await reportIssueService(trip_id, issue_type, issue)
+    if(issue.length){
+        sendResponse(res, 200, issue_data, "Reported issue successfully")
+    }
+    else{
+        throw new ApiError(400, "Bad Request")
+    }
+})
+
 
 
 export{
     getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
-    acceptTrip
+    acceptTrip,
+    reportIssue
 
 }

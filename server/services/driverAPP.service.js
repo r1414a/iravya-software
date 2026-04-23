@@ -119,6 +119,7 @@ const getDriverTripsService= async (id) => {
                 ON t.id = tr.truck_id
 
             WHERE tr.driver_id = ${id}
+                AND tr.status != 'cancelled'
             
 
             GROUP BY 
@@ -336,7 +337,6 @@ const acceptTripService =  async (trip_id) => {
     const trip = await sql`
             UPDATE "Trips"
             SET status = 'in_transit',
-                end_time = NOW()
                 is_acceptedby_driver = true
             WHERE id = ${trip_id}
             RETURNING *;
@@ -361,9 +361,28 @@ const acceptTripService =  async (trip_id) => {
     return trip
 }
 
+const reportIssueService = async (trip_id, issue_type, issue) => {
+    const issue_data = await sql`
+        INSERT INTO "Report Issue" (
+            trip,
+            issue_type,
+            complaint,
+            is_complaintby_driver
+        )
+        SELECT
+            ${trip_id},
+            unnest(${sql.array(issue_type)}::trip_issue[]),  -- ✅ FIX
+            ${issue},
+            true
+        RETURNING *;
+    `;
+    return issue_data;
+};
+
 export{
     getDriverTripsService,
     getCurrentTripService,
     confirmStopDeliveryService,
-    acceptTripService
+    acceptTripService,
+    reportIssueService
 }

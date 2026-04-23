@@ -11,7 +11,8 @@ import { addTripService,
     getDriversService,
     getGpsDevicesService,
     getStoresService,
-    reportIssueService
+    reportIssueService,
+    updateTripService
  } from "../services/trip.services.js";
 
 const getData = asyncHandler(async (req, res) => {
@@ -154,8 +155,8 @@ const cancelTrip = asyncHandler(async (req, res) => {
 const updateTrip = asyncHandler(async (req, res) => {
     const {id} = req.params
     const trip = await updateTripService(id, req.body, req.user.id)
-    if(trip.length){
-        sendResponse(trip, 200, trip, "Trip data updated successfully")
+    if(trip){
+        sendResponse(res, 200, trip, "Trip data updated successfully")
     }
     else{
         throw new ApiError(400, "Bad request")

@@ -69,18 +69,39 @@ const addTripService = async(data, dc_manager)=>{
     //     const {longitude, latitude} = delivery_stops[i]
     //     gps_points.append([longitude, latitude])
     // }
+    let total_seconds=0;
+    for (let i = 0; i < delivery_stops.length; i++) {
+      let gps_points = [[delivery_stops[i].longitude, delivery_stops[i].latitude]];
+      if(i===0){
+        gps_points.unshift([source_dc.longitude, source_dc.latitude])
+      }else{
+        gps_points.unshift([delivery_stops[i-1].longitude, delivery_stops[i-1].latitude])
+      }
+      console.log(gps_points)
+      const geodata = await calculateGeodistance(gps_points)
+      const duration = geodata.routes[0].duration
+      console.log(duration)
+      // const speed = Math.abs((total_distance)/(duration/ 3600))+10
+      const endtime = getEndTime(departure, duration)
+      delivery_stops[i].eta = endtime
+      total_seconds += duration
+
+    }
     console.log(source_dc)
     let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
-    console.log("1 : ",gps_points)
+    // console.log("1 : ",gps_points)
+
     gps_points.unshift([source_dc.longitude, source_dc.latitude])
-    console.log("2 : ",gps_points)
+    // console.log("2 : ",gps_points)
+
     const geodata = await calculateGeodistance(gps_points)
     const total_distance = geodata.routes[0].distance / 1000
     const geopath = geodata.routes[0].geometry.coordinates
     
     const duration = geodata.routes[0].duration
     const speed = Math.abs((total_distance)/(duration/ 3600))+10
-    const endtime = getEndTime(departure, duration)
+    const endtime = getEndTime(departure, total_seconds)
+    console.log(endtime, total_seconds)
     const [trip] = await sql`
         INSERT INTO "Trips" (
             "source_dc_id", "truck_id", "driver_id",
@@ -99,12 +120,14 @@ const addTripService = async(data, dc_manager)=>{
     `
 
     if (delivery_stops?.length) {
+
         for (let i = 0; i < delivery_stops.length; i++) {
-            const { store_id, eta,  } = delivery_stops[i]
-            await sql`
-                INSERT INTO "Trip_stops" (trip_id, store_id, eta, status)
-                VALUES (${trip.id}, ${store_id}, ${eta ?? null}, 'pending')
-            `
+          
+          const { store_id, eta,  } = delivery_stops[i]
+          await sql`
+              INSERT INTO "Trip_stops" (trip_id, store_id, eta, status)
+              VALUES (${trip.id}, ${store_id}, ${eta ?? null}, 'pending')
+          `
         }
     }
 
@@ -475,25 +498,28 @@ const updateTripService = async (trip_id, data, dc_manager) => {
 
   const trip_stops = await sql`
     SELECT 
-      id AS store_id,
-      longitude,
-      latitude
+      ts.store_id AS store_id,
+      s.longitude,
+      s.latitude
     
-    FROM "Trip_stops" 
-    WHERE  "trip_id" = ${trip_id}
+    FROM "Trip_stops" ts
+    LEFT JOIN "Stores" s
+    ON s.id = ts.store_id
+    WHERE  ts.trip_id = ${trip_id}
   `
   const stopsAreSame = (stops1, stops2) => {
     if (stops1.length !== stops2.length) return false;
     for (let i = 0; i < stops1.length; i++) {
         if (stops1[i].store_id !== stops2[i].store_id) return false;
-        if (stops1[i].longitude !== stops2[i].longitude) return false;
-        if (stops1[i].latitude !== stops2[i].latitude) return false;
+        if (Number(stops1[i].longitude) !== Number(stops2[i].longitude)) return false;
+        if (Number(stops1[i].latitude) !== Number(stops2[i].latitude)) return false;
     }
   
     return true;
   };
-
-  const sameStops = stopsAreSame(deliveryStopsCleaned, trip_stops);
+  console.log(delivery_stops)
+  console.log(trip_stops)
+  const sameStops = stopsAreSame(delivery_stops, trip_stops);
 
   let updatedTrip;
   
@@ -502,17 +528,36 @@ const updateTripService = async (trip_id, data, dc_manager) => {
     ? new Date(new Date(departure).getTime() + (new Date(existingTrip.end_time) - new Date(existingTrip.departed_at)))
     : existingTrip.end_time;
 
+  console.log(endtime)
+  console.log(sameStops)
   if (sameStops) {
     [updatedTrip] = await sql`
       UPDATE "Trips"
       SET 
         truck_id = ${truck ?? existingTrip.truck_id},
         driver_id = ${driver ?? existingTrip.driver_id},
-        departure_at = ${departure ?? existingTrip.departed_at},
+        departed_at = ${departure ?? existingTrip.departed_at},
         "end_time" = ${endtime}
       WHERE id  = ${trip_id}
+      RETURNING *
     `
-  }else{
+  }else{ 
+    let total_seconds = 0;
+    for (let i = 0; i < delivery_stops.length; i++) {
+      let gps_points = [[delivery_stops[i].longitude, delivery_stops[i].latitude]]
+      if(i===0){
+        gps_points.unshift([source_dc.longitude, source_dc.latitude])
+      }else{
+        gps_points.unshift([delivery_stops[i-1].longitude, delivery_stops[i-1].latitude])
+      }
+      const geodata = await calculateGeodistance(gps_points)
+      const duration = geodata.routes[0].duration
+      // const speed = Math.abs((total_distance)/(duration/ 3600))+10
+      const endtime = getEndTime(departure, duration)
+      delivery_stops[i].eta = endtime
+      total_seconds += duration
+
+    }
     let gps_points = delivery_stops.map(({ longitude, latitude }) => [longitude, latitude])
     console.log("1 : ",gps_points)
     gps_points.unshift([source_dc.longitude, source_dc.latitude])
@@ -523,14 +568,14 @@ const updateTripService = async (trip_id, data, dc_manager) => {
     
     const duration = geodata.routes[0].duration
     const speed = Math.abs((total_distance)/(duration/ 3600))+10
-    const endTime = getEndTime(departure, duration)
+    const endTime = getEndTime(departure, duration);
 
     [updatedTrip] = await sql`
         UPDATE "Trips"
         SET
             truck_id = ${truck ?? existingTrip.truck_id},
             driver_id = ${driver ?? existingTrip.driver_id},
-            departure_at = ${departure ?? existingTrip.departed_at},
+            departed_at = ${departure ?? existingTrip.departed_at},
             distance = ${total_distance},
             geopath = ${JSON.stringify(geopath)},
             end_time = ${endTime},
@@ -549,7 +594,8 @@ const updateTripService = async (trip_id, data, dc_manager) => {
         `;
     }
   }
-
+  console.log(updatedTrip)
+  return updatedTrip
 }
 
 export{
@@ -561,5 +607,6 @@ export{
     getDriversService,
     getGpsDevicesService,
     getStoresService,
-    reportIssueService
+    reportIssueService,
+    updateTripService
 }

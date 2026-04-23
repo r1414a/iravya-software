@@ -6,7 +6,8 @@ import sendResponse from "../utils/sendResponse.js";
 
 import { getDriverTripsService,
     getCurrentTripService,
-    confirmStopDeliveryService
+    confirmStopDeliveryService,
+    acceptTripService
  } from "../services/driverAPP.service.js";
 
 
@@ -33,6 +34,20 @@ const getCurrentTrip =  asyncHandler(async (req, res) => {
 
 })
 
+const acceptTrip = asyncHandler(async (req, res) => {
+    const {trip_id} = req.params
+
+    const trip = await acceptTripService(trip_id)
+    if(trip.length){
+        sendResponse(res, 200, trip, "Accepted trip successfully")
+
+    }
+    else{
+        throw new ApiError(404, "Trip not found")
+    }
+
+})
+
 const confirmStopDelivery = asyncHandler(async (req, res) => {
    const {stop_id, trip_id} = req.params
    const stop_delivery = await confirmStopDeliveryService(stop_id, trip_id)
@@ -50,5 +65,6 @@ export{
     getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
+    acceptTrip
 
 }

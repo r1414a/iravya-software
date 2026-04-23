@@ -12,8 +12,17 @@ const getDriverTripsService= async (id) => {
         FROM (
             SELECT 
                 tr.id,
+
                 tr.driver_id,
+                CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
+                u.phone_number AS driver_phone,
+                u.email AS driver_email,
+
                 tr.truck_id,
+                t.registration_no AS truck_no,
+                t.type AS truck_type,
+                t.capacity AS truck_capacity,
+                
                 tr.device_id,
                 tr.departed_at,
                 tr.end_time,
@@ -100,12 +109,25 @@ const getDriverTripsService= async (id) => {
             LEFT JOIN "User" sm 
                 ON sm.id = s.store_manager
 
+            LEFT JOIN "Drivers" d
+                ON d.id = tr.driver_id
+
+            LEFT JOIN "User" u
+                ON u.id = d.user_id
+
+            LEFT JOIN "Trucks" t
+                ON t.id = tr.truck_id
+
             WHERE tr.driver_id = ${id}
+            
 
             GROUP BY 
                 tr.id,
                 dc.id,
-                dcm.id
+                dcm.id,
+                u.id,
+                t.id,
+                d.id
 
         ) trip_data
 
@@ -310,8 +332,38 @@ const confirmStopDeliveryService = async(stop_id, trip_id) =>{
     return toemails
 }
 
+const acceptTripService =  async (trip_id) => {
+    const trip = await sql`
+            UPDATE "Trips"
+            SET status = 'in_transit',
+                end_time = NOW()
+                is_acceptedby_driver = true
+            WHERE id = ${trip_id}
+            RETURNING *;
+        `;
+
+        await sql`
+            UPDATE "Trucks" t
+            SET status = 'in_transit'
+            FROM "Trips" tr
+            WHERE tr.truck_id = t.id
+            AND tr.id = ${trip_id};
+        `;
+
+        await sql`
+            UPDATE "Drivers" d
+            SET status = 'on_trip'
+            FROM "Trips" tr
+            WHERE tr.driver_id = d.id
+            AND tr.id = ${trip_id};
+        `;
+
+    return trip
+}
+
 export{
     getDriverTripsService,
     getCurrentTripService,
-    confirmStopDeliveryService
+    confirmStopDeliveryService,
+    acceptTripService
 }

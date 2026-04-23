@@ -12,7 +12,7 @@ const getDriverTripsService= async (id) => {
         FROM (
             SELECT 
                 tr.id,
-
+                tr.tracking_code,
                 tr.driver_id,
                 CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
                 u.phone_number AS driver_phone,
@@ -141,11 +141,15 @@ const getCurrentTripService = async (id) => {
     const trip_data = await sql`
         SELECT 
             tr.id,
+            tr.tracking_code,
             tr.driver_id,
             tr.device_id,
             tr.departed_at,
             tr.end_time,
             tr.status,
+             CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
+                u.phone_number AS driver_phone,
+                u.email AS driver_email,
 
             json_build_object(
                 'id', t.id,
@@ -215,6 +219,11 @@ const getCurrentTripService = async (id) => {
         LEFT JOIN "User" dcm ON dcm.id = dc.dc_manager
         LEFT JOIN "User" sm ON sm.id = s.store_manager
         LEFT JOIN "Trucks" t ON t.id = tr.truck_id
+         LEFT JOIN "Drivers" d
+                ON d.id = tr.driver_id
+
+            LEFT JOIN "User" u
+                ON u.id = d.user_id
 
         WHERE 
             tr.driver_id = ${id}
@@ -225,6 +234,8 @@ const getCurrentTripService = async (id) => {
             tr.id,
             dc.id,
             dcm.id,
+            u.id,
+            d.id,
             t.id  -- Added truck ID to GROUP BY to avoid errors
 
         ORDER BY tr.departed_at DESC

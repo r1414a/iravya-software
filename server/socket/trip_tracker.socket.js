@@ -83,41 +83,7 @@ const tripTracker = (socket, io) =>{
         });
     });
 
-    // socket.on("get-location", async(data)=>{
-    //     const {lng, lat, deliveryId} = data
-
-    //     console.log(lng, lat, deliveryId);
-    //     const trip = await sql`
-    //         UPDATE "Trips"
-    //         SET status = 'in_transit',
-    //             end_time = NOW()
-    //         WHERE id = ${deliveryId}
-    //         RETURNING *;
-    //     `;
-
-    //     await sql`
-    //         UPDATE "Trucks" t
-    //         SET status = 'in_transit'
-    //         FROM "Trips" tr
-    //         WHERE tr.truck_id = t.id
-    //         AND tr.id = ${deliveryId};
-    //     `;
-
-    //     await sql`
-    //         UPDATE "Drivers" d
-    //         SET status = 'on_trip'
-    //         FROM "Trips" tr
-    //         WHERE tr.driver_id = d.id
-    //         AND tr.id = ${deliveryId};
-    //     `;
-
-    //     io.to(deliveryId).emit("location-update", {
-    //         lat,
-    //         lng
-    //     });
-    //     console.log("send");
-        
-    // })
+    
 
     socket.on("get-updated-location", async(data)=>{
         const {lng, lat, deliveryId, speed} = data
@@ -136,9 +102,8 @@ const tripTracker = (socket, io) =>{
                 s.latitude,
                 s.longitude,
                 s.geofence_radius
-                s.arrived_at
             FROM "Trip_stops" tst
-            LEFT JOIN "Store" s
+            LEFT JOIN "Stores" s
             ON s.id = tst.store_id
             WHERE tst.trip_id = ${deliveryId};
         `

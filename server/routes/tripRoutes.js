@@ -2,7 +2,7 @@ import { protect } from "../middleware/authmiddleware.js";
 import { authorize } from "../middleware/authoriseRoleMiddleware.js";
 import express from "express";
 import validate from "../middleware/validate.js";
-import { addTripValidator } from "../validations/trip.validation.js";
+import { addTripValidator, UpdateTripValidator } from "../validations/trip.validation.js";
 import { getData,
     addTrip,
     allTrips,
@@ -31,6 +31,6 @@ router.get("/trips", protect, authorize("super_admin", "dc_manager"),allTrips)
 router.put("/cancel/:id", protect, authorize("super_admin", "dc_manager"), cancelTrip)
 router.post("/track-trip",trackTrip)
 router.post("/report/:trip_id",reportIssue)
-router.post("/update/:id", protect, authorize("super_admin", "dc_manager"), updateTrip)
+router.post("/update/:id", protect, authorize("super_admin", "dc_manager"), UpdateTripValidator, validate, updateTrip)
 
 export default router

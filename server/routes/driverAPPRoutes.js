@@ -7,7 +7,8 @@ import { getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
     acceptTrip,
-    reportIssue
+    reportIssue,
+    confirmCompletionOfTrip
  } from "../controller/driverAPPContoller.js";
 
 
@@ -19,6 +20,7 @@ router.get("/trip/:id", getCurrentTrip)
 router.post("/confirmdelivery/:stop_id/:trip_id", confirmStopDelivery)
 router.post("/accept/:trip_id",acceptTrip)
 router.post("/report/:trip_id",reportIssue)
+router.post("/complet-trip/:trip_id", confirmCompletionOfTrip)
 
 
 

@@ -75,7 +75,13 @@ const checkDistance = (store_location, truckLocation)=>{
 const tripTracker = (socket, io) =>{
     socket.on("join-delivery", ({ deliveryId }) => {
         console.log(`join ${deliveryId}`);
-        socket.join(deliveryId);
+        const trip = await sql `
+            SELECT id
+            FROM "Trips"
+            WHERE id = ${deliveryId}
+            OR tracking_code = ${deliveryId}
+        `
+        socket.join(trip.id);
         
         socket.emit("joined-successfully", {
             message: `You have joined delivery room: ${deliveryId}`,
@@ -355,6 +361,37 @@ const tripTracker = (socket, io) =>{
             lng,
             location_name
         })
+    })
+
+    socket.on("on-complete-trip", async (deliveryId) => {
+        const trip = await sql`
+        UPDATE "Trips"
+        SET
+            status = "complete"
+        WHERE id = ${deliveryId}
+        RETURNING *
+    `
+    await sql`
+        UPDATE "Trucks" t
+        SET status = 'idle',
+        total_trips = total_trips +1
+        FROM "Trips" tr
+        WHERE tr.truck_id = t.id
+        AND tr.id = ${deliveryId};
+    `;
+
+    await sql`
+        UPDATE "Drivers" d
+        SET status = 'available',
+            total_trips = total_trips +1
+        FROM "Trips" tr
+        WHERE tr.driver_id = d.id
+        AND tr.id = ${deliveryId};
+    `;
+    })
+
+    io.emit("completion-trip",{
+        message :"Trip completed sucessfully"
     })
 
 }

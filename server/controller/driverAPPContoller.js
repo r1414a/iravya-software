@@ -8,7 +8,8 @@ import { getDriverTripsService,
     getCurrentTripService,
     confirmStopDeliveryService,
     acceptTripService,
-    reportIssueService
+    reportIssueService,
+    confirmCompletionOfTrip
  } from "../services/driverAPP.service.js";
 
 
@@ -73,13 +74,23 @@ const reportIssue = asyncHandler(async (req, res) => {
     }
 })
 
-
+const confirmCompletionOfTrip = asyncHandler (async (req, res) => {
+    const {trip_id} = req.params
+    const trip = await confirmCompletionOfTripService(trip_id)
+    if(trip){
+        sendResponse(res, 200, trip, "Trip completed")
+    }
+    else{
+        sendResponse(400, "Bad Request")
+    }
+})
 
 export{
     getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
     acceptTrip,
-    reportIssue
+    reportIssue,
+    confirmCompletionOfTrip
 
 }

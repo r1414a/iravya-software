@@ -390,10 +390,41 @@ const reportIssueService = async (trip_id, issue_type, issue) => {
     return issue_data;
 };
 
+const confirmCompletionOfTrip = async(trip_id) =>{
+    const trip = await sql`
+        UPDATE "Trips"
+        SET
+            status = "complete"
+        WHERE id = ${trip_id}
+        RETURNING *
+    `
+    await sql`
+        UPDATE "Trucks" t
+        SET status = 'idle',
+        total_trips = total_trips +1
+        FROM "Trips" tr
+        WHERE tr.truck_id = t.id
+        AND tr.id = ${trip_id};
+    `;
+
+    await sql`
+        UPDATE "Drivers" d
+        SET status = 'available',
+            total_trips = total_trips +1
+        FROM "Trips" tr
+        WHERE tr.driver_id = d.id
+        AND tr.id = ${trip_id};
+    `;
+
+    
+    
+}
+
 export{
     getDriverTripsService,
     getCurrentTripService,
     confirmStopDeliveryService,
     acceptTripService,
-    reportIssueService
+    reportIssueService,
+    confirmCompletionOfTrip
 }

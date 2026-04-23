@@ -11,7 +11,9 @@ import { getData,
     getTrucksController,
     getDriversController,
     getGpsDevicesController,
-    getStoresController
+    getStoresController,
+    reportIssue,
+    updateTrip
  } from "../controller/tripController.js";
 
 const router = express.Router()
@@ -28,4 +30,7 @@ router.post("/trip", protect, authorize("super_admin", "dc_manager"), addTripVal
 router.get("/trips", protect, authorize("super_admin", "dc_manager"),allTrips)
 router.put("/cancel/:id", protect, authorize("super_admin", "dc_manager"), cancelTrip)
 router.post("/track-trip",trackTrip)
+router.post("/report/:trip_id",reportIssue)
+router.post("/update/:id", protect, authorize("super_admin", "dc_manager"), updateTrip)
+
 export default router

@@ -10,7 +10,8 @@ import { addTripService,
     getTrucksService,
     getDriversService,
     getGpsDevicesService,
-    getStoresService
+    getStoresService,
+    reportIssueService
  } from "../services/trip.services.js";
 
 const getData = asyncHandler(async (req, res) => {
@@ -150,6 +151,16 @@ const cancelTrip = asyncHandler(async (req, res) => {
     }
 })
 
+const updateTrip = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    const trip = await updateTripService(id, req.body, req.user.id)
+    if(trip.length){
+        sendResponse(trip, 200, trip, "Trip data updated successfully")
+    }
+    else{
+        throw new ApiError(400, "Bad request")
+    }
+})
 
 const trackTrip = asyncHandler(async(req, res)=>{
     
@@ -157,6 +168,21 @@ const trackTrip = asyncHandler(async(req, res)=>{
     sendResponse(res, 201, trip, "Trip data found")
 
 })
+
+const reportIssue = asyncHandler(async (req, res) => {
+    const {trip_id} = req.params
+    const {issue_type, issue} = req.body
+
+    const issue_data = await reportIssueService(trip_id, issue_type, issue)
+    if(issue.length){
+        sendResponse(res, 200, issue_data, "Reported issue successfully")
+    }
+    else{
+        throw new ApiError(400, "Bad Request")
+    }
+})
+
+
 
 export{
     getData,
@@ -167,5 +193,7 @@ export{
     getTrucksController,
     getDriversController,
     getGpsDevicesController,
-    getStoresController
+    getStoresController,
+    reportIssue,
+    updateTrip
 }

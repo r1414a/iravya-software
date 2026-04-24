@@ -390,7 +390,7 @@ const reportIssueService = async (trip_id, issue_type, issue) => {
     return issue_data;
 };
 
-const confirmCompletionOfTrip = async(trip_id) =>{
+const confirmCompletionOfTripService = async(trip_id) =>{
     const trip = await sql`
         UPDATE "Trips"
         SET
@@ -426,5 +426,5 @@ export{
     confirmStopDeliveryService,
     acceptTripService,
     reportIssueService,
-    confirmCompletionOfTrip
+    confirmCompletionOfTripService
 }

@@ -9,7 +9,7 @@ import { getDriverTripsService,
     confirmStopDeliveryService,
     acceptTripService,
     reportIssueService,
-    confirmCompletionOfTrip
+    confirmCompletionOfTripService
  } from "../services/driverAPP.service.js";
 
 

@@ -71,11 +71,14 @@ const checkDistance = (store_location, truckLocation)=>{
     const distance = turf.distance(store_location, truckLocation, { units: "meters" });
     return distance
 }
+let prelat, prelng, same_location_from, threshold_time;
+same_location_from = undefined;
+threshold_time = undefined;
 
 const tripTracker = (socket, io) =>{
     socket.on("join-delivery", ({ deliveryId }) => {
         console.log(`join ${deliveryId}`);
-        const trip = await sql `
+        const trip =  sql `
             SELECT id
             FROM "Trips"
             WHERE id = ${deliveryId}
@@ -93,7 +96,8 @@ const tripTracker = (socket, io) =>{
 
     socket.on("get-updated-location", async(data)=>{
         const {lng, lat, deliveryId, speed} = data
-        
+        prelat = lat;
+        prelng = lng;
         console.log(lng, lat, deliveryId);
 
         const [trip] = await sql`
@@ -113,6 +117,8 @@ const tripTracker = (socket, io) =>{
             ON s.id = tst.store_id
             WHERE tst.trip_id = ${deliveryId};
         `
+
+        
 
         const truckLocation = turf.point([lng, lat]);
         // console.log(trip, trip[0].geopath);
@@ -238,6 +244,8 @@ const tripTracker = (socket, io) =>{
                 }
             }
         }
+
+
         if(deviated){
             console.log(trip.id, trip.source_dc_id)
             const alert = await sql `
@@ -352,6 +360,60 @@ const tripTracker = (socket, io) =>{
             //     tracking_code: trip.tracking_code
             // });
         }
+        console.log(trip.current_lng === lng && trip.current_lat === lat);
+        
+        if(trip.current_lng === lng && trip.current_lat === lat) {
+            
+            if(same_location_from === undefined) {
+                same_location_from = Date.now(); // Set the time when the location is first seen
+                threshold_time = same_location_from + 10 * 1000 //(10 * 60 * 1000); // 10 minutes in milliseconds
+            }
+            console.log(Date.now() > threshold_time);
+            
+            if(Date.now() > threshold_time) {
+                const alert = await sql `
+                    INSERT INTO "Alerts" (
+                        dc_id,
+                        trip_id,
+                        truck_id,
+                        device_id,
+                        type,
+                        severity,
+                        description,
+                        lat,
+                        lng,
+                        is_read,
+                        is_dismissed,
+                        triggered_at,
+                        created_at
+                    )
+                    VALUES (
+                        ${trip.source_dc_id},
+                        ${trip.id},
+                        ${trip.truck_id},
+                        ${trip.device_id?trip.device_id:null},
+                        ${"long_stop"},
+                        ${"high"},
+                        ${`More than 10 minutes at the same location ${location_name}`},
+                        ${lat},
+                        ${lng},
+                        false,
+                        false,
+                        NOW(),
+                        NOW()
+                    )
+                    `;
+                io.to(deliveryId).emit("Alert", {
+                    message: `More than 10 minutes at the same location ${location_name}`
+                });
+
+                socket.emit("Alert", {
+                    message: `More than 10 minutes at the same location ${location_name}`
+                })
+
+            }
+
+        }
         io.to(deliveryId).emit("location-update", {
             lat,
             lng
@@ -363,36 +425,41 @@ const tripTracker = (socket, io) =>{
         })
     })
 
-    socket.on("on-complete-trip", async (deliveryId) => {
+    socket.on("on-complete-trip", async (data) => {
+        const {deliveryId} = data
         const trip = await sql`
-        UPDATE "Trips"
-        SET
-            status = "complete"
-        WHERE id = ${deliveryId}
-        RETURNING *
-    `
-    await sql`
-        UPDATE "Trucks" t
-        SET status = 'idle',
-        total_trips = total_trips +1
-        FROM "Trips" tr
-        WHERE tr.truck_id = t.id
-        AND tr.id = ${deliveryId};
-    `;
-
-    await sql`
-        UPDATE "Drivers" d
-        SET status = 'available',
+            UPDATE "Trips"
+            SET
+                status = 'completed'
+            WHERE id = ${deliveryId}
+            RETURNING *
+        `
+        await sql`
+            UPDATE "Trucks" t
+            SET status = 'idle',
             total_trips = total_trips +1
-        FROM "Trips" tr
-        WHERE tr.driver_id = d.id
-        AND tr.id = ${deliveryId};
-    `;
+            FROM "Trips" tr
+            WHERE tr.truck_id = t.id
+            AND tr.id = ${deliveryId};
+        `;
+
+        await sql`
+            UPDATE "Drivers" d
+            SET status = 'available',
+                total_trips = total_trips +1
+            FROM "Trips" tr
+            WHERE tr.driver_id = d.id
+            AND tr.id = ${deliveryId};
+        `;
+        io.to(deliveryId).emit("completion-trip", {
+            message :"Trip completed sucessfully"
+        });
+        socket.emit("completion-trip",{
+            message :"Trip completed sucessfully"
+        })
     })
 
-    io.emit("completion-trip",{
-        message :"Trip completed sucessfully"
-    })
+    
 
 }
 

@@ -144,6 +144,7 @@ const getCurrentTripService = async (id) => {
             tr.tracking_code,
             tr.driver_id,
             tr.device_id,
+            tr.geopath,
             tr.departed_at,
             tr.end_time,
             tr.status,

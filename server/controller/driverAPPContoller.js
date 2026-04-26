@@ -3,6 +3,10 @@ import  ApiError  from "../utils/ApiError.js";
 import ApiResponse  from "../utils/ApiResponse.js";
 import bcrypt from "bcryptjs";
 import sendResponse from "../utils/sendResponse.js";
+import crypto from 'crypto';
+import redisClient from '../config/redis.js'
+import { sendPush } from "../services/notification.service.js";
+import { userExistbyPhoneService } from "../services/auth.service.js";
 
 import { getDriverTripsService,
     getCurrentTripService,
@@ -85,12 +89,58 @@ const confirmCompletionOfTrip = asyncHandler (async (req, res) => {
     }
 })
 
+const requestOtp = asyncHandler(async (req, res) => {
+    const { phoneNumber, deviceToken } = req.body;
+
+    if (!phoneNumber || !deviceToken) {
+        return res.status(400).json({ error: 'Missing credentials' });
+    }
+
+    const userExists = await userExistbyPhoneService(phoneNumber)
+    if(userExists.length){
+        const otp = crypto.randomInt(100000, 999999).toString();
+
+        await redisClient.set(`otp:${phoneNumber}`, otp, { EX: 300 });
+
+        // Send the notification
+        await sendPush(
+            deviceToken, 
+            'Sign-in Code', 
+            `Your OTP is ${otp}`, 
+            { type: 'AUTH' }
+        );
+        sendResponse(res, 200,
+            {'user_id':userExists.id, 
+            'user_phone':userExists.phone_number, 
+              'user_email'  :userExists.email},'OTP Sent')
+
+    }
+    else{
+        throw new ApiError(400, "User not exist")
+    }
+})
+
+const verifyOTP = asyncHandler(async (req, res) => {
+    const { phoneNumber, otp } = req.body;
+    const storedOtp = await redisClient.get(`otp:${phoneNumber}`);
+
+    if (!storedOtp || storedOtp !== otp) {
+        throw new ApiError(401, 'Invalid or expired OTP')
+    }
+
+    // Delete OTP after successful use
+    await redisClient.del(`otp:${phoneNumber}`);
+    sendResponse(res, 200, {phoneNumber}, 'Authenticated')
+})
+
 export{
     getDriverTrips,
     getCurrentTrip,
     confirmStopDelivery,
     acceptTrip,
     reportIssue,
-    confirmCompletionOfTrip
+    confirmCompletionOfTrip,
+    verifyOTP,
+    requestOtp
 
 }

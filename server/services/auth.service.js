@@ -122,6 +122,13 @@ const userExistbyemailService = async (email) =>{
     return userExists
 }
 
+const userExistbyPhoneService = async (phone) =>{
+    const [userExists] = await sql`
+        SELECT * FROM "User" WHERE "phone_number" = ${phone}
+    `
+    return userExists
+}
+
 const userExistbyidService = async (id) => {
     console.log(id)
     const userExists = await sql`
@@ -374,5 +381,6 @@ export {
     getAllUserService,
     updateUserService,
     getUserbySearchService,
-    setUserPasswordService
+    setUserPasswordService,
+    userExistbyPhoneService
 }

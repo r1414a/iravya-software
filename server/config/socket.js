@@ -1,6 +1,8 @@
 
 import { Server } from "socket.io";
-import { tripTracker } from "../socket/trip_tracker.socket.js";
+import { tripTracker, checkIsDelayStatus } from "../socket/trip_tracker.socket.js";
+import cron from 'node-cron'
+
 
 let io;
 
@@ -21,6 +23,25 @@ const initSocket = (server) => {
     });
   
 };
+
+let isRunning = false;
+
+// cron.schedule('*/5 * * * * *', async () => {
+//   if (isRunning) {
+//     console.log("Skipping cron - still running");
+//     return;
+//   }
+
+//   isRunning = true;
+
+//   try {
+//     await checkIsDelayStatus(io);
+//   } catch (err) {
+//     console.error("Cron error:", err);
+//   } finally {
+//     isRunning = false;
+//   }
+// });
 
 const getIO = () => io;
 

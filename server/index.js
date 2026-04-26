@@ -23,7 +23,7 @@ async function startServer() {
     await sql`SELECT 1`;
     console.log("✅ Database Connected");
 
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
 

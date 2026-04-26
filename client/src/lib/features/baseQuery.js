@@ -3,7 +3,7 @@ import { showErrorToast } from "../utils/showErrorToast";
 import { showSuccessToast } from "../utils/showSuccessToast";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_BACKEND_DEV,
+  baseUrl: import.meta.env.VITE_API_URL,
   credentials: "include"
 
 })

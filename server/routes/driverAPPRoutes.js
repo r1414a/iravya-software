@@ -8,7 +8,9 @@ import { getDriverTrips,
     confirmStopDelivery,
     acceptTrip,
     reportIssue,
-    confirmCompletionOfTrip
+    confirmCompletionOfTrip,
+    requestOtp,
+    verifyOTP
  } from "../controller/driverAPPContoller.js";
 
 
@@ -21,6 +23,8 @@ router.post("/confirmdelivery/:stop_id/:trip_id", confirmStopDelivery)
 router.post("/accept/:trip_id",acceptTrip)
 router.post("/report/:trip_id",reportIssue)
 router.post("/complet-trip/:trip_id", confirmCompletionOfTrip)
+router.post('/request-otp', requestOtp);
+router.post('/verify-otp', verifyOTP);
 
 
 

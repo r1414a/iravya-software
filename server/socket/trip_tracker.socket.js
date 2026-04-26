@@ -8,6 +8,27 @@ import axios from "axios";
 
 // const baseClient = mbxClient({ accessToken: process.env.VITE_MAPBOX_TOKEN });
 // const matchingService = mbxMatching(baseClient);
+const checkIsDelay = async(deliveryId, trip, now)=>{
+    const [delayAlert] = await sql`
+            SELECT * FROM "Alerts" 
+            WHERE trip_id = ${deliveryId} 
+            AND type = 'delay'
+            LIMIT 1
+        `;
+
+    const lastAlertTime = delayAlert?.created_at
+        ? new Date(delayAlert.created_at).getTime()
+        : null;
+
+    const sixHoursPassed = !lastAlertTime || (lastAlertTime + 6 * 60 * 60 * 1000 < now);
+
+    const shouldSendAlert =
+        sixHoursPassed &&
+        trip.status !== "completed";
+
+    return shouldSendAlert
+
+}
 
 async function getCleanedPath(coordinates) {
     
@@ -44,7 +65,7 @@ async function getCleanedPath(coordinates) {
 
 function checkDeviation(truckPos, route, threshold = 50) {
     // Find the point on the route closest to the truck
-    console.log(truckPos)
+    // console.log(truckPos)
     const snapped = turf.nearestPointOnLine(route, truckPos);
     // Calculate distance between truck and the snapped point
     const distance = turf.distance(truckPos, snapped, { units: 'meters' });
@@ -64,7 +85,7 @@ const getLocation = async (lng, lat) => {
     );
     const data = await res.json();
     const address = data.features[0].place_name;
-    console.log("Address:", address);
+    // console.log("Address:", address);
     return address
 };
 
@@ -118,11 +139,8 @@ const tripTracker = (socket, io) =>{
             ON s.id = tst.store_id
             WHERE tst.trip_id = ${deliveryId};
         `
-
-        
-
         const truckLocation = turf.point([lng, lat]);
-        // console.log(trip, trip[0].geopath);
+        console.log(trip, trip.geopath);
         
         const geopath = await getCleanedPath(trip.geopath)
         const {deviated, distance} = checkDeviation(truckLocation, geopath)
@@ -166,8 +184,6 @@ const tripTracker = (socket, io) =>{
                             description,
                             lat,
                             lng,
-                            is_read,
-                            is_dismissed,
                             triggered_at,
                             created_at
                         )
@@ -181,8 +197,6 @@ const tripTracker = (socket, io) =>{
                             ${`Reached store location ${st.name}`},
                             ${lat},
                             ${lng},
-                            false,
-                            false,
                             NOW(),
                             NOW()
                         )
@@ -260,8 +274,6 @@ const tripTracker = (socket, io) =>{
                 description,
                 lat,
                 lng,
-                is_read,
-                is_dismissed,
                 triggered_at,
                 created_at
             )
@@ -275,8 +287,6 @@ const tripTracker = (socket, io) =>{
                 ${`Route deviation by ${distance}m at ${location_name}`},
                 ${lat},
                 ${lng},
-                false,
-                false,
                 NOW(),
                 NOW()
             )
@@ -383,8 +393,6 @@ const tripTracker = (socket, io) =>{
                         description,
                         lat,
                         lng,
-                        is_read,
-                        is_dismissed,
                         triggered_at,
                         created_at
                     )
@@ -398,8 +406,6 @@ const tripTracker = (socket, io) =>{
                         ${`More than 10 minutes at the same location ${location_name}`},
                         ${lat},
                         ${lng},
-                        false,
-                        false,
                         NOW(),
                         NOW()
                     )
@@ -415,15 +421,67 @@ const tripTracker = (socket, io) =>{
             }
 
         }
-        io.to(deliveryId).emit("location-update", {
-            lat,
-            lng
-        });
-        socket.emit("location-update",{
-            lat,
-            lng,
-            location_name
-        })
+
+        const now = Date.now();
+        const endTime = new Date(trip.end_time).getTime();
+        if (now > endTime) {
+            if (checkIsDelay(deliveryId, trip, now)) {
+                io.to(deliveryId).emit("Alert", {
+                    message: `Delivery delayed of trip :${trip.tracking_code}` 
+                });
+
+                socket.emit("Alert", {
+                    message: `Delivery delayed of trip : ${trip.tracking_code}`
+                });
+
+                // Optional but recommended: insert/update alert record
+                const alert = await sql `
+                    INSERT INTO "Alerts" (
+                        dc_id,
+                        trip_id,
+                        truck_id,
+                        device_id,
+                        type,
+                        severity,
+                        description,
+                        lat,
+                        lng,
+                        triggered_at,
+                        created_at
+                    )
+                    VALUES (
+                        ${trip.source_dc_id},
+                        ${trip.id},
+                        ${trip.truck_id},
+                        ${trip.device_id?trip.device_id:null},
+                        ${"delay"},
+                        ${"high"},
+                        ${`Delivery delayed  of trip : ${trip.tracking_code}`},
+                        ${lat},
+                        ${lng},
+                        NOW(),
+                        NOW()
+                    )
+                    `;
+            }else{
+                io.to(deliveryId).emit("Alert", {
+                    message: `Delivery delayed  of trip : ${trip.tracking_code}`
+                });
+
+                socket.emit("Alert", {
+                    message: `Delivery delayed of trip : ${trip.tracking_code}`
+                });
+            }
+            io.to(deliveryId).emit("location-update", {
+                lat,
+                lng
+            });
+            socket.emit("location-update",{
+                lat,
+                lng,
+                location_name
+            })
+        }
     })
 
     socket.on("on-complete-trip", async (data) => {
@@ -464,6 +522,64 @@ const tripTracker = (socket, io) =>{
 
 }
 
+const checkIsDelayStatus = async (io) => {
+    const trips = await sql`
+        SELECT * FROM "Trips" 
+        WHERE completed_at = null 
+        OR (status = 'in_transit' OR status = 'scheduled')
+    `;
+
+    const now = Date.now();
+
+    for (let t of trips) {
+        const deliveryId = t.id;
+        const endTime = new Date(t.end_time).getTime();
+
+        // Skip if no end_time
+        if (!t.end_time) continue;
+
+        if (now > endTime) {
+            const isDelay = await checkIsDelay(deliveryId, t, now);
+
+            if (isDelay) {
+                const message = `Delivery delayed of trip: ${t.tracking_code}`;
+
+                // Emit alerts
+                io.to(deliveryId).emit("Alert", { message });
+                io.emit("Alert", { message });
+
+                // Save alert
+                await sql`
+                    INSERT INTO "Alerts" (
+                        dc_id,
+                        trip_id,
+                        truck_id,
+                        device_id,
+                        type,
+                        severity,
+                        description,
+                        triggered_at,
+                        created_at
+                    )
+                    VALUES (
+                        ${t.source_dc_id},
+                        ${t.id},
+                        ${t.truck_id},
+                        ${t.device_id ? t.device_id : null},
+                        ${"delay"},
+                        ${"high"},
+                        ${message},
+                        NOW(),
+                        NOW()
+                    )
+                `;
+            }
+        }
+    }
+};
+
 export{
-    tripTracker
+    tripTracker,
+    checkIsDelay,
+    checkIsDelayStatus
 }

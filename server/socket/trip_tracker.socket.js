@@ -98,20 +98,35 @@ same_location_from = undefined;
 threshold_time = undefined;
 
 const tripTracker = (socket, io) =>{
-    socket.on("join-delivery", async ({ deliveryId }) => {
+    socket.on("join-delivery", async({ deliveryId }) => {
         console.log(`join ${deliveryId}`);
-        const [trip] =  sql `
-            SELECT id
-            FROM "Trips"
-            WHERE id = ${deliveryId}
-            OR tracking_code = ${deliveryId}
-        `
-        socket.join(trip.id);
+        const [trip] = isUUID(deliveryId)
+            ? await sql`
+                SELECT id
+                FROM "Trips"
+                WHERE id = ${deliveryId}
+                `
+            : await sql`
+                SELECT id
+                FROM "Trips"
+                WHERE tracking_code = ${deliveryId}
+                `;
+        console.log(trip);
         
-        socket.emit("joined-successfully", {
-            message: `You have joined delivery room: ${deliveryId}`,
-            deliveryId: deliveryId
-        });
+        if(trip !== undefined){
+            socket.join(trip.id);
+            
+            socket.emit("joined-successfully", {
+                message: `You have joined delivery room: ${deliveryId}`,
+                deliveryId: deliveryId
+            });
+        }
+        else{
+            socket.emit("Error", {
+                message: `Trip not found: ${deliveryId}`,
+                deliveryId: deliveryId
+            });
+        }
     });
 
     

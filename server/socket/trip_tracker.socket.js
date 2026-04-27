@@ -377,7 +377,7 @@ const tripTracker = (socket, io) =>{
             
             if(same_location_from === undefined) {
                 same_location_from = Date.now(); // Set the time when the location is first seen
-                threshold_time = same_location_from + 10 * 1000 //(10 * 60 * 1000); // 10 minutes in milliseconds
+                threshold_time = same_location_from + 1 * 1000 //(10 * 60 * 1000); // 10 minutes in milliseconds
             }
             console.log(Date.now() > threshold_time);
             

@@ -147,6 +147,7 @@ const getCurrentTripService = async (id) => {
             tr.geopath,
             tr.departed_at,
             tr.end_time,
+            tr.geopath,
             tr.status,
              CONCAT(u.first_name, ' ', u.last_name) AS driver_name,
                 u.phone_number AS driver_phone,

@@ -98,7 +98,7 @@ same_location_from = undefined;
 threshold_time = undefined;
 
 const tripTracker = (socket, io) =>{
-    socket.on("join-delivery", ({ deliveryId }) => {
+    socket.on("join-delivery", async ({ deliveryId }) => {
         console.log(`join ${deliveryId}`);
         const [trip] =  sql `
             SELECT id

@@ -1,6 +1,7 @@
 import sql from "../db/database.js"
 import * as turf from '@turf/turf';
 import axios from "axios";
+import { validate as isUUID } from "uuid";
 // import mbxClient from "@mapbox/mapbox-sdk";
 // import mbxMatching from "@mapbox/mapbox-sdk/services/match";
 // import mbxClient from '@mapbox/mapbox-sdk';
@@ -496,6 +497,10 @@ const tripTracker = (socket, io) =>{
                 lng,
                 location_name
             })
+            io.emit("location-update", {
+                lat,
+                lng
+            });
         }
     })
 

@@ -98,7 +98,7 @@ const addStoreService = async(data)=>{
         ${latitude},
         ${longitude},
         ${store_manager}
-        ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
+        -- ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
         ${store_code}
         )
         RETURNING *;

@@ -8,7 +8,11 @@ import * as redis from 'redis';
 
 // await client.connect();
 // console.log('Connected to Redis');
+<<<<<<< Updated upstream
 
 const client = null
+=======
+const client = null;
+>>>>>>> Stashed changes
 
 export default client;

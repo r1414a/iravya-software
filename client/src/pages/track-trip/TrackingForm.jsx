@@ -284,10 +284,10 @@ function LiveMapbox({ routePoints, truckPosition, tripData }) {
 
       // Add markers for all stops
       tripData?.checkpoints?.forEach((cp, i) => {
-  if (!cp.lat || !cp.lng) return;
+        if (!cp.lat || !cp.lng) return;
 
-  const el = document.createElement("div");
-  el.innerHTML = `
+        const el = document.createElement("div");
+        el.innerHTML = `
     <div style="
       background:${cp.done ? "#16a34a" : "#f59e0b"};
       width:38px;height:38px;border-radius:50%;
@@ -298,17 +298,17 @@ function LiveMapbox({ routePoints, truckPosition, tripData }) {
       ${i === 0 ? "🏭" : "🏪"}
     </div>`;
 
-  const marker = new mapboxgl.Marker({ element: el })
-    .setLngLat([cp.lng, cp.lat])
-    .setPopup(
-      new mapboxgl.Popup().setHTML(
-        `<strong>${cp.name}</strong><br/>ETA: ${cp.time}`
-      )
-    )
-    .addTo(map);
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([cp.lng, cp.lat])
+          .setPopup(
+            new mapboxgl.Popup().setHTML(
+              `<strong>${cp.name}</strong><br/>ETA: ${cp.time}`
+            )
+          )
+          .addTo(map);
 
-  stopMarkersRef.current.push(marker);
-});
+        stopMarkersRef.current.push(marker);
+      });
 
       // Fit bounds once
       if (!fittedRef.current) {
@@ -408,7 +408,7 @@ export default function TrackingForm({ MOCK_TRIPS }) {
 
 
   console.log("truckPosisiton", truckPosition);
-  
+
   // const tripData = activeTripKey ? MOCK_TRIPS[activeTripKey] : null
   const statusCfg = tripData ? STATUS_CONFIG["in_transit"] : null;
   // const statusCfg = tripData ? STATUS_CONFIG[tripData.status] : null
@@ -417,12 +417,20 @@ export default function TrackingForm({ MOCK_TRIPS }) {
   const pct = Math.round(progress * 100);
 
   useEffect(() => {
+    console.log("socket, effect");
+
+    const onJoined = (data) => {
+      console.log("[Socket] Joined:", data.message);
+    };
+    
+    socket.on("joined-successfully", onJoined);
+    
     socket.on("location-update", (data) => {
-  console.log("LOCATION EVENT RECEIVED:", data);
-  if (data?.lat && data?.lng) {
-    setTruckPosition([data.lat, data.lng]);
-  }
-});
+      console.log("LOCATION EVENT RECEIVED:", data);
+      if (data?.lat && data?.lng) {
+        setTruckPosition([data.lat, data.lng]);
+      }
+    });
 
     socket.on("Alert", (data) => {
       console.log("ALERT:", data);
@@ -591,18 +599,16 @@ export default function TrackingForm({ MOCK_TRIPS }) {
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               placeholder="e.g. TRP-001"
-              className={`flex-1 text-sm px-3 py-2 rounded-lg border-2 outline-none bg-slate-50 text-slate-800 font-mono transition-colors ${
-                focused ? "border-sky-400" : "border-slate-200"
-              }`}
+              className={`flex-1 text-sm px-3 py-2 rounded-lg border-2 outline-none bg-slate-50 text-slate-800 font-mono transition-colors ${focused ? "border-sky-400" : "border-slate-200"
+                }`}
             />
             <button
               onClick={handleTrack}
               disabled={loading}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shrink-0 ${
-                loading
+              className={`px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shrink-0 ${loading
                   ? "bg-slate-400 cursor-wait"
                   : "bg-maroon hover:bg-maroon-dark active:scale-95"
-              }`}
+                }`}
             >
               {loading ? (
                 <svg
@@ -856,11 +862,10 @@ export default function TrackingForm({ MOCK_TRIPS }) {
                   <div key={i} className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <div
-                        className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 ${
-                          cp.done
+                        className={`w-3 h-3 rounded-full border-2 mt-1 shrink-0 ${cp.done
                             ? "border-green-500 bg-green-500"
                             : "border-gray-300 bg-white"
-                        }`}
+                          }`}
                       />
                       {i < tripData.checkpoints.length - 1 && (
                         <div
@@ -925,11 +930,10 @@ export default function TrackingForm({ MOCK_TRIPS }) {
                       <button
                         key={issue.id}
                         onClick={() => setSelectedIssue(issue.id)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 text-left transition-all ${
-                          selectedIssue === issue.id
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 text-left transition-all ${selectedIssue === issue.id
                             ? "border-pink-800 bg-pink-50"
                             : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
+                          }`}
                       >
                         <span className="text-lg shrink-0">{issue.emoji}</span>
                         <div className="flex-1 min-w-0">
@@ -962,11 +966,10 @@ export default function TrackingForm({ MOCK_TRIPS }) {
                   <button
                     onClick={() => selectedIssue && setReportDone(true)}
                     disabled={!selectedIssue}
-                    className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                      selectedIssue
+                    className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-all ${selectedIssue
                         ? "bg-maroon hover:bg-maroon-dark text-white active:scale-98"
                         : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                    }`}
+                      }`}
                   >
                     Submit Report
                   </button>

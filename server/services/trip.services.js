@@ -1,6 +1,7 @@
 import sql from "../db/database.js"
 import * as turf from '@turf/turf';
 import axios from "axios";
+import polyline from "@mapbox/polyline";
 
 
 async function generateTrackingCode() {
@@ -22,16 +23,26 @@ const calculateGeodistance = async(gps_points)=>{
     //     units: 'kilometers'
     // });
 
-    const coordsString = gps_points
-    .map(c => c.join(","))
+    // const coordsString = gps_points
+    // .map(c => c.join(","))
+    // .join(";");
+
+    // const response = await axios.get(
+    // `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
+    // );
+    // console.log(response)
+    const coordStr = gps_points
+    .map(([lng, lat]) => `${lng},${lat}`)
     .join(";");
 
-    const response = await axios.get(
-    `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordsString}?geometries=geojson&access_token=${process.env.VITE_MAPBOX_TOKEN}`
-    );
-    // console.log(response)
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordStr}?geometries=polyline&overview=full&access_token=${process.env.VITE_MAPBOX_TOKEN}`;
+    const response = await axios.get(url)
+    // if (!response.data.routes?.length) return { distance: 0, duration: 0 };
+    if (!response.data.routes?.length) {
+      return null;
+    }
 
-    return response.data
+    return response.data;
 }
 
 function getEndTime(dateString, seconds) {
@@ -79,10 +90,12 @@ const addTripService = async(data, dc_manager)=>{
       }
       console.log(gps_points)
       const geodata = await calculateGeodistance(gps_points)
-      const duration = geodata.routes[0].duration
-      console.log(duration)
-      // const speed = Math.abs((total_distance)/(duration/ 3600))+10
-      const endtime = getEndTime(departure, duration)
+      const duration = geodata.routes[0].duration || 0;
+
+      const endtime = getEndTime(departure, duration);
+      delivery_stops[i].eta = endtime;
+
+      total_seconds += duration;
       delivery_stops[i].eta = endtime
       total_seconds += duration
 
@@ -95,11 +108,22 @@ const addTripService = async(data, dc_manager)=>{
     // console.log("2 : ",gps_points)
 
     const geodata = await calculateGeodistance(gps_points)
-    const total_distance = geodata.routes[0].distance / 1000
-    const geopath = geodata.routes[0].geometry.coordinates
+    // const total_distance = geodata.routes[0].distance / 1000
+    // const geopath = geodata.routes[0].geometry.coordinates
     
-    const duration = geodata.routes[0].duration
-    const speed = Math.abs((total_distance)/(duration/ 3600))+10
+    // const duration = geodata.routes[0].duration
+    // const speed = Math.abs((total_distance)/(duration/ 3600))+10
+    if (!geodata?.routes?.length) return;
+
+    const route = geodata.routes[0];
+
+    const total_distance = route.distance / 1000; // km
+    const duration = route.duration; // seconds
+
+    const geopath = polyline.decode(route.geometry);
+
+    // km/h
+    const speed = total_distance / (duration / 3600);
     const endtime = getEndTime(departure, total_seconds)
     console.log(endtime, total_seconds)
     const [trip] = await sql`

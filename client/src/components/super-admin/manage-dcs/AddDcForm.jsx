@@ -43,6 +43,7 @@ import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/valida
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 import AssignManagerSelect from "./AssignManagerSelect"
+import { getCoordinatesFromAddress } from "@/lib/utils/getCoordinatesFromAddress"
 
 
 const dcSchema = z.object({
@@ -118,7 +119,13 @@ export default function AddDCForm({ dc, open, onClose, managers, managerSearch, 
     const onSubmit = async (data) => {
         console.log("on submit", data);
         //get coordinates from address here
-        const payload = {state: "Maharashtra", ...data}
+         const { lat, lng } = await getCoordinatesFromAddress(data.address);
+        const payload = {
+            state: "Maharashtra",
+            latitude: lat,
+                longitude: lng, 
+            ...data
+        }
         try {
             if (dc) {
                 await updateDc({ id: dc.id, ...payload }).unwrap();

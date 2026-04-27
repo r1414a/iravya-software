@@ -4,4 +4,6 @@ client/.env
 server/node_modules
 server/.env
 
+server/serviceAccount.json
+
 client/src/pages/dc-operator/manage-stores/StoreDetailDrawer.jsx

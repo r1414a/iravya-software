@@ -2,6 +2,9 @@ import bcrypt from "bcryptjs";
 import sql from '../db/database.js'
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiError from "../utils/ApiError.js";
+import crypto from 'crypto';
+import redisClient from '../config/redis.js'
+import { sendPush } from "../services/notification.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import {
     registerUserService,
@@ -15,7 +18,8 @@ import {
     updateUserService,
     getUserbySearchService,
     setUserPasswordService,
-    buildUserResponse
+    buildUserResponse,
+    userExistbyPhoneService
 } from "../services/auth.service.js";
 import { generateToken } from "../services/token.service.js"
 import sendResponse from "../utils/sendResponse.js";
@@ -294,6 +298,9 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 
 })
+
+
+
 
 
 export {

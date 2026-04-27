@@ -41,23 +41,23 @@ const createStoreValidator = [
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
 
-  body("manager_name")
-    .notEmpty()
-    .withMessage("Manager name is required")
-    .isLength({ min: 2 })
-    .withMessage("Manager name too short"),
+  // body("manager_name")
+  //   .notEmpty()
+  //   .withMessage("Manager name is required")
+  //   .isLength({ min: 2 })
+  //   .withMessage("Manager name too short"),
 
-  body("manager_phone")
-    .notEmpty()
-    .withMessage("Manager phone is required")
-    .isMobilePhone()
-    .withMessage("Invalid phone number"),
+  // body("manager_phone")
+  //   .notEmpty()
+  //   .withMessage("Manager phone is required")
+  //   .isMobilePhone()
+  //   .withMessage("Invalid phone number"),
 
-  body("manager_email")
-    .notEmpty()
-    .withMessage("Manager email is required")
-    .isEmail()
-    .withMessage("Invalid email")
+  // body("manager_email")
+  //   .notEmpty()
+  //   .withMessage("Manager email is required")
+  //   .isEmail()
+  //   .withMessage("Invalid email")
 ];
 
 const updateStoreValidation = [
@@ -80,17 +80,17 @@ const updateStoreValidation = [
     .isFloat({ min: -180, max: 180 })
     .withMessage("Invalid longitude"),
 
-  body("manager_name")
-    .isLength({ min: 2 })
-    .withMessage("Manager name too short"),
+  // body("manager_name")
+  //   .isLength({ min: 2 })
+  //   .withMessage("Manager name too short"),
 
-  body("manager_phone")
-    .isMobilePhone()
-    .withMessage("Invalid phone number"),
+  // body("manager_phone")
+  //   .isMobilePhone()
+  //   .withMessage("Invalid phone number"),
 
-  body("manager_email")
-    .isEmail()
-    .withMessage("Invalid email"),
+  // body("manager_email")
+  //   .isEmail()
+  //   .withMessage("Invalid email"),
 
   body("status")
     .optional()

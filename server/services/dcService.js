@@ -39,7 +39,7 @@ const getUserDataService = async ({ page, limit, search }) => {
   };
 };
 const addDcService = async(data) =>{
-    const {name, address, city, state, dc_manager} = data
+    const {name, address, city, state, dc_manager,latitude, longitude} = data
     
     // const name_= contact_name.split(" ")
     // const [newUser] = await sql`
@@ -81,6 +81,7 @@ const addDcService = async(data) =>{
             "address",
             "city",
             "state",
+            "latitude", "longitude",
             "dc_manager"
             )
             VALUES
@@ -89,6 +90,8 @@ const addDcService = async(data) =>{
             ${address},
             ${city},
             ${state},
+            ${latitude},
+            ${longitude},
             ${dc_manager}
             )
             RETURNING *
@@ -117,7 +120,7 @@ const getDcByIdService = async(id)=>{
 }
 
 const updateDcService = async(id, data) =>{
-    const {name, address, city, dc_manager, status} = data
+    const {name, address, city, dc_manager, status, latitude, longitude} = data
     const dc = (await sql`
             UPDATE "Distribution_center"
             SET 
@@ -125,7 +128,9 @@ const updateDcService = async(id, data) =>{
                 "address" = ${address},
                 "city" = ${city},
                 "status" = ${status},
-                "dc_manager" = ${dc_manager} 
+                "dc_manager" = ${dc_manager},
+                "latitude" = ${latitude},
+                "longitude" = ${longitude} 
             WHERE "id" = ${id}
             RETURNING *
         `)

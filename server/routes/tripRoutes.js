@@ -27,6 +27,7 @@ router.get("/gps-devices", protect, getGpsDevicesController);
 router.get("/stores", protect, getStoresController);
 
 router.post("/trip", protect, authorize("super_admin", "dc_manager"), addTripValidator, validate, addTrip)
+// router.post("/trip", addTripValidator, validate, addTrip)
 router.get("/trips", protect, authorize("super_admin", "dc_manager"),allTrips)
 router.put("/cancel/:id", protect, authorize("super_admin", "dc_manager"), cancelTrip)
 router.post("/track-trip",trackTrip)

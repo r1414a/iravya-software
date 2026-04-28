@@ -132,11 +132,10 @@ const addTripService = async(data, dc_manager)=>{
     const [trip] = await sql`
         INSERT INTO "Trips" (
             "source_dc_id", "truck_id", "driver_id",
-            "tracking_code", "status", "created_by", "scheduled_at", "distance", "geopath", "departed_at", "end_time", "speed_threshold"
+            "tracking_code", "status", "created_by", "distance", "geopath", "departed_at", "end_time", "speed_threshold"
         ) VALUES (
             ${source_dc.id}, ${truck}, ${driver},
             ${tracking_code}, 'scheduled', ${dc_manager},
-            ${departure ?? null},
             ${total_distance},
             ${JSON.stringify(geopath)},
             ${departure},

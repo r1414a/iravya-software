@@ -293,6 +293,7 @@ const users = await sql`
         u.first_name,
         u.last_name,
         u.role,
+        u.phone_number,
         u.user_status,
         u.last_login,
         u.created_at,

@@ -15,6 +15,7 @@ export const api = createApi({
         "TruckTrip", 
         "TruckHistory",
         'DCs', 
+        'Reports',
         "Stores", 
         "StoreDeliveries",
         "Trips"

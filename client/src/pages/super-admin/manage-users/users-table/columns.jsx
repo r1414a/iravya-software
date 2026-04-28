@@ -92,7 +92,7 @@ export const columns = [
           <div>
             <p>{user.first_name} {user.last_name}</p>
             <p className="text-xs text-muted-foreground">
-              {user.role !== 'driver' ? user.email : user.phone_number}
+              {user.role === 'driver' ? `+91 ${user.phone_number}` : user.email}
             </p>
           </div>
         </div>

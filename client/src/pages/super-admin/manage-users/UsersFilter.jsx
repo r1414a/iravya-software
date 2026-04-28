@@ -39,7 +39,7 @@ export default function UsersFilter({
 
                 <div className="flex justify-end order-1 sm:order-2">
                                     <CreateFormSheetTrigger
-                                        text="Add DC"
+                                        text="Add User"
                                         setEditWho={setEditUser}
                                         setEditOpen={setEditOpen}
                                     />

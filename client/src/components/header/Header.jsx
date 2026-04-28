@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Bell } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -61,12 +61,17 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Right: User Menu */}
+      <div className="flex items-center gap-3">
+
+        <Link to={'/admin/alerts'} className="relative">
+                <Bell size={20}stroke="white" />
+                <span className="inline-block w-2 h-2 absolute -top-0.5 right-0 bg-amber-500 rounded-full"></span>
+              </Link>
+
+               {/* Right: User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center">
-
-
+            <div className="flex items-center gap-2">
               <span className="hidden sm:block text-xs font-semibold text-white tracking-wide">
                 {user ?
                   `${user.first_name} ${user.last_name} - (${ROLES[user.role].text})`
@@ -110,6 +115,8 @@ export default function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+       
       </nav>
     </div>
   );

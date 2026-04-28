@@ -1,7 +1,7 @@
 import AdminSubHeader from "@/components/AdminSubHeader"
-import AlertsFilter from "@/components/super-admin/alerts/AlertsFilter"
-import AlertsTable from "@/components/super-admin/alerts/AlertsTable"
- 
+import AlertsFilter from "@/components/alerts/AlertsFilter"
+import AlertsTable from "@/components/alerts/AlertsTable"
+
 export default function SuperAdminAlerts() {
     return (
         <section className="mb-10">

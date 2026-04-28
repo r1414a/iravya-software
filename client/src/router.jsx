@@ -20,6 +20,7 @@ const DCManageStores = lazy(() => import("./pages/dc-operator/manage-stores/DCMa
 const DCManageDevices = lazy(() => import("./pages/dc-operator/manage-gps-device/DCManageDevices"));
 
 
+const SuperAdminReports = lazy(() => import("./pages/super-admin/reports/SuperAdminReports"));
 const SuperAdminManageTrips = lazy(() => import("./pages/super-admin/manage-trips/SuperAdminManageTrips"));
 const SuperAdminManageDCs = lazy(() => import("./pages/super-admin/manage-dcs/SuperAdminManageDCS"));
 const SuperAdminManageDrivers = lazy(() => import("./pages/super-admin/manage-drivers/SuperAdminManageDrivers"));
@@ -30,7 +31,6 @@ const SuperAdminAlerts = lazy(() => import("./pages/super-admin/alerts/SuperAdmi
 const SuperAdminManageDevices = lazy(() => import("./pages/super-admin/manage-devices/SuperAdminManageDevices"));
 const SuperAdminManageBrands = lazy(() => import("./pages/super-admin/manage-brands/SuperAdminManageBrands"));
 
-SuperAdminManageDCs
 const TrackTrip = lazy(() => import("./pages/track-trip/TrackTrip"))
 
 
@@ -101,6 +101,10 @@ const router = createBrowserRouter([
                     {
                         path: "alerts",
                         element: <SuperAdminAlerts />
+                    },
+                    {
+                        path: "reports",
+                        element: <SuperAdminReports />
                     },
                     {
                         path: "manage-brands",

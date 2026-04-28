@@ -65,3 +65,45 @@ export const SUPER_ADMIN_PLATFORMSETTINGS = {
     speed_limit: 80,
     long_stop: 15,
 }
+
+export const REPORTING_ISSUES = {
+    route_issue: {
+        style: "bg-yellow-100 text-yellow-700",
+        label: "Route Issue"
+    },
+
+    delivery_not_arrived: {
+        style: "bg-amber-100 text-amber-700",
+        label: "Delivery delayed"
+    },
+
+    wrong_delivery_location: {
+        style: "bg-purple-100 text-purple-700",
+        label: "Wrong location"
+    },
+
+    unable_to_reach_driver: {
+        style: "bg-red-100 text-red-700",
+        label: "Can't reach driver"
+    },
+
+    unable_to_reach_dc_operator: {
+        style: "bg-orange-100 text-orange-700",
+        label: "Can't reach DC"
+    },
+
+    vehicle_breakdown: {
+        style: "bg-rose-100 text-rose-700",
+        label: "Vehicle breakdown"
+    },
+
+    damaged_goods_concern: {
+        style: "bg-pink-100 text-pink-700",
+        label: "Package issue"
+    },
+
+    other_issues: {
+        style: "bg-gray-100 text-gray-600",
+        label: "Other"
+    },
+}

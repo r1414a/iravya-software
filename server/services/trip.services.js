@@ -120,7 +120,10 @@ const addTripService = async(data, dc_manager)=>{
     const total_distance = route.distance / 1000; // km
     const duration = route.duration; // seconds
 
-    const geopath = polyline.decode(route.geometry);
+    // const geopath = polyline.decode(route.geometry);
+    const geopath = polyline
+  .decode(route.geometry)
+  .map(([lat, lng]) => [lng, lat]);
 
     // km/h
     const speed = total_distance / (duration / 3600);

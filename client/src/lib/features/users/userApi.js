@@ -22,7 +22,7 @@ export const userApi = api.injectEndpoints({
                     skipToast: true,
                 };
             },
-            providesTags: ["Users"],
+            providesTags: ["Managers"],
         }),
 
         createUser: builder.mutation({

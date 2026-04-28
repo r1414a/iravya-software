@@ -7,6 +7,7 @@ export const api = createApi({
     tagTypes: [
         'Auth', 
         'Users', 
+        'Managers',
         'Drivers', 
         'DriverTrip', 
         'DriverHistory', 

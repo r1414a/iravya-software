@@ -35,7 +35,7 @@ export const dcApi = api.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: ["DCs"],
+            invalidatesTags: ["DCs", "Managers"],
         }),
  
         // PUT /updatDc/:id  (note: your route has a typo "updatDc" — keeping it to match)

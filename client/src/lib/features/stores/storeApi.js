@@ -38,7 +38,7 @@ export const storeApi = api.injectEndpoints({
         // POST /stores
         addStore: builder.mutation({
             query: (body) => ({ url: "/api/v1/stores/stores", method: "POST", body }),
-            invalidatesTags: [{ type: "Stores", id: "LIST" }],
+            invalidatesTags: [{ type: "Stores", id: "LIST" }, "Managers"],
         }),
  
         // PUT /store/:id

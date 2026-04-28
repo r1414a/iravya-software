@@ -44,6 +44,7 @@ const storeSchema = z.object({
     address: addressV,
     state: z.string().default("Maharashtra"),
     status: z.enum(["active", "inactive"]).optional(),
+    store_manager: z.string().min(1, "Manager is required"),
     store_code: z.string()
         .length(15, { message: "GSTIN must be exactly 15 characters" })
 });
@@ -70,7 +71,8 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
             city: "",
             state: "Maharashtra",
             status: "active",
-            store_code: ""
+            store_code: "",
+            store_manager: ""
         },
     });
 
@@ -84,7 +86,8 @@ export default function StoreForm({ store, brands, open, onClose, managers, mana
                 city: store?.city || "",
                 state: "Maharashtra",
                 status: store?.status || "active",
-                store_code: store?.store_code || ""
+                store_code: store?.store_code || "",
+                store_manager: store?.store_manager
             });
         } else {
             reset({

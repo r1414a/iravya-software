@@ -235,9 +235,9 @@ export default function CreateTripModal({ truck, open, onClose }) {
 
             await addTrip(payload).unwrap()
 
-            toast.success("Trip dispatched successfully", {
-                description: `Trip has been ${isEdit ? 'updated' : 'created'}.`,
-            })
+            // toast.success("Trip dispatched successfully", {
+            //     description: `Trip has been ${isEdit ? 'updated' : 'created'}.`,
+            // })
 
             reset()
             // setSelectedStops([])
@@ -245,9 +245,9 @@ export default function CreateTripModal({ truck, open, onClose }) {
             setResourcesFetched(false)
             onClose(false)
         } catch (err) {
-            toast.error("Failed to dispatch trip", {
-                description: err?.data?.message || "Please try again",
-            })
+            // toast.error("Failed to dispatch trip", {
+            //     description: err?.data?.message || "Please try again",
+            // })
             console.error(err)
         }
     }
@@ -475,13 +475,13 @@ export default function CreateTripModal({ truck, open, onClose }) {
                                                             isStore
                                                         />
                                                     </div>
-                                                    <Button
+                                                    {/* <Button
                                                         type="button"
                                                         className="bg-maroon hover:bg-maroon-dark text-white shrink-0"
                                                         disabled
                                                     >
                                                         <Plus size={14} />
-                                                    </Button>
+                                                    </Button> */}
                                                 </div>
                                                 <FieldDescription className="text-xs">
                                                     Select stores to add as delivery stops

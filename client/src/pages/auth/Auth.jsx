@@ -117,7 +117,7 @@ export default function Auth() {
                         I
                     </div>
                     <span
-                        className="text-white text-[22px] font-semibold tracking-wide"
+                        className="text-white text-3xl font-semibold tracking-wide"
 
                     >
                         Iravya
@@ -132,12 +132,12 @@ export default function Auth() {
                 >
                     {/* Heading */}
                     <h1
-                        className="text-[24px] font-semibold text-[#1a1a2e] text-center mb-1.5"
+                        className="text-2xl font-semibold text-[#1a1a2e] text-center mb-1.5"
 
                     >
                         Sign In
                     </h1>
-                    <p className="text-[13.5px] text-[#7a7a8a] text-center mb-7 font-normal">
+                    <p className="text-md text-[#7a7a8a] text-center mb-7 font-normal">
                         Enter your credentials to continue
                     </p>
 
@@ -155,7 +155,7 @@ export default function Auth() {
 
                         </div>
                         {errors.email && (
-                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.email.message}</span>
+                            <span className="text-red-500 text-sm mt-0.5 ml-1">{errors.email.message}</span>
                         )}
 
                         {/* Password */}
@@ -178,18 +178,17 @@ export default function Auth() {
                             </button>
                         </div>
                         {errors.password && (
-                            <span className="text-red-500 text-[10px] mt-0.5 ml-1">{errors.password.message}</span>
+                            <span className="text-red-500 text-sm mt-0.5 ml-1">{errors.password.message}</span>
                         )}
 
                         {/* Sign In button */}
                         <button
                             type="submit"
-                            className="btn-signin w-full py-3.5 text-white text-[15px] font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
+                            className="btn-signin w-full py-3.5 text-white text-md font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
                             
                             style={{
                                 background: "linear-gradient(135deg, #8b1a30, #6b1223)",
                                 boxShadow: "0 4px 18px rgba(139,26,48,0.32)",
-                                fontFamily: "'DM Sans', sans-serif",
                             }}
                         >
                             {isLoading ? 'Please wait...' : 'Sign In'}
@@ -199,7 +198,7 @@ export default function Auth() {
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-5">
                         <div className="flex-1 h-px bg-[#e8e8f0]" />
-                        <span className="text-[10.5px] font-semibold tracking-[2px] uppercase text-[#b0b0c0]">
+                        <span className="text-sm font-semibold tracking-[0.5px] uppercase text-[#b0b0c0]">
                             Default Credentials
                         </span>
                         <div className="flex-1 h-px bg-[#e8e8f0]" />
@@ -213,21 +212,21 @@ export default function Auth() {
                         >
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[13.5px] font-semibold text-[#1a1a2e]">{cred.role}</span>
+                                    <span className="text-sm font-semibold text-[#1a1a2e]">{cred.role}</span>
                                     <span
-                                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-[5px] tracking-wide border ${cred.badgeClass}`}
+                                        className={`text-xs font-semibold px-2 py-0.5 rounded-[5px] tracking-wide border ${cred.badgeClass}`}
                                     >
                                         {cred.badge}
                                     </span>
                                 </div>
-                                <span className="text-[12px] text-[#9090a0] font-mono">
+                                <span className="text-sm text-[#9090a0]">
                                     {cred.email} / {cred.pass}
                                 </span>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => handleUse(cred)}
-                                className="use-btn text-[12.5px] font-semibold text-maroon-dark bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
+                                className="use-btn text-md font-semibold text-maroon-dark bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
                             >
                                 Use →
                             </button>

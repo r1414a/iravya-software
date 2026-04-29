@@ -78,12 +78,12 @@ export function DangerSection() {
                     desc="Immediately invalidates all active sessions across all devices. You will need to log in again."
                     buttonLabel="Sign out all"
                 /> */}
-                <DangerCard
+                {/* <DangerCard
                     icon={RefreshCw}
                     title="Reset platform settings"
                     desc="Resets all platform-level settings (MQTT config, GPS interval, alert thresholds) to defaults. Does not affect user data."
                     buttonLabel="Reset settings"
-                />
+                /> */}
                 <DangerCard
                     icon={Trash2}
                     title="Delete super admin account"

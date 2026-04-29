@@ -18,8 +18,8 @@ export const reportApi = api.injectEndpoints({
             },
             providesTags: ["Reports"],
             transformResponse: (res) => ({
-                data:        res.data ?? [],
-                pagination:  res.pagination ?? { page: 1, total_pages: 1, total: 0 },
+                data:        res.data.data ?? [],
+                pagination:  res.data.pagination ?? { page: 1, total_pages: 1, total: 0 },
             }),
         }),
 

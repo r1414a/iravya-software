@@ -11,7 +11,7 @@ export default function CreateFormSheetTrigger({ text, setEditWho, setEditOpen }
       }}
         className="w-full sm:w-auto bg-maroon hover:bg-maroon-dark text-white"
       >
-        <Plus className="w-4 h-4 mr-1" />
+        <Plus className="w-4 h-4" />
         {text}
       </Button>
   );

@@ -52,12 +52,12 @@ export default function Header() {
           </div>
 
           <Link to="/admin" className="flex flex-col leading-tight">
-            <span className="font-bold text-white text-sm">
+            <span className="font-bold text-white text-lg">
               Iravya
             </span>
-            <span className="text-[10px] font-semibold tracking-widest uppercase text-rose-200">
+            {/* <span className="text-sm font-semibold tracking-widest uppercase text-rose-200">
               Manager
-            </span>
+            </span> */}
           </Link>
         </div>
 
@@ -72,7 +72,7 @@ export default function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2">
-              <span className="hidden sm:block text-xs font-semibold text-white tracking-wide">
+              <span className="hidden sm:block text-sm font-semibold text-white tracking-wide">
                 {user ?
                   `${user.first_name} ${user.last_name} - (${ROLES[user.role].text})`
                   :

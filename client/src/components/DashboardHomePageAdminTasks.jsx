@@ -12,7 +12,7 @@ function MenuCard({ item }) {
             {item.icon}
           </div>
 
-          <span className="text-xs font-semibold text-gray-600 text-center">
+          <span className="text-md font-semibold text-gray-600 text-center">
             {item.label}
           </span>
         </CardContent>

@@ -148,7 +148,7 @@ const getAllReportIssuesService = async (filters) => {
         )`;
     }
 
-    if (user_role !== "super-admin" && user_id) {
+    if (user_role !== "super_admin" && user_id) {
         where = sql`${where} AND dc.dc_manager = ${user_id}`;
     }
 

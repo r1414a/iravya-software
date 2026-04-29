@@ -10,16 +10,16 @@ import { DangerSection } from "@/components/super-admin/settings/DangerSection"
 const NAV_ITEMS = [
     { key: "profile", label: "Profile", icon: User },
     { key: "password", label: "Password", icon: Lock },
-    { key: "notifications", label: "Notifications", icon: Bell },
-    { key: "platform", label: "Platform settings", icon: Settings2 },
+    // { key: "notifications", label: "Notifications", icon: Bell },
+    // { key: "platform", label: "Platform settings", icon: Settings2 },
     { key: "danger", label: "Danger zone", icon: AlertTriangle },
 ]
 
 const SECTION_MAP = {
     profile: <ProfileSection />,
     password: <PasswordSection />,
-    notifications: <NotificationsSection />,
-    platform: <PlatformSection />,
+    // notifications: <NotificationsSection />,
+    // platform: <PlatformSection />,
     danger: <DangerSection />,
 }
 

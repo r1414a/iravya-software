@@ -4,6 +4,7 @@ import AdminSubHeader from "@/components/AdminSubHeader"
 import CreateUserModal from "./CreateUserModal"
 import { useState, useEffect } from "react"
 import { useGetAllUsersQuery } from "@/lib/features/users/userApi"
+import CommonFilter from "@/components/CommonFilter"
 
 
 const LIMIT = 10
@@ -85,13 +86,22 @@ export default function SuperAdminManageUser() {
                 onClose={setEditOpen}
             />
 
-            <UsersFilter
+            <CommonFilter
+                setEditWho={setEditUser}
+                setEditOpen={setEditOpen}
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+                buttonText={'Add User'}
+            />
+
+            {/* <UsersFilter
                 setEditUser={setEditUser}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
                 setSearchInput={handleSearchChange}
                 handleClear={handleClear}
-            />
+            /> */}
             <UsersTable
                 users={users}
                 setEditUser={setEditUser}

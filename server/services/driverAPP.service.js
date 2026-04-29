@@ -348,12 +348,13 @@ const confirmStopDeliveryService = async(stop_id, trip_id) =>{
 
 const acceptTripService =  async (trip_id) => {
     const trip = await sql`
-            UPDATE "Trips"
-            SET status = 'in_transit',
-                is_acceptedby_driver = true
-            WHERE id = ${trip_id}
-            RETURNING *;
-        `;
+        UPDATE "Trips"
+        SET status = 'in_transit',
+            is_acceptedby_driver = true,
+            started_at = CURRENT_DATE
+        WHERE id = ${trip_id}
+        RETURNING *;
+    `;
 
         await sql`
             UPDATE "Trucks" t

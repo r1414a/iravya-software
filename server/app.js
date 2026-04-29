@@ -13,6 +13,7 @@ import settingsRoutes from "./routes/settingsRoutes.js"
 import tripRoutes from "./routes/tripRoutes.js"
 import driverAPPRoutes from "./routes/driverAPPRoutes.js"
 import reportIssuesRoutes from "./routes/reportIssuesRoutes.js"
+import analyticsRoutes from "./routes/analyticsRoutes.js"
 
 const app = express()
 
@@ -38,6 +39,7 @@ app.use('/api/v1/trips',tripRoutes)
 app.use('/api/v1/settings', settingsRoutes)
 app.use('/api/v1/driverapp',driverAPPRoutes)
 app.use('/api/v1/issues',reportIssuesRoutes)
+app.use('/api/v1/analytics',analyticsRoutes)
 
 app.use(globalErrorHandler);
 

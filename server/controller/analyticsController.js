@@ -4,7 +4,9 @@ import ApiResponse  from "../utils/ApiResponse.js";
 import bcrypt from "bcryptjs";
 import sendResponse from "../utils/sendResponse.js";
 import crypto from 'crypto';
-import { getCountDataService } from "../services/analytics.service.js";
+import { getCountDataService,
+    graphDataService
+ } from "../services/analytics.service.js";
 
 
 const getCountData = asyncHandler(async (req,res) => {
@@ -18,6 +20,20 @@ const getCountData = asyncHandler(async (req,res) => {
     }
 })
 
+const graphData = asyncHandler(async (req,res) => {
+    const {id, role} = req.user
+    const {date, year, month} = req.query
+    const graph_data = await graphDataService(id, role, date, year, month)
+    if(graph_data){
+        sendResponse(res, 201, graph_data, "Graph Data")
+    }
+    else{
+        throw new ApiError(400, "Bad request")
+    }
+
+})
+
 export{
-    getCountData
+    getCountData,
+    graphData
 }

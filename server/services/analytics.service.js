@@ -197,6 +197,141 @@ const getCountDataService = async (id, role) => {
     };
 };
 
+const graphDataService = async (id, role, date, year, month) => {
+    const user_id = role === 'dc_manager' ? id : null;
+    const dc_filter = role === 'dc_manager'
+        ? sql`dc.dc_manager = ${user_id}`
+        : sql`TRUE`;
+
+    let series;
+    let trunc_unit;
+    let label_format;
+    let key_name;
+    let date_filter = sql`TRUE`;
+
+    const pad = (val) => String(val).padStart(2, '0');
+
+    if (year && !month && !date) {
+        const start = `${year}-01-01`;
+
+        series = sql`
+        generate_series(
+            DATE_TRUNC('year', ${start}::date),
+            DATE_TRUNC('year', ${start}::date) + INTERVAL '11 months',
+            INTERVAL '1 month'
+        )
+        `;
+
+        trunc_unit = 'month';
+        label_format = 'Month';
+        key_name = 'month';
+
+        date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 year')
+        `;
+    }
+
+    else if (year && month && !date) {
+        const start = `${year}-${pad(month)}-01`;
+
+        series = sql`
+        generate_series(
+            DATE_TRUNC('month', ${start}::date),
+            DATE_TRUNC('month', ${start}::date) + INTERVAL '1 month - 1 day',
+            INTERVAL '1 day'
+        )
+        `;
+
+        trunc_unit = 'day';
+        label_format = 'DD';
+        key_name = 'day';
+
+        date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 month')
+        `;
+    }
+
+    else if (year && month && date) {
+        const start = `${year}-${pad(month)}-${pad(date)}`;
+
+        series = sql`
+        generate_series(
+            DATE_TRUNC('day', ${start}::date),
+            DATE_TRUNC('day', ${start}::date) + INTERVAL '23 hours',
+            INTERVAL '1 hour'
+        )
+        `;
+
+        trunc_unit = 'hour';
+        label_format = 'HH24:00';
+        key_name = 'hour';
+
+        date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 day')
+        `;
+    }
+
+    else {
+        const start = new Date().getFullYear() - 4;
+
+        series = sql`
+        generate_series(
+            DATE_TRUNC('year', ${start}-01-01::date),
+            DATE_TRUNC('year', CURRENT_DATE),
+            INTERVAL '1 year'
+        )
+        `;
+
+        trunc_unit = 'year';
+        label_format = 'YYYY';
+        key_name = 'year';
+    }
+
+    const raw = await sql`
+        WITH time_series AS (
+        SELECT ${series} AS period
+        ),
+        trip_data AS (
+        SELECT
+            DATE_TRUNC('${sql.unsafe(trunc_unit)}', t.departed_at) AS period,
+            t.status
+        FROM "Trips" t
+        JOIN "Distribution_center" dc
+            ON dc.id = t.source_dc_id
+        WHERE t.departed_at IS NOT NULL
+            AND ${dc_filter}
+            AND ${date_filter}
+        )
+        SELECT
+        ts.period,
+        TO_CHAR(ts.period, ${sql.unsafe(`'${label_format}'`)}) AS label,
+
+        COUNT(td.status) FILTER (WHERE td.status = 'completed') AS completed,
+        COUNT(td.status) FILTER (WHERE td.status = 'scheduled') AS scheduled,
+        COUNT(td.status) FILTER (WHERE td.status ='cancelled') AS cancelled
+
+        FROM time_series ts
+        LEFT JOIN trip_data td
+        ON ts.period = td.period
+
+        GROUP BY ts.period
+        ORDER BY ts.period;
+    `;
+
+    const trip_by_status = raw.map(row => ({
+        [key_name]: key_name === 'day' ? Number(row.label) : row.label.trim(),
+        scheduled: Number(row.scheduled || 0),
+        completed: Number(row.completed || 0),
+        cancelled: Number(row.cancelled || 0)
+    }));
+
+    return { trip_by_status };
+}
+
 export{
-    getCountDataService
+    getCountDataService,
+    graphDataService
 }

@@ -275,14 +275,18 @@ const graphDataService = async (id, role, date, year, month) => {
     }
 
     else {
-        const start = new Date().getFullYear() - 4;
-
         series = sql`
-        generate_series(
-            DATE_TRUNC('year', ${start}-01-01::date),
-            DATE_TRUNC('year', CURRENT_DATE),
+            generate_series(
+            COALESCE(
+                (SELECT DATE_TRUNC('year', MIN(departed_at)) FROM "Trips"),
+                DATE_TRUNC('year', CURRENT_DATE)
+            ),
+            COALESCE(
+                (SELECT DATE_TRUNC('year', MAX(departed_at)) FROM "Trips"),
+                DATE_TRUNC('year', CURRENT_DATE)
+            ),
             INTERVAL '1 year'
-        )
+            )
         `;
 
         trunc_unit = 'year';
@@ -328,7 +332,220 @@ const graphDataService = async (id, role, date, year, month) => {
         cancelled: Number(row.cancelled || 0)
     }));
 
-    return { trip_by_status };
+    let dc_date_filter = sql`TRUE`;
+
+    // 🎯 YEAR
+    if (year && !month && !date) {
+        const start = `${year}-01-01`;
+
+        dc_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 year')
+        `;
+    }
+
+    // 🎯 YEAR + MONTH
+    else if (year && month && !date) {
+        const start = `${year}-${pad(month)}-01`;
+
+        dc_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 month')
+        `;
+    }
+
+    // 🎯 FULL DATE
+    else if (year && month && date) {
+        const start = `${year}-${pad(month)}-${pad(date)}`;
+
+        dc_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 day')
+        `;
+    }
+
+    // 🎯 DEFAULT → last 5 years
+    else {
+        dc_date_filter = sql`
+        t.departed_at >= (
+            SELECT DATE_TRUNC('year', MIN(departed_at)) FROM "Trips"
+        )
+        `;
+    }
+
+    const result = await sql`
+        SELECT
+            dc.name AS dc,
+
+            COUNT(t.id) AS dispatched,
+
+            COUNT(t.id) FILTER (WHERE t.status = 'completed') AS completed,
+            COUNT(t.id) FILTER (WHERE t.status = 'in_transit') AS in_transit,
+
+            -- 🎯 Performance %
+            COALESCE(
+            ROUND(
+                COUNT(t.id) FILTER (WHERE t.status = 'completed') * 100.0 
+                / NULLIF(COUNT(t.id), 0),
+                0
+            ),
+            0
+            ) AS performance
+
+        FROM "Distribution_center" dc
+
+        LEFT JOIN "Trips" t
+            ON dc.id = t.source_dc_id
+            AND t.departed_at IS NOT NULL
+            AND ${dc_date_filter}
+
+        WHERE 
+            ${dc_filter}
+            AND dc.status = 'active'
+
+        GROUP BY dc.name
+        ORDER BY dc.name;
+        `;
+
+    // ✅ Final format
+    const dc_data = result.map(row => ({
+        dc: row.dc,
+        completed: Number(row.completed || 0),
+        in_transit: Number(row.in_transit || 0),
+        performance: Number(row.performance || 0)
+    }));
+    
+    let alert_date_filter = sql`TRUE`;
+
+    // YEAR FILTER
+    if (year && !month && !date) {
+        const start = `${year}-01-01`;
+
+        alert_date_filter = sql`
+        a.created_at >= ${start}::date
+        AND a.created_at < (${start}::date + INTERVAL '1 year')
+        `;
+    }
+
+    // YEAR + MONTH
+    else if (year && month && !date) {
+        const start = `${year}-${pad(month)}-01`;
+
+        alert_date_filter = sql`
+        a.created_at >= ${start}::date
+        AND a.created_at < (${start}::date + INTERVAL '1 month')
+        `;
+    }
+
+    // FULL DATE
+    else if (year && month && date) {
+        const start = `${year}-${pad(month)}-${pad(date)}`;
+
+        alert_date_filter = sql`
+        a.created_at >= ${start}::date
+        AND a.created_at < (${start}::date + INTERVAL '1 day')
+        `;
+    }
+
+    // DEFAULT → all data
+    else {
+        alert_date_filter = sql`
+        a.created_at >= (
+            SELECT COALESCE(MIN(created_at), CURRENT_DATE)
+            FROM "Alerts"
+        )
+        `;
+    }
+
+    const alert_result = await sql`
+        SELECT
+        a.type,
+        COUNT(*) AS value
+        FROM "Alerts" a
+        WHERE ${alert_date_filter}
+        GROUP BY a.type
+        ORDER BY value DESC;
+    `;
+
+    const alert = alert_result.map(row => ({
+        type: row.type,
+        value: Number(row.value || 0)
+    }));
+
+    let top_store_date_filter = sql`TRUE`;
+
+    // 🎯 YEAR
+    if (year && !month && !date) {
+        const start = `${year}-01-01`;
+
+        top_store_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 year')
+        `;
+    }
+
+    // 🎯 YEAR + MONTH
+    else if (year && month && !date) {
+        const start = `${year}-${pad(month)}-01`;
+
+        top_store_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 month')
+        `;
+    }
+
+    // 🎯 FULL DATE
+    else if (year && month && date) {
+        const start = `${year}-${pad(month)}-${pad(date)}`;
+
+        top_store_date_filter = sql`
+        t.departed_at >= ${start}::date
+        AND t.departed_at < (${start}::date + INTERVAL '1 day')
+        `;
+    }
+
+    // 🎯 DEFAULT → all data
+    else {
+        top_store_date_filter = sql`
+        t.departed_at >= (
+            SELECT COALESCE(MIN(departed_at), CURRENT_DATE)
+            FROM "Trips"
+        )
+        `;
+    }
+
+    const store_result = await sql`
+        SELECT
+        s.name AS store,
+        COUNT(*) AS deliveries
+
+        FROM "Trip_stops" ts
+
+        JOIN "Trips" t
+        ON t.id = ts.trip_id
+        AND t.status = 'completed'         -- ✅ only delivered
+        AND t.departed_at IS NOT NULL
+        AND ${top_store_date_filter}
+
+        JOIN "Stores" s
+        ON s.id = ts.store_id
+
+        JOIN "Distribution_center" dc
+        ON dc.id = t.source_dc_id
+
+        WHERE ${dc_filter}
+
+        GROUP BY s.name
+        ORDER BY deliveries DESC
+        LIMIT 5;
+    `;
+
+    const top_stores = store_result.map(row => ({
+        store: row.store,
+        deliveries: Number(row.deliveries || 0)
+    }));
+
+    return { trip_by_status, dc_data, alert ,top_stores};
 }
 
 export{

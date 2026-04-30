@@ -2,11 +2,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react"
 import AdminSubHeader from "@/components/AdminSubHeader"
 import AddDCForm from "@/components/super-admin/manage-dcs/AddDcForm"
-import DCsFilter from "@/components/super-admin/manage-dcs/DcsFilter"
+// import DCsFilter from "@/components/super-admin/manage-dcs/DcsFilter"
 import DCsTable from "@/components/super-admin/manage-dcs/DcsTable"
 import { useGetAllDcsQuery } from "@/lib/features/dcs/dcApi"
 import { useGetAvailableManagersQuery } from "@/lib/features/users/userApi"
 import DCDetailDrawer from "@/components/super-admin/manage-dcs/DcDetailDrawer"
+import CommonFilter from "@/components/CommonFilter"
 
 const LIMIT = 10
 
@@ -112,13 +113,23 @@ export default function SuperAdminManageDCs() {
                 onClose={() => setViewOpen(false)}
             />
 
-            <DCsFilter
+            <CommonFilter
+                setEditWho={setEditDc}
+    setEditOpen={setEditOpen}
+    searchInput={searchInput}
+    setSearchInput={handleSearchChange}
+    handleClear={handleClear}
+    buttonText={'Add DC'}
+    placeholder={"Search DC name, city, or manager name..."}
+            />
+
+            {/* <DCsFilter
                 setEditDc={setEditDc}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
                 setSearchInput={handleSearchChange}
                 handleClear={handleClear}
-            />
+            /> */}
 
             <DCsTable
                 dcs={dcs}

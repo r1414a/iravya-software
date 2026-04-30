@@ -1,11 +1,11 @@
 
 import AdminSubHeader from "@/components/AdminSubHeader"
+import CommonFilter from "@/components/CommonFilter";
 import CreateTripModal from "@/components/manage-trip/CreateNewTrip";
 import TripDetailSheet from "@/components/manage-trip/TripDetailSheet";
 import AddTruckModal from "@/components/manage-truck/AddTruckForm";
-import AddTruckForm from "@/components/manage-truck/AddTruckForm"
 import TruckDetailDrawer from "@/components/manage-truck/TruckDetailDrawer";
-import TrucksFilter from "@/components/manage-truck/TrucksFilter"
+// import TrucksFilter from "@/components/manage-truck/TrucksFilter"
 import TrucksTable from "@/components/manage-truck/TrucksTable"
 import { selectUser } from "@/lib/features/auth/authSlice";
 import { useGetAllTrucksQuery, useGetTruckRecentTripQuery } from "@/lib/features/trucks/truckApi";
@@ -115,13 +115,23 @@ export default function SuperAdminManageTrucks() {
                 onClose={() => setCurrentTripOpen(false)}
             />
 
-            <TrucksFilter
+            <CommonFilter
+                setEditWho={setEditTruck}
+                setEditOpen={setEditOpen}
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+                buttonText={'Add Truck'}
+                placeholder={"Search registration no."}
+            />
+
+            {/* <TrucksFilter
                 setEditTruck={setEditTruck}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
                 handleClear={handleClear}
-            />
+            /> */}
 
 
             <TrucksTable

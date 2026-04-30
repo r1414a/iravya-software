@@ -3,19 +3,20 @@ import { useEffect, useState, useMemo } from "react"
 import AdminSubHeader from "@/components/AdminSubHeader"
 import StoreDetailDrawer from "@/components/manage-store/StoreDetailsDrawer"
 import StoreForm from "@/components/manage-store/StoreForm"
-import StoresFilter from "@/components/manage-store/StoresFilter"
+// import StoresFilter from "@/components/manage-store/StoresFilter"
 import StoresTable from "@/components/manage-store/StoresTable"
 import { useGetAllBrandsQuery } from "@/lib/features/brands/brandApi"
 import { useGetAllStoresQuery } from "@/lib/features/stores/storeApi"
 import { useGetAvailableManagersQuery } from "@/lib/features/users/userApi"
 import { useSelector } from "react-redux"
 import { selectUser } from "@/lib/features/auth/authSlice"
+import CommonFilter from "@/components/CommonFilter"
 
 const LIMIT = 10
 
 export default function SuperAdminManageStores() {
 
-    const {user} = useSelector(selectUser);
+    const { user } = useSelector(selectUser);
     const isadmin = user.role === 'super_admin'
     // State
     const [page, setPage] = useState(1)
@@ -24,7 +25,7 @@ export default function SuperAdminManageStores() {
     const [columnFilters, setColumnFilters] = useState([])
     const [managerSearch, setManagerSearch] = useState("")
     const [debouncedManagerSearch, setDebouncedManagerSearch] = useState("")
-    
+
     // Modal states
     const [editStore, setEditStore] = useState(null)
     const [editOpen, setEditOpen] = useState(false)
@@ -100,7 +101,7 @@ export default function SuperAdminManageStores() {
     return (
         <section className="mb-10">
             <AdminSubHeader
-                to={isadmin ? "/admin": "/dc"}
+                to={isadmin ? "/admin" : "/dc"}
                 heading="Manage Stores"
                 subh={isadmin ? "All retail stores across all brands — add, edit, manage geofence and public tracking" : "Stores this DC delivers to — track incoming deliveries, devices held and manager contacts"}
             />
@@ -122,13 +123,23 @@ export default function SuperAdminManageStores() {
                 onClose={() => setViewOpen(false)}
             />
 
-            <StoresFilter
+            <CommonFilter
+                setEditWho={setEditStore}
+                setEditOpen={setEditOpen}
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+                buttonText={'Add Store'}
+                placeholder={"Search store name, city..."}
+            />
+
+            {/* <StoresFilter
                 setEditStore={setEditStore}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
                 handleClear={handleClear}
-            />
+            /> */}
 
             <StoresTable
                 stores={stores}

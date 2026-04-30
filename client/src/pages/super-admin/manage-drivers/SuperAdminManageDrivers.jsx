@@ -1,6 +1,7 @@
 import AdminSubHeader from "@/components/AdminSubHeader"
+import CommonFilter from "@/components/CommonFilter"
 import TripHistorySheet from "@/components/manage-driver/drivers-table/TripHistorySheet"
-import DriversFilter from "@/components/manage-driver/DriversFilter"
+// import DriversFilter from "@/components/manage-driver/DriversFilter"
 import DriversTable from "@/components/manage-driver/DriversTable"
 import ManageDriverForm from "@/components/manage-driver/ManageDriverForm"
 import TripDetailSheet from "@/components/manage-trip/TripDetailSheet"
@@ -98,13 +99,23 @@ export default function SuperAdminManageDrivers() {
                 onClose={() => setDriverHistoryOpen(false)}
             />
 
-            <DriversFilter
+            <CommonFilter
+                setEditWho={setEditDriver}
+                setEditOpen={setEditOpen}
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+                buttonText={'Add Driver'}
+                placeholder={"Search drivers by name or mobile number..."}
+            />
+
+            {/* <DriversFilter
                 setEditDriver={setEditDriver}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
                 handleClear={handleClear}
-            />
+            /> */}
             <DriversTable
                 drivers={drivers}
                 setEditDriver={setEditDriver}

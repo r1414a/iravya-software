@@ -156,7 +156,6 @@ const resetPasswordService = async (id, old_pass , new_pass)=>{
             "role",
             "user_status",
             "last_login"
-            RETURNING "id", "email", "first_name", "last_name", "role", "last_login"
     `)[0]
     await sendEmail({
         to: user.email,

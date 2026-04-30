@@ -86,11 +86,11 @@ export default function Auth() {
 
             {/* Root */}
             <div
-                className="w-full min-h-screen flex flex-col items-center justify-center bg-maroon relative overflow-hidden px-4 py-6"
+                className="w-full min-h-screen bg-linear-to-br from-[#701a40] to-[#5a1430] flex flex-col items-center justify-center bg-maroon relative overflow-hidden px-4 py-6"
 
             >
                 {/* Background orbs */}
-                <div
+                {/* <div
                     className="absolute rounded-full pointer-events-none"
                     style={{ width: 480, height: 480, background: "#ffab25", filter: "blur(90px)", opacity: 0.18, top: -120, left: -80 }}
                 />
@@ -101,7 +101,7 @@ export default function Auth() {
                 <div
                     className="absolute rounded-full pointer-events-none"
                     style={{ width: 220, height: 220, background: "#ffab25", filter: "blur(90px)", opacity: 0.18, top: "40%", left: "60%" }}
-                />
+                /> */}
 
                 {/* Brand */}
                 <div className="flex flex-col items-center gap-2.5 mb-7 animate-fade-down">
@@ -117,7 +117,7 @@ export default function Auth() {
                         I
                     </div>
                     <span
-                        className="text-white text-3xl font-semibold tracking-wide"
+                        className="text-white text-xl font-semibold tracking-wide"
 
                     >
                         Iravya
@@ -132,12 +132,12 @@ export default function Auth() {
                 >
                     {/* Heading */}
                     <h1
-                        className="text-2xl font-semibold text-[#1a1a2e] text-center mb-1.5"
+                        className="text-xl font-semibold text-[#1a1a2e] text-center mb-1.5"
 
                     >
                         Sign In
                     </h1>
-                    <p className="text-md text-[#7a7a8a] text-center mb-7 font-normal">
+                    <p className="text-sm text-[#7a7a8a] text-center mb-7 font-normal">
                         Enter your credentials to continue
                     </p>
 
@@ -184,7 +184,7 @@ export default function Auth() {
                         {/* Sign In button */}
                         <button
                             type="submit"
-                            className="btn-signin w-full py-3.5 text-white text-md font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
+                            className="btn-signin w-full py-3.5 text-white text-sm font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
                             
                             style={{
                                 background: "linear-gradient(135deg, #8b1a30, #6b1223)",
@@ -198,7 +198,7 @@ export default function Auth() {
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-5">
                         <div className="flex-1 h-px bg-[#e8e8f0]" />
-                        <span className="text-sm font-semibold tracking-[0.5px] uppercase text-[#b0b0c0]">
+                        <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#b0b0c0]">
                             Default Credentials
                         </span>
                         <div className="flex-1 h-px bg-[#e8e8f0]" />
@@ -212,21 +212,21 @@ export default function Auth() {
                         >
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm font-semibold text-[#1a1a2e]">{cred.role}</span>
+                                    <span className="text-xs font-semibold text-[#1a1a2e]">{cred.role}</span>
                                     <span
                                         className={`text-xs font-semibold px-2 py-0.5 rounded-[5px] tracking-wide border ${cred.badgeClass}`}
                                     >
                                         {cred.badge}
                                     </span>
                                 </div>
-                                <span className="text-sm text-[#9090a0]">
+                                <span className="text-xs text-[#9090a0]">
                                     {cred.email} / {cred.pass}
                                 </span>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => handleUse(cred)}
-                                className="use-btn text-md font-semibold text-maroon-dark bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
+                                className="use-btn text-xs font-semibold text-maroon-dark bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors duration-150 p-0"
                             >
                                 Use →
                             </button>

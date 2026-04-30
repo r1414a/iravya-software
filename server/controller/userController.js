@@ -77,7 +77,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.cookie("token", token, options)
 
     // console.log("responseData",responseData);
-    
+
     sendResponse(res, 200, responseData, `Welcome back, ${responseData.first_name} - (${responseData.role === 'super_admin' ? 'Super admin' : 'DC manager'})`)
 
 })
@@ -97,7 +97,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params
     const userExists = await userExistbyidService(id)
     if (!userExists.length) {
-        res.status(200)
+        return res.status(200)
             .json(
                 new ApiResponse(
                     404,
@@ -139,7 +139,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     const { old_pass, new_pass } = req.body;
     const userExists = await userExistbyidService(id)
     if (!userExists.length) {
-        res.status(200)
+        return res.status(200)
             .json(
                 new ApiResponse(
                     404,
@@ -154,7 +154,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     const isMatch = await bcrypt.compare(old_pass, new_pass)
 
     if (old_pass === new_pass || isMatch) {
-        res
+        return res
             .status(200)
             .json(
                 new ApiResponse(
@@ -172,7 +172,7 @@ const resetPassword = asyncHandler(async (req, res) => {
                 new ApiResponse(
                     200,
                     user_,
-                    "New password reset successfully."
+                    "Password reset successfully."
                 )
             )
     }

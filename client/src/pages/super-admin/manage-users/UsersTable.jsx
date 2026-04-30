@@ -1,8 +1,6 @@
 import { DataTable } from "./users-table/data-table";
 import { columns } from "./users-table/columns";
-import { useGetAllUsersQuery } from "@/lib/features/users/userApi";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { useState } from "react";
+import { useMemo } from "react";
 
 
 const users = [

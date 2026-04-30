@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import {lazy} from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROLES } from "./constants/constant";
+import PublicRoute from "./PublicRoute";
 
 const Auth = lazy(() => import("./pages/auth/Auth"))
 
@@ -44,15 +45,20 @@ const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
 const router = createBrowserRouter([
     //Auth Routes
     {
-        path: "/",
-        element: <AuthLayout />,
-        children: [
-            {
-                index: true,
-                element: <Auth />
-            }
-        ]
-    },
+  element: <PublicRoute />,   // 👈 IMPORTANT
+  children: [
+    {
+      path: "/",
+      element: <AuthLayout />,
+      children: [
+        {
+          index: true,
+          element: <Auth />
+        }
+      ]
+    }
+  ]
+},
 
     //Admin Routes
     {
@@ -149,7 +155,11 @@ const router = createBrowserRouter([
                     {
                         path: 'manage-stores',
                         element: <DCManageStores />
-                    }
+                    },
+                    {
+                        path: "reports",
+                        element: <SuperAdminReports />
+                    },
                 ]
             }
 

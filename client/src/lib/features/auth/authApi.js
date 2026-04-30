@@ -44,6 +44,14 @@ export const authApi = api.injectEndpoints({
             }),
         }),
 
+        changePassword: builder.mutation({
+            query: ({ id, old_pass, new_pass }) => ({
+                url: `/api/v1/users/reset_pass/${id}`,
+                method: "POST",
+                body: { old_pass, new_pass },
+            }),
+        }),
+
         //login,getMe,logout
     })
 })
@@ -52,5 +60,6 @@ export const {
     useSignInMutation,
     useGetMeQuery,
     useSignOutMutation,
-    useSetNotificationPreferencesMutation
+    useSetNotificationPreferencesMutation,
+    useChangePasswordMutation
 } = authApi

@@ -211,7 +211,7 @@ export const columns = [
             return (
                 <div className="-space-y-0.5">
                     <p className="text-sm font-mono">{row.original.licence_no}</p>
-                    <p className="text-xs text-gray-400">{licence_class} · Exp {licence_expiry ? format(parseISO(licence_expiry), 'MMM yyyy') : "-"}</p>
+                    <p className="text-xs text-gray-400">{licence_class} · {licence_expiry ? `Exp - ${format(parseISO(licence_expiry), 'MMM yyyy')}` : "-"}</p>
                 </div>
             )
         },

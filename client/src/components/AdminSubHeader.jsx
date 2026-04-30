@@ -11,7 +11,7 @@ export default function AdminSubHeader({to, heading,subh}){
                 <div className="flex items-center justify-between w-full">
                     <div className="-space-y-1 flex-1">
                         <h1 className="text-md lg:text-lg mb-0.5 lg:mb-0">{heading}</h1>
-                        <p className="text-md text-gray-500">
+                        <p className="text-sm text-gray-500">
                             {subh}
                         </p>
                     </div>

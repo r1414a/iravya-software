@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import ReportsFilter from "@/components/reports/ReportsFilter";
 import ReportTable from "@/components/reports/ReportTable";
+import ReportDetailsDrawer from "@/components/reports/ReportDetailsDrawer";
 
 const LIMIT = 10;
 
@@ -15,6 +16,8 @@ export default function SuperAdminReports() {
     const [searchInput, setSearchInput] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [columnFilters, setColumnFilters] = useState([]);
+    const [viewReport, setViewReport] = useState(null)
+    const [viewOpen, setViewOpen] = useState(false)
 
     const issueTypeFilter = useMemo(
         () => columnFilters.find(f => f.id === "issue_type")?.value || "",
@@ -65,6 +68,12 @@ export default function SuperAdminReports() {
 
             />
 
+            <ReportDetailsDrawer
+                report={viewReport}
+                open={viewOpen}
+                onClose={() => setViewOpen(false)}
+            />
+
             <ReportsFilter
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
@@ -73,6 +82,8 @@ export default function SuperAdminReports() {
 
             <ReportTable
                 reports={reports}
+                setViewReport={setViewReport}
+                setViewOpen={setViewOpen}
                 setPage={setPage}
                 columnFilters={columnFilters}
                 setColumnFilters={setColumnFilters}

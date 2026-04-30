@@ -90,9 +90,10 @@ export default function SuperAdminManageUser() {
                 setEditWho={setEditUser}
                 setEditOpen={setEditOpen}
                 searchInput={searchInput}
-                setSearchInput={setSearchInput}
+                setSearchInput={handleSearchChange}
                 handleClear={handleClear}
                 buttonText={'Add User'}
+                placeholder={'"Search user by name/email..."'}
             />
 
             {/* <UsersFilter

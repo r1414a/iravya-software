@@ -1,6 +1,6 @@
-import { useState } from "react"
 import { DataTable } from "./trucks-table/data-table"
 import { columns } from "./trucks-table/columns"
+import { useMemo } from "react"
 
 const trucks = [
     {

@@ -84,8 +84,8 @@ export const columns = [
             const { name, address } = row.original
             return (
                 <div className="-space-y-0.5">
-                    <p className="font-semibold text-sm">{name}</p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-56 text-wrap">
+                    <p className="font-semibold text-sm capitalize">{name}</p>
+                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-72 text-wrap">
                         <MapPin size={10} className="shrink-0" />
                         {address}
                     </p>

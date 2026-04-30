@@ -107,3 +107,9 @@ export const REPORTING_ISSUES = {
         label: "Other"
     },
 }
+
+export const TRUCK_TYPES = {
+    mini_truck: "Mini",
+    medium: "Medium",
+    heavy: "Heavy",
+}

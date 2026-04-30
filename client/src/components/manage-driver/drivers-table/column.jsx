@@ -15,9 +15,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FieldLabel } from "@/components/ui/field"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
-import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { format, parseISO } from "date-fns"
 import { useDeleteDriverMutation } from "@/lib/features/drivers/driverApi"
+import { getNameInitials } from "@/lib/utils/helperFunctions"
 
 // Colour map for avatar initials — same ua-* palette as users
 
@@ -211,7 +211,7 @@ export const columns = [
             return (
                 <div className="-space-y-0.5">
                     <p className="text-sm font-mono">{row.original.licence_no}</p>
-                    <p className="text-xs text-gray-400">{licence_class} · Exp {licence_expiry ? format(parseISO(licence_expiry), 'MMM yyyy') : "-"}</p>
+                    <p className="text-xs text-gray-400">{licence_class} · {licence_expiry ? `Exp - ${format(parseISO(licence_expiry), 'MMM yyyy')}` : "-"}</p>
                 </div>
             )
         },

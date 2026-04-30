@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import {lazy} from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROLES } from "./constants/constant";
+import PublicRoute from "./PublicRoute";
 
 const Auth = lazy(() => import("./pages/auth/Auth"))
 
@@ -33,8 +34,8 @@ const SuperAdminManageBrands = lazy(() => import("./pages/super-admin/manage-bra
 
 const TrackTrip = lazy(() => import("./pages/track-trip/TrackTrip"))
 
-
-const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
+const Analytics = lazy(() => import("@/pages/super-admin/analytics/Analytics"));
+// const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
 
 
 
@@ -44,15 +45,20 @@ const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
 const router = createBrowserRouter([
     //Auth Routes
     {
-        path: "/",
-        element: <AuthLayout />,
-        children: [
-            {
-                index: true,
-                element: <Auth />
-            }
-        ]
-    },
+  element: <PublicRoute />,   // 👈 IMPORTANT
+  children: [
+    {
+      path: "/",
+      element: <AuthLayout />,
+      children: [
+        {
+          index: true,
+          element: <Auth />
+        }
+      ]
+    }
+  ]
+},
 
     //Admin Routes
     {
@@ -109,6 +115,10 @@ const router = createBrowserRouter([
                     {
                         path: "manage-brands",
                         element: <SuperAdminManageBrands />
+                    },
+                    {
+                        path: "analytics",
+                        element: <Analytics/>
                     }
 
 
@@ -149,6 +159,14 @@ const router = createBrowserRouter([
                     {
                         path: 'manage-stores',
                         element: <DCManageStores />
+                    },
+                    {
+                        path: "reports",
+                        element: <SuperAdminReports />
+                    },
+                     {
+                        path: "analytics",
+                        element: <Analytics/>
                     }
                 ]
             }
@@ -157,21 +175,22 @@ const router = createBrowserRouter([
 
     },
     //Driver Route
-    {
-        path: "/driver",
-        element: <DriverDashboard/>
-    },
+    // {
+    //     path: "/driver",
+    //     element: <DriverDashboard/>
+    // },
 
     //Tracking Public Route
     {
         path: '/track',
-        element: <AdminLayout />,
-        children: [
-            {
-                index: true,
-                element: <TrackTrip />
-            },
-        ]
+        element: <TrackTrip />
+        // element: <AdminLayout />,
+        // children: [
+        //     {
+        //         index: true,
+        //         element: <TrackTrip />
+        //     },
+        // ]
     }
 ])
 

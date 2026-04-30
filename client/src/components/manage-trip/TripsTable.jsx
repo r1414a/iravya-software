@@ -1,5 +1,6 @@
 import { DataTable } from "./trips-table/data-table"
 import { columns } from "./trips-table/columns"
+import { useMemo } from "react"
 
 // const trips = [
 //     {

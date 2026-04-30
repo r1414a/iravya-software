@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
+import { Eye } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -36,22 +36,38 @@ const reporterStyles = {
 }
 
 // 🔧 Actions
-function ActionsCell({ row }) {
-    const issue = row.original
+function ActionsCell({ row, table }) {
+    const issue = row.original;
+    const { setViewReport, setViewOpen } = table.options.meta || {};
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal size={16} />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border shadow-md w-36">
-                <DropdownMenuItem className="text-sm cursor-pointer">
-                    View details
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+
+        <div className="flex items-center gap-2 justify-end">
+            <Button
+                variant="outline"
+                size="xs"
+                onClick={() => {
+                    setViewReport?.(issue)
+                    setViewOpen?.(true)
+                }}
+                className="hover:bg-maroon cursor-pointer text-blue-800 hover:text-white"
+            >
+                <Eye size={16} />
+            </Button>
+        </div>
+
+        // <DropdownMenu>
+        //     <DropdownMenuTrigger asChild>
+        //         <Button variant="ghost" size="icon" className="h-8 w-8">
+        //             <MoreHorizontal size={16} />
+        //         </Button>
+        //     </DropdownMenuTrigger>
+        //     <DropdownMenuContent align="end" className="bg-white border shadow-md w-36">
+        //         <DropdownMenuItem className="text-sm cursor-pointer">
+        //             View details
+        //         </DropdownMenuItem>
+        //     </DropdownMenuContent>
+        // </DropdownMenu>
     )
 }
 
@@ -99,7 +115,7 @@ export const columns = [
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    
+
                 </div>
             )
         },
@@ -128,7 +144,7 @@ export const columns = [
                 <div className="flex items-center gap-2">
                     <span>Reported By</span>
 
-                  
+
                 </div>
             )
         },
@@ -208,7 +224,7 @@ export const columns = [
 
             return (
                 <span className="text-sm text-gray-500">
-                     {/* <p className="text-sm">{formatDistanceToNow(parseISO(last_trip), { addSuffix: true })}</p> */}
+                    {/* <p className="text-sm">{formatDistanceToNow(parseISO(last_trip), { addSuffix: true })}</p> */}
                     {created_at
                         ? formatDistanceToNow(parseISO(created_at), { addSuffix: true })
                         : "-"}
@@ -220,6 +236,6 @@ export const columns = [
     // 🚀 Actions
     {
         id: "actions",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
     },
 ]

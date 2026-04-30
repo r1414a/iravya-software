@@ -43,8 +43,7 @@ import { addressV, cityV, emailV, fullNameV, phoneV } from "@/validations/valida
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 import AssignManagerSelect from "./AssignManagerSelect"
-import { getCoordinatesFromAddress } from "@/lib/utils/getCoordinatesFromAddress"
-
+import { getCoordinatesFromAddress } from "@/lib/utils/helperFunctions"
 
 const dcSchema = z.object({
     name: z.string().min(2, "DC name must be at least 2 characters").max(100, "DC name is too long"),

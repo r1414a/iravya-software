@@ -25,6 +25,7 @@ import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
 import { useDeleteTruckMutation } from "@/lib/features/trucks/truckApi"
 import { format, formatDistanceToNow, parseISO } from "date-fns"
+import { TRUCK_TYPES } from "@/constants/constant"
 
 // Truck type icon colours — a small coloured square instead of avatar initials
 // const typeColors = {
@@ -33,11 +34,6 @@ import { format, formatDistanceToNow, parseISO } from "date-fns"
 //     heavy: "bg-purple-100 text-purple-700",
 // }
 
-const typeLabels = {
-    mini_truck: "Mini",
-    medium: "Medium",
-    heavy: "Heavy",
-}
 
 // Status badge styles matching the three truck states
 const statusStyles = {
@@ -58,15 +54,15 @@ function ActionsCell({ row, table }) {
     // const [openDispatch, setOpenDispatch] = useState(false)
     const location = useLocation();
 
-    const { 
-        setEditTruck, 
-        setEditOpen, 
+    const {
+        setEditTruck,
+        setEditOpen,
         setTruckHistory,
         setTruckHistoryOpen,
-        setCurrentTrip, 
+        setCurrentTrip,
         setCurrentTripOpen,
         setDispatchTruck,
-    setDispatchTruckOpen, 
+        setDispatchTruckOpen,
     } = table.options.meta || {}
 
     const [deleteTruck, { isLoading: isDeleting }] = useDeleteTruckMutation();
@@ -76,7 +72,7 @@ function ActionsCell({ row, table }) {
             await deleteTruck(truck.id).unwrap();
         } catch (err) {
             console.error("Failed to delete truck", err);
-            
+
         }
     };
 
@@ -143,21 +139,21 @@ function ActionsCell({ row, table }) {
                     </Button>
                 )}
 
-               
-                            <Button variant="outline" size="xs" 
-                            onClick={() => {
-                                    setEditTruck?.(truck)
-                                    setEditOpen?.(true)
-                                }} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
 
-                                 {
+                <Button variant="outline" size="xs"
+                    onClick={() => {
+                        setEditTruck?.(truck)
+                        setEditOpen?.(true)
+                    }} className="hover:bg-maroon cursor-pointer hover:text-white"><Pencil size={16} /></Button>
+
+                {
                     location.pathname.startsWith('/admin') && (
-                            <DeleteModal
-                                who={truck.registration_no}
-                                m1active="Truck will not be assignable to any trip"
-                                onConfirm={handleDelete}
-                                isLoading={isDeleting}
-                            />
+                        <DeleteModal
+                            who={truck.registration_no}
+                            m1active="Truck will not be assignable to any trip"
+                            onConfirm={handleDelete}
+                            isLoading={isDeleting}
+                        />
                     )
                 }
 
@@ -170,20 +166,20 @@ function ActionsCell({ row, table }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-white border shadow-md w-46">
                         {truck.status === "in_transit" && (
-                            <DropdownMenuItem 
-                            onClick={() => {
-                                        setCurrentTrip(truck)
-                                        setCurrentTripOpen?.(true)
-                                    }} 
-                                    className="gap-2 text-sm cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setCurrentTrip(truck)
+                                    setCurrentTripOpen?.(true)
+                                }}
+                                className="gap-2 text-sm cursor-pointer">
                                 <Road size={14} /> View trip details
                             </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem 
-                        onClick={() => {
+                        <DropdownMenuItem
+                            onClick={() => {
                                 setTruckHistory?.(truck)
                                 setTruckHistoryOpen?.(true)
-                            }}className="gap-2 text-sm cursor-pointer">
+                            }} className="gap-2 text-sm cursor-pointer">
                             <History size={14} /> View trip history
                         </DropdownMenuItem>
                         {/* <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
@@ -249,7 +245,7 @@ export const columns = [
             return (
                 <div className="flex items-center gap-3">
                     <div className={`rounded-lg flex items-center justify-center text-xs font-bold p-1 bg-gold text-maroon`}>
-                        {typeLabels[type]}
+                        {TRUCK_TYPES[type]}
                     </div>
                     <div className="-space-y-0.5">
                         <p className="font-semibold text-sm font-mono">{registration_no}</p>
@@ -345,21 +341,21 @@ export const columns = [
         accessorKey: "lastTrip",
         header: "Last trip",
         cell: ({ row }) => {
-            const {last_trip} = row.original
-            if(!last_trip){
-                return(
+            const { last_trip } = row.original
+            if (!last_trip) {
+                return (
                     <span className="text-sm mx-auto text-gray-400">-</span>
                 )
             }
 
-            return(
-            <div className="-space-y-0.5">
-                <p className="text-sm">{formatDistanceToNow(parseISO(last_trip), { addSuffix: true })}</p>
-                <p className="text-xs text-gray-400">{format(parseISO(last_trip), 'MMM dd, hh:mm a')}</p>
-                
-            </div>
-        )
-    },
+            return (
+                <div className="-space-y-0.5">
+                    <p className="text-sm">{formatDistanceToNow(parseISO(last_trip), { addSuffix: true })}</p>
+                    <p className="text-xs text-gray-400">{format(parseISO(last_trip), 'MMM dd, hh:mm a')}</p>
+
+                </div>
+            )
+        },
     },
     // Status badge
     {
@@ -425,6 +421,6 @@ export const columns = [
     // Actions — idle trucks get a "Dispatch now" quick button; others get the 3-dot menu only
     {
         id: "actions",
-        cell: ({ row, table }) => <ActionsCell row={row} table={table}/>,
+        cell: ({ row, table }) => <ActionsCell row={row} table={table} />,
     },
 ]

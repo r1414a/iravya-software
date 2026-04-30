@@ -1,6 +1,6 @@
 import { columns } from "./alert-table/columns"
 import { DataTable } from "./alert-table/data-table"
- 
+
 const alerts = [
     {
         id: "ALT-1001",
@@ -101,17 +101,35 @@ const alerts = [
         isRead: true,
     },
 ]
- 
-export default function AlertsTable() {
+
+export default function AlertsTable({
+    // alerts,
+    setPage,
+    columnFilters,
+    setColumnFilters,
+    totalPages,
+    page,
+    onPrevious,
+    onNext,
+    isFetching
+}) {
     // const [selectedAlert, setSelectedAlert] = useState(null)
- 
+
     return (
         <section className="my-6 px-4 lg:px-10">
             <div className="border rounded-lg">
                 <DataTable
                     columns={columns}
                     data={alerts}
-                    // onRowClick={(row) => setSelectedAlert(row)}
+                    // meta={meta}
+                    setPage={setPage}
+                    columnFilters={columnFilters}
+                    setColumnFilters={setColumnFilters}
+                    totalPages={totalPages}
+                    page={page}
+                    onPrevious={onPrevious}
+                    onNext={onNext}
+                    isFetching={isFetching}
                 />
             </div>
 

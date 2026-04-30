@@ -3,32 +3,39 @@ import {
     InputGroupAddon,
     InputGroupInput,
 } from "@/components/ui/input-group"
-import { Search } from "lucide-react"
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+
  
-export default function AlertsFilter() {
+export default function AlertsFilter({
+    searchInput,
+    setSearchInput,
+    handleClear,
+}) {
     const [activeRead, setActiveRead] = useState("All")
  
     return (
         <section className="mt-6 px-4 lg:px-10">
             <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center sm:justify-between">
- 
-               
-                    <InputGroup>
-                        <InputGroupInput placeholder="Search truck, driver, trip ID..." className="placeholder:text-xs lg:placeholder:text-sm"/>
+                    <InputGroup className="max-w-96">
+                        <InputGroupInput 
+                        value={searchInput}
+                            onChange={e => setSearchInput(e.target.value)}
+                            placeholder="Search truck, driver, trip ID..." className="placeholder:text-xs lg:placeholder:text-sm"
+                        />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
+
+                        {searchInput && (
+                            <button
+                                onClick={handleClear}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
                     </InputGroup>
  
                 {/* Right — read/unread tabs, same pattern as UsersFilter All/Active/Inactive */}

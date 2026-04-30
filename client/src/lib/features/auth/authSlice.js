@@ -4,6 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     user: null,
     isAuthenticated: false,
+    isAuthChecked: false,
     loading: true,
     notifications: SUPER_ADMIN_NOTIFICATIONS,
     platformSettings: SUPER_ADMIN_PLATFORMSETTINGS
@@ -16,12 +17,14 @@ const authSlice = createSlice({
         setUser: (state, action) => {
             state.user = action.payload;
             state.isAuthenticated = true;
+            state.isAuthChecked = true;
             state.loading = false
         },
         clearUser: (state) => {
             state.user = null;
             state.isAuthenticated = false;
-            state.loading = false
+            state.loading = false;
+            state.isAuthChecked = true;
         },
         updateUserProfile: (state, action) => {
             if (state.user) {

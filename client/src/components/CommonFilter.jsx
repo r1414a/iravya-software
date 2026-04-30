@@ -12,7 +12,8 @@ export default function CommonFilter({
     searchInput,
     setSearchInput,
     handleClear,
-    buttonText
+    buttonText,
+    placeholder
 }) {
     return (
         <section className="mt-6 px-4 lg:px-10">
@@ -22,7 +23,7 @@ export default function CommonFilter({
                         <InputGroupInput
                             value={searchInput}
                             onChange={e => setSearchInput(e.target.value)}
-                            placeholder="Search user by name/email..." className="placeholder:text-sm" />
+                            placeholder={placeholder} className="placeholder:text-sm" />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>

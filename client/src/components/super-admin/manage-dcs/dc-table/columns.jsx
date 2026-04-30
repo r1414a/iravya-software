@@ -23,7 +23,6 @@ const STATUS_STYLES = {
 
 function ActionsCell({ row, table }) {
     const dc = row.original
-    const [viewDetails, setViewDetails] = useState(false)
     const { setEditDc, setEditOpen, setViewDc, setViewOpen } = table.options.meta || {}
 
     const [deleteDC, { isLoading: isDeleting }] = useDeleteDcMutation()
@@ -84,8 +83,8 @@ export const columns = [
             const { dc_name, address } = row.original
             return (
                 <div className="-space-y-0.5">
-                    <p className="font-semibold text-sm">{dc_name}</p>
-                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-64 text-wrap">
+                    <p className="font-semibold text-sm capitalize">{dc_name}</p>
+                    <p className="text-xs text-gray-400 flex items-center gap-1 max-w-96 text-wrap">
                         <MapPin size={10} className="shrink-0" /> {address}
                     </p>
                 </div>

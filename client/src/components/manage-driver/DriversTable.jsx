@@ -1,6 +1,6 @@
+import { useMemo } from "react"
 import { columns } from "./drivers-table/column"
 import { DataTable } from "./drivers-table/data-table"
-
 
 const drivers = [
     {

@@ -48,9 +48,9 @@ export default function DCDetailDrawer({ dc, open, onClose }) {
                 <SheetHeader className="p-4 border-b">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div className="min-w-0">
-                            <SheetTitle className="text-base sm:text-lg lg:text-xl font-bold truncate">{dc.dc_name}</SheetTitle>
+                            <SheetTitle className="text-base sm:text-lg lg:text-xl font-bold truncate capitalize">{dc.dc_name}</SheetTitle>
                             <p className="text-xs sm:text-sm text-gray-500 mt-0.5 flex items-center gap-1 flex-wrap">
-                                <MapPin size={12} /> {dc.city} · {dc.brand}
+                                <MapPin size={12} /> {dc.city}
                             </p>
                         </div>
                         <Badge className={`${statusStyles[dc.status]} border-0 text-xs font-medium sm:mt-6 w-fit`}>

@@ -5,9 +5,9 @@ import { sendEmail } from "../utils/mailer.js"
 import asyncHandler from "../utils/asyncHandler.js"
 
 const getUserDataService = async ({ page, limit, search }) => {
-  const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-  const users = await sql`
+    const users = await sql`
     SELECT 
         u.id,
         u.first_name,
@@ -31,16 +31,16 @@ const getUserDataService = async ({ page, limit, search }) => {
         OFFSET ${offset}
     `;
 
-  return {
-    users,
-    total: users[0]?.total_count || 0,
-    page,
-    limit,
-  };
+    return {
+        users,
+        total: users[0]?.total_count || 0,
+        page,
+        limit,
+    };
 };
-const addDcService = async(data) =>{
-    const {name, address, city, state, dc_manager,latitude, longitude} = data
-    
+const addDcService = async (data) => {
+    const { name, address, city, state, dc_manager, latitude, longitude } = data
+
     // const name_= contact_name.split(" ")
     // const [newUser] = await sql`
     //     INSERT INTO "User"
@@ -55,7 +55,7 @@ const addDcService = async(data) =>{
     //     )
     //     VALUES
     //     (
-        
+
     //         ${name_[0]},
     //         ${name_[1]},
     //         ${"dc_manager"},
@@ -71,9 +71,9 @@ const addDcService = async(data) =>{
     //         "phone_number"
     //         "role",
     //         "user_status"
-            
+
     // `;
-    
+
     const dc = await sql`
         INSERT INTO "Distribution_center"
 (
@@ -99,7 +99,7 @@ const addDcService = async(data) =>{
     return dc
 }
 
-const dcByNameExist = async(name)=>{
+const dcByNameExist = async (name) => {
     const dc = (await sql`
         SELECT * from "Distribution_center"
         WHERE "name" = ${name}
@@ -109,7 +109,7 @@ const dcByNameExist = async(name)=>{
     return dc
 }
 
-const getDcByIdService = async(id)=>{
+const getDcByIdService = async (id) => {
     const dc = (await sql`
         SELECT * from "Distribution_center"
         WHERE "id" = ${id}
@@ -119,8 +119,8 @@ const getDcByIdService = async(id)=>{
     return dc
 }
 
-const updateDcService = async(id, data) =>{
-    const {name, address, city, dc_manager, status, latitude, longitude} = data
+const updateDcService = async (id, data) => {
+    const { name, address, city, dc_manager, status, latitude, longitude } = data
     const dc = (await sql`
             UPDATE "Distribution_center"
             SET 
@@ -135,23 +135,23 @@ const updateDcService = async(id, data) =>{
             RETURNING *
         `)
 
-        // const name_ = contact_name?.split(" ") || [];
-        // await sql`
-        //     UPDATE "User"
-        //     SET
-        //         "first_name" = COALESCE(${name_[0]}, "first_name"),
-        //         "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
-        //         "email" = COALESCE(${contact_email}, "email"),
-        //         "phone_number" = COALESCE(${contact_phone}, "phone_number")
-        //     WHERE "id" = (
-        //         SELECT "dc_manager"
-        //         FROM "Distribution_center"
-        //         WHERE "id" = ${id}
-        //     )
-        //     `;
-console.log("updatedc", dc);
+    // const name_ = contact_name?.split(" ") || [];
+    // await sql`
+    //     UPDATE "User"
+    //     SET
+    //         "first_name" = COALESCE(${name_[0]}, "first_name"),
+    //         "last_name" = COALESCE(${name_[1] || ""}, "last_name"),
+    //         "email" = COALESCE(${contact_email}, "email"),
+    //         "phone_number" = COALESCE(${contact_phone}, "phone_number")
+    //     WHERE "id" = (
+    //         SELECT "dc_manager"
+    //         FROM "Distribution_center"
+    //         WHERE "id" = ${id}
+    //     )
+    //     `;
+    console.log("updatedc", dc);
 
-        return dc
+    return dc
 }
 
 const deleteDcService = async (id) => {
@@ -164,7 +164,7 @@ const deleteDcService = async (id) => {
     return dc
 }
 
-const getAllDcService = async(page, limit, search, dc_status)=>{
+const getAllDcService = async (page, limit, search, dc_status) => {
     const offset = (page - 1) * limit;
     const dc = await sql`
 
@@ -209,6 +209,9 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
         AND (
             dc.name ILIKE ${'%' + search + '%'}
             OR dc.city ILIKE ${'%' + search + '%'}
+            OR u.first_name ILIKE ${'%' + search + '%'}
+    OR u.last_name ILIKE ${'%' + search + '%'}
+    OR CONCAT(u.first_name, ' ', u.last_name) ILIKE ${'%' + search + '%'}
         )
         ` : sql``}
 
@@ -226,15 +229,15 @@ const getAllDcService = async(page, limit, search, dc_status)=>{
 
         `
 
-        const total = dc.length ? Number(dc[0].total_count) : 0
+    const total = dc.length ? Number(dc[0].total_count) : 0
 
-        return {
-            data: dc,
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit)
-        }
+    return {
+        data: dc,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+    }
 }
 
 export {

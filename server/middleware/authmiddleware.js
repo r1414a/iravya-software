@@ -20,7 +20,7 @@ const protect = asyncHandler(async (req, res, next) => {
   
   // PostgreSQL Query instead of User.findById
   const users = await sql`
-        SELECT "id", "first_name", "last_name", "last_login", "user_status",  "email", "created_at", "role","updated_at" 
+        SELECT "id", "first_name", "last_name", "last_login", "phone_number", "user_status",  "email", "created_at", "role","updated_at" 
         FROM "User" 
         WHERE "id" = ${decoded.id}
       `;

@@ -8,14 +8,18 @@ import { Provider } from 'react-redux';
 import { store } from './lib/store';
 import { Toaster } from 'sonner';
 import LoadingSpinner from './components/LoadingSpinner';
+// import AuthLayout from './layouts/AuthLayout';
+import AuthLoader from './AuthLoader';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-        <Toaster position="top-right" />
-        <Suspense fallback={<LoadingSpinner/>}>
+      <Toaster position="top-center" />
+      <Suspense fallback={<LoadingSpinner />}>
+        <AuthLoader>
         <RouterProvider router={router} />
-        </Suspense>
+        </AuthLoader>
+      </Suspense>
     </Provider>
   </StrictMode>,
 )

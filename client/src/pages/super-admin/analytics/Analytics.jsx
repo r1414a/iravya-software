@@ -1,0 +1,618 @@
+// pages/superadmin/Analytics.jsx
+// ─────────────────────────────────────────────────────────────────────────────
+// Super admin analytics page
+// • All Tailwind CSS — no custom CSS
+// • Recharts for all charts
+// • Same UI patterns as manage pages: maroon, slate cards, AdminSubHeader
+// • Fully self-contained with mock data (swap for RTK hooks when ready)
+// • Components: StatCard, SectionTitle, ChartCard, TripStatusBadge
+// ─────────────────────────────────────────────────────────────────────────────
+
+import {
+    ResponsiveContainer,
+    AreaChart, Area,
+    BarChart, Bar,
+    XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+} from "recharts"
+import AdminSubHeader from "@/components/AdminSubHeader"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { useState } from "react"
+import {
+    Truck, Users, MapPin, Route,
+    TrendingUp, TrendingDown, Minus, Clock, CheckCircle2,
+} from "lucide-react"
+import { useGetCountDataQuery, useGetGraphDataQuery } from "@/lib/features/analytics/analyticApi"
+import { getDatesInMonth, getLast5Years, getStatsDataInFormat } from "@/lib/utils/helperFunctions"
+import LoadingSpinner from "@/components/LoadingSpinner"
+
+// ── Colour palette (consistent with your maroon theme) ───────────────────────
+const C = {
+    maroon: "#701a40",
+    sky: "#0ea5e9",
+    green: "#16a34a",
+    amber: "#d97706",
+    red: "#dc2626",
+    violet: "#7c3aed",
+    teal: "#0f766e",
+    slate: "#64748b",
+    cyan: "#0e7490",
+}
+
+// ── Mock data — replace with useGetAnalyticsQuery() when ready ────────────────
+const TRIPS_WEEKLY = [
+    { day: "Mon", completed: 18, cancelled: 2, scheduled: 5 },
+    { day: "Tue", completed: 24, cancelled: 1, scheduled: 8 },
+    { day: "Wed", completed: 21, cancelled: 3, scheduled: 6 },
+    { day: "Thu", completed: 29, cancelled: 0, scheduled: 9 },
+    { day: "Fri", completed: 32, cancelled: 2, scheduled: 11 },
+    { day: "Sat", completed: 27, cancelled: 1, scheduled: 7 },
+    { day: "Sun", completed: 14, cancelled: 0, scheduled: 3 },
+]
+
+const TRIPS_MONTHLY = [
+    { month: "Jul", completed: 312, cancelled: 18, scheduled: 44 },
+    { month: "Aug", completed: 341, cancelled: 22, scheduled: 51 },
+    { month: "Sep", completed: 298, cancelled: 15, scheduled: 39 },
+    { month: "Oct", completed: 387, cancelled: 27, scheduled: 63 },
+    { month: "Nov", completed: 421, cancelled: 19, scheduled: 58 },
+    { month: "Dec", completed: 358, cancelled: 24, scheduled: 47 },
+    { month: "Jan", completed: 445, cancelled: 21, scheduled: 72 },
+]
+
+const ALERT_TYPES = [
+    { name: "Speeding", value: 84, color: C.red },
+    { name: "Long stop", value: 61, color: C.amber },
+    { name: "Route deviation", value: 47, color: C.violet },
+    { name: "Geofence enter", value: 112, color: C.green },
+    { name: "Device offline", value: 23, color: C.slate },
+    { name: "Low battery", value: 38, color: C.cyan },
+]
+
+
+const DELIVERY_RATE_TREND = [
+    { week: "W1", rate: 91 }, { week: "W2", rate: 94 },
+    { week: "W3", rate: 89 }, { week: "W4", rate: 96 },
+    { week: "W5", rate: 93 }, { week: "W6", rate: 97 },
+    { week: "W7", rate: 95 }, { week: "W8", rate: 98 },
+]
+
+const DELIVERY_RATE_MONTHLY = [
+    { month: "Jun", rate: 92 },
+    { month: "Jul", rate: 94 },
+    { month: "Aug", rate: 91 },
+    { month: "Sep", rate: 95 },
+    { month: "Oct", rate: 96 },
+    { month: "Nov", rate: 93 },
+    { month: "Dec", rate: 97 },
+    { month: "Jan", rate: 98 },
+]
+
+const DC_ACTIVITY = [
+    { dc: "Pune DC", dispatched: 124, completed: 119 },
+    { dc: "Mumbai DC", dispatched: 87, completed: 84 },
+    { dc: "Nashik DC", dispatched: 163, completed: 154 },
+    { dc: "Kolhapur DC", dispatched: 71, completed: 68 },
+    { dc: "Nagpur DC", dispatched: 58, completed: 57 },
+    { dc: "Amravati DC", dispatched: 76, completed: 71 },
+]
+
+const TOP_STORES = [
+    { store: "Westside Phoenix", deliveries: 64, brand: "Westside" },
+    { store: "Zudio Koregaon Park", deliveries: 58, brand: "Zudio" },
+    { store: "Zudio Baner", deliveries: 51, brand: "Zudio" },
+    { store: "Cliq Viviana Mall", deliveries: 47, brand: "Tata Cliq" },
+    { store: "Tanishq KP", deliveries: 41, brand: "Tanishq" },
+    { store: "Westside Amanora", deliveries: 39, brand: "Westside" },
+]
+
+// ── Summary KPIs ─────────────────────────────────────────────────────────────
+const STATS = [
+    { label: "Total trips", value: "1,469", sub: "+12% vs last month", trend: "up", icon: Route, color: "border-t-slate-800", iconBg: "bg-slate-700" },
+    { label: "Active right now", value: "4", sub: "trucks in transit", trend: "flat", icon: Truck, color: "border-t-sky-700", iconBg: "bg-sky-600" },
+    { label: "Delivery rate", value: "96.4%", sub: "+2.1% vs last month", trend: "up", icon: CheckCircle2, color: "border-t-green-700", iconBg: "bg-green-600" },
+    { label: "Avg trip time", value: "2h 18m", sub: "-4min vs last month", trend: "up", icon: Clock, color: "border-t-violet-700", iconBg: "bg-violet-600" },
+    // { label: "Open alerts",       value: "7",     sub: "3 high severity",    trend: "down", icon: AlertTriangle, color: "bg-red-800",    iconBg: "bg-red-700"    },
+    { label: "Active drivers", value: "10", sub: "3 on trip today", trend: "flat", icon: Users, color: "border-t-amber-700", iconBg: "bg-amber-600" },
+    // { label: "GPS devices", value: "8", sub: "4 online, 4 at DC", trend: "flat", icon: LocateFixed, color: "border-t-teal-700", iconBg: "bg-teal-600" },
+    { label: "Stores served", value: "12", sub: "across 4 brands", trend: "flat", icon: MapPin, color: "border-t-cyan-700", iconBg: "bg-cyan-600" },
+]
+
+// ── Reusable components ───────────────────────────────────────────────────────
+function StatCard({ label, value, sub, trend, icon: Icon, color, iconBg }) {
+
+    const TrendIcon = trend === "increase" ? TrendingUp : trend === "decrease" ? TrendingDown : Minus
+    const trendColor = trend === "increase"
+        ? "text-green-800"
+        : trend === "decrease"
+            ? "text-red-800"
+            : "text-slate-800"
+
+    return (
+        <div className={`border-3 ${color} rounded-2xl p-4 flex items-start gap-3 shadow-sm`}>
+            <div className={`${iconBg} w-11 h-11 rounded-xl flex items-center justify-center shrink-0`}>
+                <Icon size={20} color="white" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-black/60 text-xs font-medium uppercase tracking-wider">{label}</p>
+                <p className="text-black text-2xl font-bold mt-0.5 leading-tight">{value}</p>
+                <div className={`flex items-center gap-1 mt-1 ${trendColor}`}>
+                    <TrendIcon size={11} />
+                    <p className="text-sm leading-none">{sub}</p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function SectionTitle({ children, action }) {
+    return (
+        <div className="flex items-center justify-between mb-3">
+            <div>
+                {/* <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
+                    Analytics
+                </p> */}
+                <h2 className="text-lg font-semibold text-slate-700">{children}</h2>
+            </div>
+            {action}
+        </div>
+    )
+}
+
+function ChartCard({ title, subtitle, children, className = "" }) {
+    return (
+        <div className={`bg-white border border-slate-200 rounded-2xl p-5 shadow-sm ${className}`}>
+            <div className="mb-4">
+                <p className="text-sm font-bold text-slate-800">{title}</p>
+                {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+            </div>
+            {children}
+        </div>
+    )
+}
+
+const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null
+    return (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-3 text-xs">
+            <p className="font-semibold text-slate-700 mb-1.5">{label}</p>
+            {payload.map((entry, i) => (
+                <div key={i} className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ background: entry.color }} />
+                    <span className="text-slate-500">{entry.name}:</span>
+                    <span className="font-semibold text-slate-800">{entry.value}</span>
+                </div>
+            ))}
+        </div>
+    )
+}
+
+function FilterControls({ filters, setFilters }) {
+    const years = getLast5Years();
+    const months = [
+        { label: "Jan", value: 1 },
+        { label: "Feb", value: 2 },
+        { label: "Mar", value: 3 },
+        { label: "Apr", value: 4 },
+        { label: "May", value: 5 },
+        { label: "Jun", value: 6 },
+        { label: "Jul", value: 7 },
+        { label: "Aug", value: 8 },
+        { label: "Sep", value: 9 },
+        { label: "Oct", value: 10 },
+        { label: "Nov", value: 11 },
+        { label: "Dec", value: 12 },
+    ];
+
+    const dates = getDatesInMonth(filters.year, filters.month)
+
+    return (
+        // // <div className="flex gap-2">
+
+        //     {/* Year 
+        //     {/* <Select
+        //         value={String(filters.year)}
+        //         onValueChange={(val) =>
+        //             setFilters((prev) => ({
+        //                 ...prev,
+        //                 year: Number(val),
+        //                 date: "",
+        //             }))
+        //         }
+        //     >
+        //         <SelectTrigger className="w-[90px] h-8 text-xs">
+        //             <SelectValue placeholder="Year" />
+        //         </SelectTrigger>
+        //         <SelectContent>
+        //             {years.map((y) => (
+        //                 <SelectItem key={y} value={String(y)}>
+        //                     {y}
+        //                 </SelectItem>
+        //             ))}
+        //         </SelectContent>
+        //     </Select> */}
+
+        //     {/* Month */}
+        //     {/* <Select
+        //         value={filters.month ? String(filters.month) : "all"}
+        //         onValueChange={(val) =>
+        //             setFilters((prev) => ({
+        //                 ...prev,
+        //                 month: val === "all" ? "" : Number(val),
+        //                 date: "",
+        //             }))
+        //         }
+        //     >
+        //         <SelectTrigger className="w-[110px] h-8 text-xs">
+        //             <SelectValue placeholder="Month" />
+        //         </SelectTrigger>
+        //         <SelectContent>
+        //             <SelectItem value="all">All months</SelectItem>
+        //             {months.map((m) => (
+        //                 <SelectItem key={m.value} value={m.value}>
+        //                     {m.label}
+        //                 </SelectItem>
+        //             ))}
+        //         </SelectContent>
+        //     </Select> */}
+
+        //     {/* Date */}
+        //     {/* <Select
+        //         value={filters.date || ""}
+        //         onValueChange={(val) =>
+        //             setFilters((prev) => ({
+        //                 ...prev,
+        //                 date: val,
+        //             }))
+        //         }
+        //         disabled={!filters.month}
+        //     >
+        //         <SelectTrigger className="w-[120px] h-8 text-xs">
+        //             <SelectValue placeholder="Date" />
+        //         </SelectTrigger>
+        //         <SelectContent>
+        //             <SelectItem value="">Select date</SelectItem>
+        //             {dates.map((d) => (
+        //                 <SelectItem key={d.value} value={d.value}>
+        //                     {d.label}
+        //                 </SelectItem>
+        //             ))}
+        //         </SelectContent>
+        //     </Select> */}
+
+        // // </div>
+
+        <div className="flex gap-2">
+
+            {/* Year */}
+            <select
+                value={filters.year}
+                onChange={(e) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        year: Number(e.target.value),
+                        date: "", // reset date
+                    }))
+                }
+                className="px-2 py-1 text-xs border rounded-md"
+            >
+                {years.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                ))}
+            </select>
+
+            {/* Month */}
+            <select
+                value={filters.month}
+                onChange={(e) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        month: Number(e.target.value),
+                        date: "", // reset date if month changes
+                    }))
+                }
+                className="px-2 py-1 text-xs border rounded-md"
+            >
+                <option value="">All months</option>
+                {months.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+            </select>
+
+            {/* Date dropdown */}
+            <select
+                value={filters.date}
+                disabled={!filters.month} // only enabled if month selected
+                onChange={(e) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                    }))
+                }
+                className="px-2 py-1 text-xs border rounded-md"
+            >
+                <option value="">Select date</option>
+                {dates.map((d) => (
+                    <option key={d.value} value={d.value}>
+                        {d.label}
+                    </option>
+                ))}
+            </select>
+
+        </div>
+    );
+}
+
+// ── Range toggle ──────────────────────────────────────────────────────────────
+function RangeToggle({ value, onChange }) {
+    return (
+        <div className="flex bg-slate-100 rounded-lg p-0.5">
+            {["Weekly", "Monthly"].map(opt => (
+                <button
+                    key={opt}
+                    onClick={() => onChange(opt)}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${value === opt
+                        ? "bg-white shadow-sm text-slate-800"
+                        : "text-slate-500 hover:text-slate-700"
+                        }`}
+                >
+                    {opt}
+                </button>
+            ))}
+        </div>
+    )
+}
+
+const getXAxisKey = (filters) => {
+    if (filters.date) return "hour";     // specific date → hourly data
+    if (filters.month) return "day";     // month selected → daily data
+    return "month";                      // only year → monthly data
+};
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+export default function Analytics() {
+    const [tripRange, setTripRange] = useState("Weekly");
+    const [filters, setFilters] = useState({
+        year: new Date().getFullYear(),
+        month: "",
+        date: "",
+    });
+    const { data: statsData, isLoading: loadingStats, error } = useGetCountDataQuery();
+    const { data: graphsData, isLoading: loadingGraphData } = useGetGraphDataQuery(filters, {
+        refetchOnMountOrArgChange: true,
+    });
+
+    const hasData = graphsData?.trip_by_status?.some(
+        (item) => item.scheduled > 0 || item.completed > 0 || item.cancelled > 0
+    );
+
+
+    if (loadingStats || loadingGraphData) {
+        return <LoadingSpinner />
+    }
+
+
+    const formattedStatsdata = getStatsDataInFormat(statsData?.data)
+    console.log(graphsData);
+
+    const xKey = getXAxisKey(filters);
+    const tripData = tripRange === "Weekly" ? TRIPS_WEEKLY : TRIPS_MONTHLY
+    const tripKey = tripRange === "Weekly" ? "day" : "month"
+    const deliveryRateData =
+        tripRange === "Weekly" ? DELIVERY_RATE_TREND : DELIVERY_RATE_MONTHLY
+
+    const deliveryKey = tripRange === "Weekly" ? "week" : "month"
+
+    return (
+        <section className="min-h-screen bg-slate-50">
+            <AdminSubHeader
+                to="/admin"
+                heading="Analytics"
+                subh="Fleet performance, delivery metrics and operational insights"
+                CreateButton={<></>}
+            />
+
+            <div className="px-4 lg:px-10 py-6 flex flex-col gap-8">
+
+                {/* ── KPI stat cards ──────────────────────────────────────── */}
+                <section>
+                    <SectionTitle>Platform overview</SectionTitle>
+                    <div className="flex flex-wrap gap-6 justify-center items-center">
+                        {formattedStatsdata.map((stat) => (
+                            <div key={stat.label} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-12px)] max-w-90">
+                                <StatCard {...stat} />
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* ── Trip volume + delivery rate ──────────────────────────── */}
+                <section>
+                    <SectionTitle
+                        action={<FilterControls filters={filters} setFilters={setFilters} />}
+                    >
+                        Trip volume & stores
+                    </SectionTitle>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                        {/* Stacked bar — trip volume */}
+                        <ChartCard
+                            title="Trips by status"
+                            subtitle={`${tripRange} breakdown`}
+                        // className="lg:col-span-2"
+                        >
+
+                            {!hasData ? (
+                                <div className="h-60 flex items-center justify-center text-slate-500 text-sm">
+                                    No trip data available for this period
+                                </div>
+                            ) : (
+                                <ResponsiveContainer width="100%" height={240}>
+                                    <BarChart data={graphsData["trip_by_status"]} barSize={tripRange === "Weekly" ? 28 : 20}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                        <XAxis
+                                            dataKey={xKey} //hour,month,day
+                                            tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                            interval={0}
+                                            angle={-30}
+                                            textAnchor="end"
+                                            height={50}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <YAxis
+                                            tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <Tooltip content={<CustomTooltip />} />
+                                        <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
+                                        <Bar dataKey="completed" name="Completed" stackId="a" fill={C.green} radius={[0, 0, 0, 0]} />
+                                        <Bar dataKey="scheduled" name="Scheduled" stackId="a" fill={C.sky} radius={[0, 0, 0, 0]} />
+                                        <Bar dataKey="cancelled" name="Cancelled" stackId="a" fill={C.red} radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            )}
+                        </ChartCard>
+
+                        {/* Top stores + store delivery bar */}
+                        <ChartCard title="Top stores by deliveries" subtitle="Most deliveries received — all time">
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={TOP_STORES} layout="vertical" barSize={14} margin={{ left: -25 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                                    <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                                    <YAxis
+                                        dataKey="store" type="category"
+                                        tick={{ fontSize: 10, fill: "#64748b" }}
+                                        axisLine={false} tickLine={false} width={160}
+                                        tickFormatter={(v) => (v.length > 25 ? v.slice(0, 22) + "…" : v)}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="deliveries" name="Deliveries" fill={C.teal} radius={[0, 4, 4, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+
+                        </ChartCard>
+
+                        {/* Delivery rate line */}
+                        {/* <ChartCard title="Delivery success rate" subtitle={tripRange === "Weekly" ? "8-week rolling trend" : "8-month trend"}>
+                            <ResponsiveContainer width="100%" height={240}>
+                                <AreaChart key={tripRange} data={deliveryRateData}>
+                                    <defs>
+                                        <linearGradient id="rateGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={C.green} stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor={C.green} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis dataKey={deliveryKey} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                                    <YAxis domain={[85, 100]} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} unit="%" />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area
+                                        type="monotone" dataKey="rate" name="Success rate"
+                                        stroke={C.green} strokeWidth={2.5}
+                                        fill="url(#rateGrad)" dot={{ r: 3, fill: C.green }}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                            <div className="mt-3 flex items-center justify-between px-1">
+                                <div>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Current rate</p>
+                                    <p className="text-xl font-bold text-green-700">98%</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">8-wk avg</p>
+                                    <p className="text-xl font-bold text-slate-700">94.1%</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Best week</p>
+                                    <p className="text-xl font-bold text-slate-700">98%</p>
+                                </div>
+                            </div>
+                        </ChartCard> */}
+                    </div>
+                </section>
+
+                {/* ── Brand breakdown + DC activity ────────────────────────── */}
+                <section>
+                    <SectionTitle>Distribution centers & alerts</SectionTitle>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                        {/* DC dispatched vs completed */}
+                        <ChartCard title="DC dispatch performance" subtitle="Trips dispatched vs completed per DC"
+                        // className="lg:col-span-2"
+                        >
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={DC_ACTIVITY} barGap={2} barSize={14}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis dataKey="dc" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
+                                    <Bar dataKey="dispatched" name="Dispatched" fill={C.sky} radius={[3, 3, 0, 0]} />
+                                    <Bar dataKey="completed" name="Completed" fill={C.green} radius={[3, 3, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+
+                            {/* Completion rate pills */}
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                {DC_ACTIVITY.map(dc => {
+                                    const rate = Math.round((dc.completed / dc.dispatched) * 100)
+                                    const color = rate >= 97 ? "bg-green-100 text-green-700"
+                                        : rate >= 93 ? "bg-amber-100 text-amber-700"
+                                            : "bg-red-100 text-red-700"
+                                    return (
+                                        <div key={dc.dc} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
+                                            <span>{dc.dc}</span>
+                                            <span className="font-bold">{rate}%</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </ChartCard>
+
+                        {/* Alert type breakdown */}
+                        <ChartCard title="Alert breakdown" subtitle="By type — last 30 days">
+                            <div className="flex flex-col gap-2.5">
+                                {ALERT_TYPES.map(a => {
+                                    const max = Math.max(...ALERT_TYPES.map(x => x.value))
+                                    const pct = Math.round((a.value / max) * 100)
+                                    return (
+                                        <div key={a.name}>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs text-slate-600">{a.name}</span>
+                                                <span className="text-xs font-bold text-slate-800">{a.value}</span>
+                                            </div>
+                                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-700"
+                                                    style={{ width: `${pct}%`, background: a.color }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <p className="text-xs text-slate-500">Total alerts</p>
+                                <p className="text-lg font-bold text-slate-800">
+                                    {ALERT_TYPES.reduce((s, a) => s + a.value, 0)}
+                                </p>
+                            </div>
+                        </ChartCard>
+
+
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    )
+}

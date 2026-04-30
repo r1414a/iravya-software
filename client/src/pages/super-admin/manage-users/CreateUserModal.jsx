@@ -35,8 +35,6 @@ import { emailV, firstNameV, lastNameV, passwordV, roleV } from "@/validations/v
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useCreateUserMutation, useUpdateUserMutation } from "@/lib/features/users/userApi"
-import { generateStrongPassword } from "@/lib/utils/generateStrongPassword"
-import { getPasswordStrength } from "@/lib/utils/getPasswordStrength"
 import UserPassword from "./UserPassword"
 
 const ROLE_HINT = {

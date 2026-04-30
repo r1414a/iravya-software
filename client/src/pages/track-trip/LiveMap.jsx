@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 const mapboxgl = await import("mapbox-gl");
 import "mapbox-gl/dist/mapbox-gl.css";
 
+
+console.log(import.meta.env.VITE_MAPBOX_TOKEN, mapboxgl);
+
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 function getClosestIndex(route, truckPosition) {
@@ -29,20 +32,53 @@ export default function LiveMap({ routePoints, truckPosition, tripData }) {
     const fittedRef = useRef(false);
     const stopMarkersRef = useRef([]);
     // Init map once
-    useEffect(() => {
-        if (mapRef.current || !containerRef.current) return;
-        mapRef.current = new mapboxgl.Map({
-            container: containerRef.current,
-            style: "mapbox://styles/mapbox/streets-v12",
-            center: [73.85, 18.52],
-            zoom: 7,
-        });
 
-        mapRef.current.on("load", () => {
-            mapLoadedRef.current = true;
-        });
-        mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+     useEffect(() => {
+        let map;
+
+        async function initMap() {
+            const mapboxgl = (await import("mapbox-gl")).default;
+
+            const token = import.meta.env.VITE_MAPBOX_TOKEN;
+
+            if (!token) {
+                console.error("Mapbox token missing");
+                return;
+            }
+
+            mapboxgl.accessToken = token;
+
+            map = new mapboxgl.Map({
+                container: containerRef.current,
+                style: "mapbox://styles/mapbox/streets-v12",
+                center: [73.85, 18.52],
+                zoom: 7,
+            });
+
+            mapRef.current = map;
+        }
+
+        if (!mapRef.current && containerRef.current) {
+            initMap();
+        }
+
+        return () => map?.remove();
     }, []);
+
+    // useEffect(() => {
+    //     if (mapRef.current || !containerRef.current) return;
+    //     mapRef.current = new mapboxgl.Map({
+    //         container: containerRef.current,
+    //         style: "mapbox://styles/mapbox/streets-v12",
+    //         center: [73.85, 18.52],
+    //         zoom: 7,
+    //     });
+
+    //     mapRef.current.on("load", () => {
+    //         mapLoadedRef.current = true;
+    //     });
+    //     mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    // }, []);
 
     // Draw/update route + fixed markers when routePoints change
     useEffect(() => {

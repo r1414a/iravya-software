@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { generateStrongPassword } from "@/lib/utils/generateStrongPassword";
-import { getPasswordStrength } from "@/lib/utils/getPasswordStrength";
+import { generateStrongPassword, getPasswordStrength } from "@/lib/utils/helperFunctions";
 
 
 export default function UserPassword({ isEdit, register, errors, setValue, text, passwordValue }) {

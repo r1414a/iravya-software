@@ -12,18 +12,31 @@ import {
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
  
-export function DataTable({ columns, data }) {
-    const [columnFilters, setColumnFilters] = useState([])
- 
-    const table = useReactTable({
+export function DataTable({ 
+    columns, 
+    data,
+    setPage, 
+    columnFilters, 
+    setColumnFilters,
+    totalPages = 1,
+    page = 1,
+    onPrevious,
+    onNext,
+    isFetching = false, 
+    meta 
+ }) {
+   const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         state: { columnFilters },
         onColumnFiltersChange: setColumnFilters,
-        initialState: { pagination: { pageSize: 10 } },
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        manualFiltering: true,
+        meta: {
+            ...meta,
+            updatePage: (newPage) => setPage(newPage)
+        }
     })
  
     return (
@@ -77,21 +90,23 @@ export function DataTable({ columns, data }) {
                 </TableBody>
             </Table>
  
-            <div className="flex items-center justify-between px-4 py-3">
+           <div className="flex items-center justify-between px-4 py-3">
                 <div className="text-sm text-black font-semibold">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                   Page {page} of {totalPages}
                 </div>
+
                 <div className="flex gap-2">
                     <Button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        onClick={onPrevious}
+                        disabled={page <= 1 || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Previous
                     </Button>
+                    
                     <Button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        onClick={onNext}
+                        disabled={page >= totalPages || isFetching}
                         className="bg-maroon text-xs hover:bg-maroon-dark cursor-pointer disabled:bg-gray-200 disabled:text-black"
                     >
                         Next

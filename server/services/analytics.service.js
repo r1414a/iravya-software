@@ -33,9 +33,9 @@ const getCountDataService = async (id, role) => {
         WHERE month = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         )
         SELECT
-        COALESCE(c.trip_count, 0) AS total_trips_this_month,
-        COALESCE(l.trip_count, 0) AS total_trips_last_month,
-        (COALESCE(c.trip_count, 0) - COALESCE(l.trip_count, 0)) AS trip_difference,
+        COALESCE(c.trip_count, 0) AS current,
+        COALESCE(l.trip_count, 0) AS last,
+        (COALESCE(c.trip_count, 0) - COALESCE(l.trip_count, 0)) AS difference,
         CASE
             WHEN COALESCE(c.trip_count, 0) > COALESCE(l.trip_count, 0) THEN 'increase'
             WHEN COALESCE(c.trip_count, 0) < COALESCE(l.trip_count, 0) THEN 'decrease'
@@ -48,7 +48,7 @@ const getCountDataService = async (id, role) => {
             / COALESCE(l.trip_count, 0),
             2
             )
-        END AS percent_change
+        END AS percentChange
         FROM (SELECT 1) dummy
         LEFT JOIN current_month c ON true
         LEFT JOIN last_month l ON true;
@@ -86,9 +86,9 @@ const getCountDataService = async (id, role) => {
         WHERE month = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         )
         SELECT
-        ROUND(COALESCE(c.avg_duration, 0) / 60, 2) AS avg_trip_minutes_this_month,
-        ROUND(COALESCE(l.avg_duration, 0) / 60, 2) AS avg_trip_minutes_last_month,
-        ROUND((COALESCE(c.avg_duration, 0) - COALESCE(l.avg_duration, 0)) / 60, 2) AS difference_minutes,
+        ROUND(COALESCE(c.avg_duration, 0) / 60, 2) AS current,
+        ROUND(COALESCE(l.avg_duration, 0) / 60, 2) AS last,
+        ROUND((COALESCE(c.avg_duration, 0) - COALESCE(l.avg_duration, 0)) / 60, 2) AS difference,
         CASE
             WHEN COALESCE(c.avg_duration, 0) > COALESCE(l.avg_duration, 0) THEN 'increase'
             WHEN COALESCE(c.avg_duration, 0) < COALESCE(l.avg_duration, 0) THEN 'decrease'
@@ -101,7 +101,7 @@ const getCountDataService = async (id, role) => {
             / COALESCE(l.avg_duration, 0),
             2
             )
-        END AS percent_change
+        END AS percentChange
         FROM (SELECT 1) dummy
         LEFT JOIN current_month c ON true
         LEFT JOIN last_month l ON true;
@@ -110,8 +110,8 @@ const getCountDataService = async (id, role) => {
     // 🚚 Truck Data (no duplicates)
     const truck_data = await sql`
         SELECT
-        COUNT(DISTINCT t.truck_id) FILTER (WHERE LOWER(t.status::text) = 'idle') AS idle_trucks,
-        COUNT(DISTINCT t.truck_id) FILTER (WHERE LOWER(t.status::text) = 'in_transit') AS in_transit_trucks
+        COUNT(DISTINCT t.truck_id) FILTER (WHERE LOWER(t.status::text) = 'idle') AS idle,
+        COUNT(DISTINCT t.truck_id) FILTER (WHERE LOWER(t.status::text) = 'in_transit') AS inTransit
         FROM "Trips" t
         JOIN "Distribution_center" dc
         ON dc.id = t.source_dc_id
@@ -121,8 +121,8 @@ const getCountDataService = async (id, role) => {
     // 👨‍✈️ Driver Data (no duplicates)
     const driver_data = await sql`
         SELECT
-        COUNT(DISTINCT t.driver_id) FILTER (WHERE LOWER(d.status::text) = 'available') AS active_driver,
-        COUNT(DISTINCT t.driver_id) FILTER (WHERE LOWER(d.status::text) = 'on_trip') AS on_trip_driver
+        COUNT(DISTINCT t.driver_id) FILTER (WHERE LOWER(d.status::text) = 'available') AS active,
+        COUNT(DISTINCT t.driver_id) FILTER (WHERE LOWER(d.status::text) = 'on_trip') AS onTrip
         FROM "Trips" t
         JOIN "Drivers" d ON d.id = t.driver_id
         JOIN "Distribution_center" dc ON dc.id = t.source_dc_id
@@ -155,9 +155,9 @@ const getCountDataService = async (id, role) => {
         WHERE month = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         )
         SELECT
-        ROUND(COALESCE(c.delivery_rate, 0), 2) AS delivery_rate_this_month,
-        ROUND(COALESCE(l.delivery_rate, 0), 2) AS delivery_rate_last_month,
-        ROUND(COALESCE(c.delivery_rate, 0) - COALESCE(l.delivery_rate, 0), 2) AS rate_difference,
+        ROUND(COALESCE(c.delivery_rate, 0), 2) AS current,
+        ROUND(COALESCE(l.delivery_rate, 0), 2) AS last,
+        ROUND(COALESCE(c.delivery_rate, 0) - COALESCE(l.delivery_rate, 0), 2) AS difference,
         CASE
             WHEN COALESCE(c.delivery_rate, 0) > COALESCE(l.delivery_rate, 0) THEN 'increase'
             WHEN COALESCE(c.delivery_rate, 0) < COALESCE(l.delivery_rate, 0) THEN 'decrease'
@@ -170,7 +170,7 @@ const getCountDataService = async (id, role) => {
             / COALESCE(l.delivery_rate, 0),
             2
             )
-        END AS percent_change
+        END AS percentChange
         FROM (SELECT 1) dummy
         LEFT JOIN current_month c ON true
         LEFT JOIN last_month l ON true;
@@ -179,8 +179,8 @@ const getCountDataService = async (id, role) => {
     // 🏪 Store Data
     const store_data = await sql`
         SELECT 
-        COUNT(DISTINCT ts.store_id) AS total_served_store,
-        COUNT(*) AS total_deliveries
+        COUNT(DISTINCT ts.store_id) AS served,
+        COUNT(*) AS deliveries
         FROM "Trip_stops" ts
         JOIN "Trips" t ON t.id = ts.trip_id
         JOIN "Distribution_center" dc ON dc.id = t.source_dc_id
@@ -188,12 +188,12 @@ const getCountDataService = async (id, role) => {
     `;
 
     return {
-        "trip_count":trip_count,
-        "avg_trip_time":avg_trip_time,
-        truck_data,
-        driver_data,
-        delivery_rate,
-        store_data
+        totalTrip:trip_count,
+        avgTripTime:avg_trip_time,
+        trucks: truck_data,
+        drivers: driver_data,
+        deliveryRate: delivery_rate,
+        stores: store_data
     };
 };
 

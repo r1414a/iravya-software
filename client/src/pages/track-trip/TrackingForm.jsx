@@ -349,17 +349,16 @@ export default function TrackingForm({ MOCK_TRIPS }) {
 
   return (
     <div
-      className="flex bg-slate-50 overflow-hidden"
-      style={{ height: "calc(100vh - 140px)" }}
+      className="flex flex-col lg:flex-row bg-slate-50 min-h-screen lg:h-[calc(100vh-80px)]"
     >
       {/* ── LEFT SIDEBAR — white, matches your manage pages ── */}
-      <div className="w-125 shrink-0 flex flex-col bg-white border-t border-slate-200 overflow-y-auto">
+      <div className="order-2 lg:order-1 w-full lg:w-125 shrink-0 flex flex-col bg-white border-t lg:border-r border-slate-200 overflow-y-auto max-h-[55vh] lg:max-h-full">
         {/* Sticky search strip */}
         <div className="px-5 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
             Track shipment
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={tripIdInput}
               onChange={(e) => {
@@ -752,7 +751,7 @@ export default function TrackingForm({ MOCK_TRIPS }) {
       </div>
 
       {/* ── RIGHT — full height Mapbox map ── */}
-      <div className="flex-1 relative">
+      <div className="order-1 lg:order-2 w-full h-[45vh] sm:h-[50vh] md:h-[60vh] lg:flex-1 lg:h-auto relative overflow-hidden">
         {/* Map legend — bottom right */}
         {tripData && !routeLoading && (
           <div className="absolute bottom-5 right-5 z-10 bg-white rounded-xl border border-slate-200 shadow-md px-4 py-3 text-xs space-y-1.5">

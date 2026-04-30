@@ -15,9 +15,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FieldLabel } from "@/components/ui/field"
 import { useLocation } from "react-router-dom"
 import DeleteModal from "@/components/DeleteModal"
-import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { format, parseISO } from "date-fns"
 import { useDeleteDriverMutation } from "@/lib/features/drivers/driverApi"
+import { getNameInitials } from "@/lib/utils/helperFunctions"
 
 // Colour map for avatar initials — same ua-* palette as users
 

@@ -9,16 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import EditUserDrawer from "./EditUserDrawer"
 import { useState } from "react"
 import { KeyRound, Pencil } from "lucide-react"
 import DeleteModal from "@/components/DeleteModal"
-import { getNameInitials } from "@/lib/utils/getNameInitials"
 import { ROLES, STATUS } from "@/constants/constant"
 import { formatDistanceToNow, parseISO } from "date-fns"
-import CreateUserModal from "../CreateUserModal"
 import { useDeleteUserMutation } from "@/lib/features/users/userApi"
 import EditPasswordModal from "../EditPasswordModal"
+import { getNameInitials } from "@/lib/utils/helperFunctions"
 
 function ActionsCell({ row, table }) {
   const user = row.original;

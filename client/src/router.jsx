@@ -34,8 +34,8 @@ const SuperAdminManageBrands = lazy(() => import("./pages/super-admin/manage-bra
 
 const TrackTrip = lazy(() => import("./pages/track-trip/TrackTrip"))
 
-
-const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
+const Analytics = lazy(() => import("@/pages/super-admin/analytics/Analytics"));
+// const DriverDashboard = lazy(() => import("./pages/driver/DriverDashboard"))
 
 
 
@@ -115,6 +115,10 @@ const router = createBrowserRouter([
                     {
                         path: "manage-brands",
                         element: <SuperAdminManageBrands />
+                    },
+                    {
+                        path: "analytics",
+                        element: <Analytics/>
                     }
 
 
@@ -160,6 +164,10 @@ const router = createBrowserRouter([
                         path: "reports",
                         element: <SuperAdminReports />
                     },
+                     {
+                        path: "analytics",
+                        element: <Analytics/>
+                    }
                 ]
             }
 
@@ -167,21 +175,22 @@ const router = createBrowserRouter([
 
     },
     //Driver Route
-    {
-        path: "/driver",
-        element: <DriverDashboard/>
-    },
+    // {
+    //     path: "/driver",
+    //     element: <DriverDashboard/>
+    // },
 
     //Tracking Public Route
     {
         path: '/track',
-        element: <AdminLayout />,
-        children: [
-            {
-                index: true,
-                element: <TrackTrip />
-            },
-        ]
+        element: <TrackTrip />
+        // element: <AdminLayout />,
+        // children: [
+        //     {
+        //         index: true,
+        //         element: <TrackTrip />
+        //     },
+        // ]
     }
 ])
 

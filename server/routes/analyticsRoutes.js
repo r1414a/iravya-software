@@ -6,5 +6,5 @@ import { getCountData } from "../controller/analyticsController.js";
 
 const router = express.Router()
 
-router.get("/count", protect, authorize("super_admin", "dc_manageer"), getCountData)
+router.get("/count", protect, authorize("super_admin", "dc_manager"), getCountData)
 export default router

@@ -1,133 +1,53 @@
-// pages/superadmin/Analytics.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Super admin analytics page
-// • All Tailwind CSS — no custom CSS
-// • Recharts for all charts
-// • Same UI patterns as manage pages: maroon, slate cards, AdminSubHeader
-// • Fully self-contained with mock data (swap for RTK hooks when ready)
-// • Components: StatCard, SectionTitle, ChartCard, TripStatusBadge
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Analytics.jsx (Fixed with proper filtering)
+import { useState } from "react"
 import {
-    ResponsiveContainer,
-    AreaChart, Area,
-    BarChart, Bar,
-    XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+    BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
+    Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
 } from "recharts"
-import AdminSubHeader from "@/components/AdminSubHeader"
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useState } from "react"
 import {
-    Truck, Users, MapPin, Route,
-    TrendingUp, TrendingDown, Minus, Clock, CheckCircle2,
+    Route, Truck, CheckCircle2, Clock, Users, MapPin,
+    TrendingUp, TrendingDown, Minus
 } from "lucide-react"
-import { useGetCountDataQuery, useGetGraphDataQuery } from "@/lib/features/analytics/analyticApi"
-import { getDatesInMonth, getLast5Years, getStatsDataInFormat } from "@/lib/utils/helperFunctions"
+import AdminSubHeader from "@/components/AdminSubHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
+import { useGetCountDataQuery, useGetGraphDataQuery } from "@/lib/features/analytics/analyticApi"
 
-// ── Colour palette (consistent with your maroon theme) ───────────────────────
+import {
+    getStatsDataInFormat,
+    getLast5Years,
+    getDatesInMonth,
+    getXAxisKey,
+    formatXAxisLabel,
+    hasGraphData,
+    hasDCData
+} from "@/lib/utils/helperFunctions"
+
+// Color palette
 const C = {
-    maroon: "#701a40",
-    sky: "#0ea5e9",
     green: "#16a34a",
-    amber: "#d97706",
+    sky: "#0ea5e9",
     red: "#dc2626",
-    violet: "#7c3aed",
-    teal: "#0f766e",
-    slate: "#64748b",
-    cyan: "#0e7490",
+    teal: "#14b8a6",
+    amber: "#f59e0b",
+    violet: "#8b5cf6",
 }
 
-// ── Mock data — replace with useGetAnalyticsQuery() when ready ────────────────
-const TRIPS_WEEKLY = [
-    { day: "Mon", completed: 18, cancelled: 2, scheduled: 5 },
-    { day: "Tue", completed: 24, cancelled: 1, scheduled: 8 },
-    { day: "Wed", completed: 21, cancelled: 3, scheduled: 6 },
-    { day: "Thu", completed: 29, cancelled: 0, scheduled: 9 },
-    { day: "Fri", completed: 32, cancelled: 2, scheduled: 11 },
-    { day: "Sat", completed: 27, cancelled: 1, scheduled: 7 },
-    { day: "Sun", completed: 14, cancelled: 0, scheduled: 3 },
-]
-
-const TRIPS_MONTHLY = [
-    { month: "Jul", completed: 312, cancelled: 18, scheduled: 44 },
-    { month: "Aug", completed: 341, cancelled: 22, scheduled: 51 },
-    { month: "Sep", completed: 298, cancelled: 15, scheduled: 39 },
-    { month: "Oct", completed: 387, cancelled: 27, scheduled: 63 },
-    { month: "Nov", completed: 421, cancelled: 19, scheduled: 58 },
-    { month: "Dec", completed: 358, cancelled: 24, scheduled: 47 },
-    { month: "Jan", completed: 445, cancelled: 21, scheduled: 72 },
-]
-
-const ALERT_TYPES = [
-    { name: "Speeding", value: 84, color: C.red },
-    { name: "Long stop", value: 61, color: C.amber },
-    { name: "Route deviation", value: 47, color: C.violet },
-    { name: "Geofence enter", value: 112, color: C.green },
-    { name: "Device offline", value: 23, color: C.slate },
-    { name: "Low battery", value: 38, color: C.cyan },
-]
-
-
-const DELIVERY_RATE_TREND = [
-    { week: "W1", rate: 91 }, { week: "W2", rate: 94 },
-    { week: "W3", rate: 89 }, { week: "W4", rate: 96 },
-    { week: "W5", rate: 93 }, { week: "W6", rate: 97 },
-    { week: "W7", rate: 95 }, { week: "W8", rate: 98 },
-]
-
-const DELIVERY_RATE_MONTHLY = [
-    { month: "Jun", rate: 92 },
-    { month: "Jul", rate: 94 },
-    { month: "Aug", rate: 91 },
-    { month: "Sep", rate: 95 },
-    { month: "Oct", rate: 96 },
-    { month: "Nov", rate: 93 },
-    { month: "Dec", rate: 97 },
-    { month: "Jan", rate: 98 },
-]
-
-const DC_ACTIVITY = [
-    { dc: "Pune DC", dispatched: 124, completed: 119 },
-    { dc: "Mumbai DC", dispatched: 87, completed: 84 },
-    { dc: "Nashik DC", dispatched: 163, completed: 154 },
-    { dc: "Kolhapur DC", dispatched: 71, completed: 68 },
-    { dc: "Nagpur DC", dispatched: 58, completed: 57 },
-    { dc: "Amravati DC", dispatched: 76, completed: 71 },
-]
-
-const TOP_STORES = [
-    { store: "Westside Phoenix", deliveries: 64, brand: "Westside" },
-    { store: "Zudio Koregaon Park", deliveries: 58, brand: "Zudio" },
-    { store: "Zudio Baner", deliveries: 51, brand: "Zudio" },
-    { store: "Cliq Viviana Mall", deliveries: 47, brand: "Tata Cliq" },
-    { store: "Tanishq KP", deliveries: 41, brand: "Tanishq" },
-    { store: "Westside Amanora", deliveries: 39, brand: "Westside" },
-]
-
-// ── Summary KPIs ─────────────────────────────────────────────────────────────
-const STATS = [
-    { label: "Total trips", value: "1,469", sub: "+12% vs last month", trend: "up", icon: Route, color: "border-t-slate-800", iconBg: "bg-slate-700" },
-    { label: "Active right now", value: "4", sub: "trucks in transit", trend: "flat", icon: Truck, color: "border-t-sky-700", iconBg: "bg-sky-600" },
-    { label: "Delivery rate", value: "96.4%", sub: "+2.1% vs last month", trend: "up", icon: CheckCircle2, color: "border-t-green-700", iconBg: "bg-green-600" },
-    { label: "Avg trip time", value: "2h 18m", sub: "-4min vs last month", trend: "up", icon: Clock, color: "border-t-violet-700", iconBg: "bg-violet-600" },
-    // { label: "Open alerts",       value: "7",     sub: "3 high severity",    trend: "down", icon: AlertTriangle, color: "bg-red-800",    iconBg: "bg-red-700"    },
-    { label: "Active drivers", value: "10", sub: "3 on trip today", trend: "flat", icon: Users, color: "border-t-amber-700", iconBg: "bg-amber-600" },
-    // { label: "GPS devices", value: "8", sub: "4 online, 4 at DC", trend: "flat", icon: LocateFixed, color: "border-t-teal-700", iconBg: "bg-teal-600" },
-    { label: "Stores served", value: "12", sub: "across 4 brands", trend: "flat", icon: MapPin, color: "border-t-cyan-700", iconBg: "bg-cyan-600" },
-]
+const alertColors = {
+    speeding: C.red,
+    delay: C.amber,
+    route_deviation: C.violet,
+    long_stop: C.sky,
+};
 
 // ── Reusable components ───────────────────────────────────────────────────────
 function StatCard({ label, value, sub, trend, icon: Icon, color, iconBg }) {
-
     const TrendIcon = trend === "increase" ? TrendingUp : trend === "decrease" ? TrendingDown : Minus
     const trendColor = trend === "increase"
         ? "text-green-800"
@@ -155,12 +75,7 @@ function StatCard({ label, value, sub, trend, icon: Icon, color, iconBg }) {
 function SectionTitle({ children, action }) {
     return (
         <div className="flex items-center justify-between mb-3">
-            <div>
-                {/* <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
-                    Analytics
-                </p> */}
-                <h2 className="text-lg font-semibold text-slate-700">{children}</h2>
-            </div>
+            <h2 className="text-lg font-semibold text-slate-700">{children}</h2>
             {action}
         </div>
     )
@@ -197,218 +112,165 @@ const CustomTooltip = ({ active, payload, label }) => {
 function FilterControls({ filters, setFilters }) {
     const years = getLast5Years();
     const months = [
-        { label: "Jan", value: 1 },
-        { label: "Feb", value: 2 },
-        { label: "Mar", value: 3 },
-        { label: "Apr", value: 4 },
-        { label: "May", value: 5 },
-        { label: "Jun", value: 6 },
-        { label: "Jul", value: 7 },
-        { label: "Aug", value: 8 },
-        { label: "Sep", value: 9 },
-        { label: "Oct", value: 10 },
-        { label: "Nov", value: 11 },
-        { label: "Dec", value: 12 },
+        { label: "January", value: "1" },
+        { label: "February", value: "2" },
+        { label: "March", value: "3" },
+        { label: "April", value: "4" },
+        { label: "May", value: "5" },
+        { label: "June", value: "6" },
+        { label: "July", value: "7" },
+        { label: "August", value: "8" },
+        { label: "September", value: "9" },
+        { label: "October", value: "10" },
+        { label: "November", value: "11" },
+        { label: "December", value: "12" },
     ];
 
     const dates = getDatesInMonth(filters.year, filters.month)
 
+
+
     return (
-        // // <div className="flex gap-2">
-
-        //     {/* Year 
-        //     {/* <Select
-        //         value={String(filters.year)}
-        //         onValueChange={(val) =>
-        //             setFilters((prev) => ({
-        //                 ...prev,
-        //                 year: Number(val),
-        //                 date: "",
-        //             }))
-        //         }
-        //     >
-        //         <SelectTrigger className="w-[90px] h-8 text-xs">
-        //             <SelectValue placeholder="Year" />
-        //         </SelectTrigger>
-        //         <SelectContent>
-        //             {years.map((y) => (
-        //                 <SelectItem key={y} value={String(y)}>
-        //                     {y}
-        //                 </SelectItem>
-        //             ))}
-        //         </SelectContent>
-        //     </Select> */}
-
-        //     {/* Month */}
-        //     {/* <Select
-        //         value={filters.month ? String(filters.month) : "all"}
-        //         onValueChange={(val) =>
-        //             setFilters((prev) => ({
-        //                 ...prev,
-        //                 month: val === "all" ? "" : Number(val),
-        //                 date: "",
-        //             }))
-        //         }
-        //     >
-        //         <SelectTrigger className="w-[110px] h-8 text-xs">
-        //             <SelectValue placeholder="Month" />
-        //         </SelectTrigger>
-        //         <SelectContent>
-        //             <SelectItem value="all">All months</SelectItem>
-        //             {months.map((m) => (
-        //                 <SelectItem key={m.value} value={m.value}>
-        //                     {m.label}
-        //                 </SelectItem>
-        //             ))}
-        //         </SelectContent>
-        //     </Select> */}
-
-        //     {/* Date */}
-        //     {/* <Select
-        //         value={filters.date || ""}
-        //         onValueChange={(val) =>
-        //             setFilters((prev) => ({
-        //                 ...prev,
-        //                 date: val,
-        //             }))
-        //         }
-        //         disabled={!filters.month}
-        //     >
-        //         <SelectTrigger className="w-[120px] h-8 text-xs">
-        //             <SelectValue placeholder="Date" />
-        //         </SelectTrigger>
-        //         <SelectContent>
-        //             <SelectItem value="">Select date</SelectItem>
-        //             {dates.map((d) => (
-        //                 <SelectItem key={d.value} value={d.value}>
-        //                     {d.label}
-        //                 </SelectItem>
-        //             ))}
-        //         </SelectContent>
-        //     </Select> */}
-
-        // // </div>
-
         <div className="flex gap-2">
-
             {/* Year */}
-            <select
-                value={filters.year}
-                onChange={(e) =>
+            <Select
+                value={String(filters.year)}
+                onValueChange={(val) =>
                     setFilters((prev) => ({
                         ...prev,
-                        year: Number(e.target.value),
-                        date: "", // reset date
+                        year: Number(val),
+                        month: "",
+                        date: "",
                     }))
                 }
-                className="px-2 py-1 text-xs border rounded-md"
             >
-                {years.map((y) => (
-                    <option key={y} value={y}>{y}</option>
-                ))}
-            </select>
+                <SelectTrigger className="w-[90px] h-8 text-xs">
+                    <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    {years.map((y) => (
+                        <SelectItem key={y} value={String(y)}>
+                            {y}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
 
             {/* Month */}
-            <select
-                value={filters.month}
-                onChange={(e) =>
+            <Select
+                value={filters.month ? String(filters.month) : "all"}
+                onValueChange={(val) =>
                     setFilters((prev) => ({
                         ...prev,
-                        month: Number(e.target.value),
-                        date: "", // reset date if month changes
+                        month: val === "all" ? "" : Number(val),
+                        date: "",
                     }))
                 }
-                className="px-2 py-1 text-xs border rounded-md"
             >
-                <option value="">All months</option>
-                {months.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-            </select>
+                <SelectTrigger className="w-[110px] h-8 text-xs">
+                    <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All months</SelectItem>
+                    {months.map((m) => (
+                        <SelectItem key={m.value} value={m.value}>
+                            {m.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
 
-            {/* Date dropdown */}
-            <select
-                value={filters.date}
-                disabled={!filters.month} // only enabled if month selected
-                onChange={(e) =>
+            {/* Date */}
+            <Select
+                value={filters.date ? String(filters.date) : "none"}
+                onValueChange={(val) =>
                     setFilters((prev) => ({
                         ...prev,
-                        date: e.target.value,
+                        date: val === "none" ? "" : Number(val),
                     }))
                 }
-                className="px-2 py-1 text-xs border rounded-md"
+                disabled={!filters.month}
             >
-                <option value="">Select date</option>
-                {dates.map((d) => (
-                    <option key={d.value} value={d.value}>
-                        {d.label}
-                    </option>
-                ))}
-            </select>
-
-        </div>
-    );
-}
-
-// ── Range toggle ──────────────────────────────────────────────────────────────
-function RangeToggle({ value, onChange }) {
-    return (
-        <div className="flex bg-slate-100 rounded-lg p-0.5">
-            {["Weekly", "Monthly"].map(opt => (
-                <button
-                    key={opt}
-                    onClick={() => onChange(opt)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${value === opt
-                        ? "bg-white shadow-sm text-slate-800"
-                        : "text-slate-500 hover:text-slate-700"
-                        }`}
-                >
-                    {opt}
-                </button>
-            ))}
+                <SelectTrigger className="w-[100px] h-8 text-xs">
+                    <SelectValue placeholder="Date" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="none">All dates</SelectItem>
+                    {dates.map((d) => (
+                        <SelectItem key={d.value} value={d.value}>
+                            {d.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
     )
 }
 
-const getXAxisKey = (filters) => {
-    if (filters.date) return "hour";     // specific date → hourly data
-    if (filters.month) return "day";     // month selected → daily data
-    return "month";                      // only year → monthly data
-};
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function Analytics() {
-    const [tripRange, setTripRange] = useState("Weekly");
     const [filters, setFilters] = useState({
         year: new Date().getFullYear(),
         month: "",
         date: "",
     });
-    const { data: statsData, isLoading: loadingStats, error } = useGetCountDataQuery();
-    const { data: graphsData, isLoading: loadingGraphData } = useGetGraphDataQuery(filters, {
+
+    const { data: statsData, isLoading: loadingStats } = useGetCountDataQuery();
+    const { data: graphsData, isLoading: loadingGraphData, isFetching } = useGetGraphDataQuery(filters, {
         refetchOnMountOrArgChange: true,
     });
-
-    const hasData = graphsData?.trip_by_status?.some(
-        (item) => item.scheduled > 0 || item.completed > 0 || item.cancelled > 0
-    );
-
 
     if (loadingStats || loadingGraphData) {
         return <LoadingSpinner />
     }
 
+    const formattedStatsData = getStatsDataInFormat(statsData?.data)
+    const xKey = getXAxisKey(filters)
+    const tripDataExists = hasGraphData(graphsData?.trip_by_status)
 
-    const formattedStatsdata = getStatsDataInFormat(statsData?.data)
-    console.log(graphsData);
+    // Get subtitle based on filter selection
+    // const getChartSubtitle = () => {
+    //     if (filters.date) {
+    //         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    //         return `${monthNames[filters.month - 1]} ${filters.date}, ${filters.year} - Hourly breakdown`
+    //     }
+    //     if (filters.month) {
+    //         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    //         return `${monthNames[filters.month - 1]} ${filters.year} - Daily breakdown`
+    //     }
+    //     return `${filters.year} - Monthly breakdown`
+    // }
 
-    const xKey = getXAxisKey(filters);
-    const tripData = tripRange === "Weekly" ? TRIPS_WEEKLY : TRIPS_MONTHLY
-    const tripKey = tripRange === "Weekly" ? "day" : "month"
-    const deliveryRateData =
-        tripRange === "Weekly" ? DELIVERY_RATE_TREND : DELIVERY_RATE_MONTHLY
+    const getFilterLabel = () => {
+        const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthNamesFull = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    const deliveryKey = tripRange === "Weekly" ? "week" : "month"
+        if (filters.date) {
+            return `${monthNamesShort[filters.month - 1]} ${filters.date}, ${filters.year}`;
+        }
+
+        if (filters.month) {
+            return `${monthNamesFull[filters.month - 1]} ${filters.year}`;
+        }
+
+        return `${filters.year}`;
+    };
+
+    const getAlertSubtitle = () => {
+        if (filters.date) {
+            return `${getFilterLabel()} - Alert breakdown (hourly)`
+        }
+        if (filters.month) {
+            return `${getFilterLabel()} - Alert breakdown (daily)`
+        }
+        return `${getFilterLabel()} - Alert breakdown (monthly)`
+    }
+
+    const dcData = graphsData?.dc_data || [];
+    const dcDataExists = hasDCData(dcData);
+
+    console.log("trip_by_status:", graphsData);
+    console.log("tripDataExists:", tripDataExists);
 
     return (
         <section className="min-h-screen bg-slate-50">
@@ -420,12 +282,11 @@ export default function Analytics() {
             />
 
             <div className="px-4 lg:px-10 py-6 flex flex-col gap-8">
-
                 {/* ── KPI stat cards ──────────────────────────────────────── */}
                 <section>
                     <SectionTitle>Platform overview</SectionTitle>
                     <div className="flex flex-wrap gap-6 justify-center items-center">
-                        {formattedStatsdata.map((stat) => (
+                        {formattedStatsData.map((stat) => (
                             <div key={stat.label} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-12px)] max-w-90">
                                 <StatCard {...stat} />
                             </div>
@@ -441,177 +302,292 @@ export default function Analytics() {
                         Trip volume & stores
                     </SectionTitle>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-                        {/* Stacked bar — trip volume */}
+                        {/* Trips by status */}
                         <ChartCard
                             title="Trips by status"
-                            subtitle={`${tripRange} breakdown`}
-                        // className="lg:col-span-2"
+                            // subtitle={getChartSubtitle()}
+                            subtitle={`${getFilterLabel()} - ${filters.date ? "Hourly" : filters.month ? "Daily" : "Monthly"} breakdown`}
                         >
-
-                            {!hasData ? (
+                            {loadingGraphData ? (
+                                <div className="h-60 flex items-center justify-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : !tripDataExists ? (
                                 <div className="h-60 flex items-center justify-center text-slate-500 text-sm">
                                     No trip data available for this period
                                 </div>
                             ) : (
-                                <ResponsiveContainer width="100%" height={240}>
-                                    <BarChart data={graphsData["trip_by_status"]} barSize={tripRange === "Weekly" ? 28 : 20}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                        <XAxis
-                                            dataKey={xKey} //hour,month,day
-                                            tick={{ fontSize: 11, fill: "#94a3b8" }}
-                                            interval={0}
-                                            angle={-30}
-                                            textAnchor="end"
-                                            height={50}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-                                        <YAxis
-                                            tick={{ fontSize: 11, fill: "#94a3b8" }}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-                                        <Tooltip content={<CustomTooltip />} />
-                                        <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
-                                        <Bar dataKey="completed" name="Completed" stackId="a" fill={C.green} radius={[0, 0, 0, 0]} />
-                                        <Bar dataKey="scheduled" name="Scheduled" stackId="a" fill={C.sky} radius={[0, 0, 0, 0]} />
-                                        <Bar dataKey="cancelled" name="Cancelled" stackId="a" fill={C.red} radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                <div className="relative">
+                                    {/* Overlay loader while refetching */}
+                                    {isFetching && (
+                                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded-lg">
+                                            <LoadingSpinner small />
+                                        </div>
+                                    )}
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <BarChart
+                                            data={graphsData?.trip_by_status || []}
+                                            barSize={filters.date ? 16 : filters.month ? 20 : 28}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                            <XAxis
+                                                dataKey={xKey}
+                                                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                                interval={filters.date ? 2 : 0}
+                                                angle={filters.date ? -45 : -30}
+                                                textAnchor="end"
+                                                height={60}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <YAxis
+                                                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
+                                            <Bar dataKey="completed" name="Completed" stackId="a" fill={C.green} radius={[0, 0, 0, 0]} />
+                                            <Bar dataKey="scheduled" name="Scheduled" stackId="a" fill={C.sky} radius={[0, 0, 0, 0]} />
+                                            <Bar dataKey="cancelled" name="Cancelled" stackId="a" fill={C.red} radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             )}
                         </ChartCard>
 
-                        {/* Top stores + store delivery bar */}
-                        <ChartCard title="Top stores by deliveries" subtitle="Most deliveries received — all time">
-                            <ResponsiveContainer width="100%" height={200}>
-                                <BarChart data={TOP_STORES} layout="vertical" barSize={14} margin={{ left: -25 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                                    <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                                    <YAxis
-                                        dataKey="store" type="category"
-                                        tick={{ fontSize: 10, fill: "#64748b" }}
-                                        axisLine={false} tickLine={false} width={160}
-                                        tickFormatter={(v) => (v.length > 25 ? v.slice(0, 22) + "…" : v)}
-                                    />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Bar dataKey="deliveries" name="Deliveries" fill={C.teal} radius={[0, 4, 4, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        {/* Top stores */}
+                        <ChartCard title="Top stores by deliveries"
+                            // subtitle="Most deliveries received — all time"
+                            subtitle={`Most deliveries - ${getFilterLabel()}`}
+                        >
+                            {graphsData?.top_stores?.length > 0 ? (
+                                <div className="relative">
+                                    {isFetching && (
+                                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded-lg">
+                                            <LoadingSpinner small />
+                                        </div>
+                                    )}
 
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <BarChart
+                                            data={graphsData.top_stores}
+                                            layout="vertical"
+                                            barSize={14}
+                                            margin={{ left: 0 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                                            <XAxis
+                                                type="number"
+                                                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <YAxis
+                                                dataKey="store"
+                                                type="category"
+                                                tick={{ fontSize: 10, fill: "#64748b" }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                                width={110}
+                                                tickFormatter={(v) => (v.length > 25 ? v.slice(0, 22) + "…" : v)}
+                                            />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Bar dataKey="deliveries" name="Deliveries" fill={C.teal} radius={[0, 4, 4, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            ) : loadingGraphData ? (
+                                <div className="h-60 flex items-center justify-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : (
+                                <div className="h-60 flex items-center justify-center text-slate-500 text-sm">
+                                    No delivery data available
+                                </div>
+                            )}
                         </ChartCard>
-
-                        {/* Delivery rate line */}
-                        {/* <ChartCard title="Delivery success rate" subtitle={tripRange === "Weekly" ? "8-week rolling trend" : "8-month trend"}>
-                            <ResponsiveContainer width="100%" height={240}>
-                                <AreaChart key={tripRange} data={deliveryRateData}>
-                                    <defs>
-                                        <linearGradient id="rateGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={C.green} stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor={C.green} stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                    <XAxis dataKey={deliveryKey} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                                    <YAxis domain={[85, 100]} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} unit="%" />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Area
-                                        type="monotone" dataKey="rate" name="Success rate"
-                                        stroke={C.green} strokeWidth={2.5}
-                                        fill="url(#rateGrad)" dot={{ r: 3, fill: C.green }}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                            <div className="mt-3 flex items-center justify-between px-1">
-                                <div>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Current rate</p>
-                                    <p className="text-xl font-bold text-green-700">98%</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">8-wk avg</p>
-                                    <p className="text-xl font-bold text-slate-700">94.1%</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Best week</p>
-                                    <p className="text-xl font-bold text-slate-700">98%</p>
-                                </div>
-                            </div>
-                        </ChartCard> */}
                     </div>
                 </section>
 
-                {/* ── Brand breakdown + DC activity ────────────────────────── */}
+                {/* ── Distribution centers & alerts ────────────────────────── */}
                 <section>
                     <SectionTitle>Distribution centers & alerts</SectionTitle>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-                        {/* DC dispatched vs completed */}
-                        <ChartCard title="DC dispatch performance" subtitle="Trips dispatched vs completed per DC"
-                        // className="lg:col-span-2"
+                        {/* DC performance */}
+                        <ChartCard
+                            title="DC dispatch performance"
+                            // subtitle={`Trips dispatched vs completed per DC - ${getChartSubtitle()}`}
+                            subtitle={`Trips dispatched vs completed per DC - ${getFilterLabel()}`}
                         >
-                            <ResponsiveContainer width="100%" height={220}>
-                                <BarChart data={DC_ACTIVITY} barGap={2} barSize={14}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                    <XAxis dataKey="dc" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
-                                    <Bar dataKey="dispatched" name="Dispatched" fill={C.sky} radius={[3, 3, 0, 0]} />
-                                    <Bar dataKey="completed" name="Completed" fill={C.green} radius={[3, 3, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-
-                            {/* Completion rate pills */}
-                            <div className="flex flex-wrap gap-2 mt-4">
-                                {DC_ACTIVITY.map(dc => {
-                                    const rate = Math.round((dc.completed / dc.dispatched) * 100)
-                                    const color = rate >= 97 ? "bg-green-100 text-green-700"
-                                        : rate >= 93 ? "bg-amber-100 text-amber-700"
-                                            : "bg-red-100 text-red-700"
-                                    return (
-                                        <div key={dc.dc} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
-                                            <span>{dc.dc}</span>
-                                            <span className="font-bold">{rate}%</span>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </ChartCard>
-
-                        {/* Alert type breakdown */}
-                        <ChartCard title="Alert breakdown" subtitle="By type — last 30 days">
-                            <div className="flex flex-col gap-2.5">
-                                {ALERT_TYPES.map(a => {
-                                    const max = Math.max(...ALERT_TYPES.map(x => x.value))
-                                    const pct = Math.round((a.value / max) * 100)
-                                    return (
-                                        <div key={a.name}>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs text-slate-600">{a.name}</span>
-                                                <span className="text-xs font-bold text-slate-800">{a.value}</span>
+                            {loadingGraphData ? (
+                                <div className="h-60 flex items-center justify-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : !dcDataExists ? (
+                                <div className="h-60 flex items-center justify-center text-slate-500 text-sm">
+                                    No DC data available
+                                </div>
+                            ) :
+                                (
+                                    <div className="relative">
+                                        {isFetching && (
+                                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded-lg">
+                                                <LoadingSpinner small />
                                             </div>
-                                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full rounded-full transition-all duration-700"
-                                                    style={{ width: `${pct}%`, background: a.color }}
+                                        )}
+                                        <ResponsiveContainer width="100%" height={220}>
+                                            <BarChart data={graphsData.dc_data} barGap={2} barSize={14}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                <XAxis
+                                                    dataKey="dc"
+                                                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    angle={-30}
+                                                    textAnchor="end"
+                                                    height={70}
                                                 />
-                                            </div>
+                                                <YAxis
+                                                    tick={{ fontSize: 11, fill: "#94a3b8" }}
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                />
+                                                <Tooltip content={<CustomTooltip />} />
+                                                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
+                                                <Bar dataKey="in_transit" name="In Transit" fill={C.amber} radius={[3, 3, 0, 0]} />
+                                                <Bar dataKey="completed" name="Completed" fill={C.green} radius={[3, 3, 0, 0]} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+
+                                        {/* Performance pills */}
+                                        <div className="flex flex-wrap gap-2 mt-4">
+                                            {graphsData.dc_data.map(dc => {
+                                                const rate = Number(dc.performance) || 0
+                                                const color = rate >= 90 ? "bg-green-100 text-green-700"
+                                                    : rate >= 70 ? "bg-amber-100 text-amber-700"
+                                                        : "bg-red-100 text-red-700"
+                                                return (
+                                                    <div key={dc.dc} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
+                                                        <span>{dc.dc}</span>
+                                                        <span className="font-bold">{rate}%</span>
+                                                    </div>
+                                                )
+                                            })}
                                         </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                <p className="text-xs text-slate-500">Total alerts</p>
-                                <p className="text-lg font-bold text-slate-800">
-                                    {ALERT_TYPES.reduce((s, a) => s + a.value, 0)}
-                                </p>
-                            </div>
+                                    </div>
+
+                                )}
                         </ChartCard>
 
+                        {/* Alert breakdown */}
+                        <ChartCard title="Alert breakdown"
+                            // subtitle="By type — last 30 days"
+                            subtitle={getAlertSubtitle()}
+                        >
+                            {graphsData?.alert?.length > 0 ? (
+                                <div className="relative">
+                                    {isFetching && (
+                                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded-lg">
+                                            <LoadingSpinner small />
+                                        </div>
+                                    )}
 
+                                    <ResponsiveContainer width="100%" height={260}>
+                                        <PieChart>
+                                            <Pie
+                                                data={graphsData?.alert || []}
+                                                dataKey="value"
+                                                nameKey="type"
+                                                cx="50%"
+                                                cy="50%"
+                                                outerRadius={90}
+                                                innerRadius={50} // makes it donut style (optional 🔥)
+                                                paddingAngle={3}
+                                            >
+                                                {graphsData?.alert.map((entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={alertColors[entry.type] || C.sky}
+                                                    />
+                                                ))}
+                                            </Pie>
+
+                                            <Tooltip
+                                                formatter={(value, name) => [value, name.replace(/_/g, " ")]}
+                                            />
+
+                                            <Legend
+                                                formatter={(value) => value.replace(/_/g, " ")}
+                                                wrapperStyle={{ fontSize: 12 }}
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+
+                                    {/* Total */}
+                                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <p className="text-xs text-slate-500">Total alerts</p>
+                                        <p className="text-lg font-bold text-slate-800">
+                                            {graphsData?.alert.reduce((s, a) => s + a.value, 0)}
+                                        </p>
+                                    </div>
+                                </div>
+                                // <div className="relative">
+                                //     {isFetching && (
+                                //         <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 rounded-lg">
+                                //             <LoadingSpinner small />
+                                //         </div>
+                                //     )}
+                                //     <div className="flex flex-col gap-2.5">
+                                //         {graphsData.alert.map(a => {
+                                //             const alertColors = {
+                                //                 speeding: C.red,
+                                //                 delay: C.amber,
+                                //                 route_deviation: C.violet,
+                                //                 long_stop: C.sky,
+                                //             }
+                                //             const max = Math.max(...graphsData.alert.map(x => x.value))
+                                //             const pct = Math.round((a.value / max) * 100)
+                                //             return (
+                                //                 <div key={a.type}>
+                                //                     <div className="flex items-center justify-between mb-1">
+                                //                         <span className="text-xs text-slate-600 capitalize">
+                                //                             {a.type.replace(/_/g, ' ')}
+                                //                         </span>
+                                //                         <span className="text-xs font-bold text-slate-800">{a.value}</span>
+                                //                     </div>
+                                //                     <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                //                         <div
+                                //                             className="h-full rounded-full transition-all duration-700"
+                                //                             style={{
+                                //                                 width: `${pct}%`,
+                                //                                 background: alertColors[a.type] || C.sky
+                                //                             }}
+                                //                         />
+                                //                     </div>
+                                //                 </div>
+                                //             )
+                                //         })}
+                                //     </div>
+                                //     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                //         <p className="text-xs text-slate-500">Total alerts</p>
+                                //         <p className="text-lg font-bold text-slate-800">
+                                //             {graphsData.alert.reduce((s, a) => s + a.value, 0)}
+                                //         </p>
+                                //     </div>
+                                // </div>
+                            ) : loadingGraphData ? (
+                                <div className="h-60 flex items-center justify-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : (
+                                <div className="h-60 flex items-center justify-center text-slate-500 text-sm">
+                                    No alert data available
+                                </div>
+                            )}
+                        </ChartCard>
                     </div>
                 </section>
-
             </div>
         </section>
     )

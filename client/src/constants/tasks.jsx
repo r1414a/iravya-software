@@ -21,6 +21,6 @@ export const DC_TASKS = [
   { key: "drivers", label: "Drivers", icon: <BookUser size={35} color="white"strokeWidth={1}/>, bg:  "bg-amber-700 shadow-lg shadow-amber-700/40", path: "/dc/manage-drivers" },
   { key: "trucks", label: "Trucks", icon: <Truck size={35} color="white"strokeWidth={1}/>, bg: "bg-violet-600 shadow-lg shadow-violet-600/40", path: "/dc/manage-trucks" },
   { key: "reports", label: "Reported Issues", icon: <OctagonAlert size={35} color="white"strokeWidth={1}/>, bg: "bg-red-800 shadow-lg shadow-red-800/40", path: "/dc/reports" },
-  { key: "analytics", label: "Analytics", icon: <ChartNoAxesCombined size={35} color="white"strokeWidth={1}/>, bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40", path: "/dc/manage-trucks" },
+  { key: "analytics", label: "Analytics", icon: <ChartNoAxesCombined size={35} color="white"strokeWidth={1}/>, bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40", path: "/dc/analytics" },
   // { key: "devices", label: "GPS Devices", icon: <LocateFixed size={35} color="white"strokeWidth={1}/>, bg: "bg-teal-700 shadow-lg shadow-teal-700/40", path: "/dc/manage-gps-devices" },
 ];

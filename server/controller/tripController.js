@@ -107,18 +107,18 @@ const getTrucksController = asyncHandler(async (req, res) => {
 
 const getDriversController = asyncHandler(async (req, res) => {
   const result = await getDriversService(req.query);
-  sendResponse(res, 200, result, "Trucks fetched");
+  sendResponse(res, 200, result, "Drivers fetched");
 });
 
 
 const getGpsDevicesController = asyncHandler(async (req, res) => {
   const result = await getGpsDevicesService(req.query, req.user);
-  sendResponse(res, 200, result, "Trucks fetched");
+  sendResponse(res, 200, result, "GpsDevices fetched");
 });
 
 const getStoresController = asyncHandler(async (req, res) => {
   const result = await getStoresService(req.query);
-  sendResponse(res, 200, result, "Trucks fetched");
+  sendResponse(res, 200, result, "Store fetched");
 });
 
 
